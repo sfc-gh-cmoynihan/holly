@@ -1,0 +1,12 @@
+EXCHANGE,SYMBOL,SHORTNAME,LONGNAME,SECTOR,INDUSTRY,CURRENTPRICE,MARKETCAP,EBITDA,REVENUEGROWTH,CITY,STATE,COUNTRY,FULLTIMEEMPLOYEES,WEIGHT
+NMS,AAPL,Apple Inc.,Apple Inc.,Technology,Consumer Electronics,254.49,3846819807232,134660997120,0.061,Cupertino,CA,United States,164000,0.0692091524
+NMS,NVDA,NVIDIA Corporation,NVIDIA Corporation,Technology,Semiconductors,134.7,3298803056640,61184000000,1.224,Santa Clara,CA,United States,29600,0.0593496382
+NMS,MSFT,Microsoft Corporation,Microsoft Corporation,Technology,Software - Infrastructure,436.6,3246068596736,136551997440,0.16,Redmond,WA,United States,228000,0.0584008785
+NMS,AMZN,"Amazon.com, Inc.","Amazon.com, Inc.",Consumer Cyclical,Internet Retail,224.92,2365033807872,111583002624,0.11,Seattle,WA,United States,1551000,0.0425499487
+NMS,GOOGL,Alphabet Inc.,Alphabet Inc.,Communication Services,Internet Content & Information,191.41,2351625142272,123469996032,0.151,Mountain View,CA,United States,181269,0.0423087098
+NMS,GOOG,Alphabet Inc.,Alphabet Inc.,Communication Services,Internet Content & Information,192.96,2351623045120,123469996032,0.151,Mountain View,CA,United States,181269,0.0423086721
+NMS,META,"Meta Platforms, Inc.","Meta Platforms, Inc.",Communication Services,Internet Content & Information,585.25,1477457739776,79208996864,0.189,Menlo Park,CA,United States,72404,0.0265813329
+NMS,TSLA,"Tesla, Inc.","Tesla, Inc.",Consumer Cyclical,Auto Manufacturers,421.06,1351627833344,13244000256,0.078,Austin,TX,United States,140473,0.0243174938
+NMS,AVGO,Broadcom Inc.,Broadcom Inc.,Technology,Semiconductors,220.79,1031217348608,22958000128,0.164,Palo Alto,CA,United States,20000,0.018552904
+NYQ,BRK-B,Berkshire Hathaway Inc. New,Berkshire Hathaway Inc.,Financial Services,Insurance - Diversified,453.2,978776031232,149547008000,-0.002,Omaha,NE,United States,396500,0.0176094184
+NMS,SNOW,Snowflake Inc.,Snowflake Inc.,Technology,Software - Application,163.25,55000000000,1500000000,0.35,Bozeman,MT,United States,6000,0.0099
