@@ -1,194 +1,117 @@
-# Agent Holly - Demo Script
+# Holly - Demo Script
 
-## 🎯 Demo Overview
+## Overview
 
-This demo showcases Agent Holly as a self-service AI assistant for stock research and investment analysis. The demo takes approximately 15-20 minutes and covers key use cases for portfolio managers, analysts, and traders.
-
----
-
-## 📋 Pre-Demo Checklist
-
-- [ ] Holly agent deployed to `SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY`
-- [ ] All underlying tables populated with data
-- [ ] Cortex Search services are indexed and active
-- [ ] Semantic views created and accessible
-- [ ] User has access to Snowflake Intelligence
+Demo of Holly as a self-service AI assistant for stock research. Duration: 10-15 minutes.
 
 ---
 
-## 🎬 Demo Script
+## Pre-Demo Checklist
 
-### Scene 1: Introduction (2 minutes)
-
-**Talking Points:**
-> "Meet Holly - your AI-powered research assistant for stock selection and investment analysis. Holly can search through SEC filings, expert transcripts, historical stock prices, and company fundamentals - all through natural conversation."
-
-**Show:**
-- Navigate to **AI & ML > Snowflake Intelligence**
-- Select **Holly** agent
-- Highlight the agent description
+- [ ] Run `INSTALL.sql` successfully
+- [ ] Verify Cortex Search services are indexed: `SHOW CORTEX SEARCH SERVICES IN DATABASE COLM_DB;`
+- [ ] Access Snowflake Intelligence: AI & ML > Snowflake Intelligence
 
 ---
 
-### Scene 2: Company Screening (3 minutes)
+## Demo Scenes
 
-**Use Case:** Portfolio manager wants to find high-growth companies for a new fund.
+### 1. Introduction (2 min)
 
-**Demo Query:**
-```
-Show me the top 10 S&P 500 companies by revenue growth
-```
+> "Meet Holly - your AI research assistant for stock analysis. Holly searches SEC filings, transcripts, stock prices, and company fundamentals through natural conversation."
 
-**Expected Result:** Table showing companies ranked by revenue growth with sector, market cap, and other fundamentals.
-
-**Follow-up Query:**
-```
-Of these, which ones are in the Technology sector?
-```
-
-**Talking Points:**
-> "Holly uses Cortex Analyst to translate natural language into SQL, querying our semantic views. Notice how it understands the context from the previous question."
+**Navigate to:** AI & ML > Snowflake Intelligence > Holly
 
 ---
 
-### Scene 3: Stock Price Analysis (3 minutes)
+### 2. Company Screening (3 min)
 
-**Use Case:** Analyst wants to analyze recent price movements.
+**Query:**
+```
+Show me the top 5 companies by revenue growth
+```
 
-**Demo Query:**
+**Follow-up:**
+```
+Which of these are in the Technology sector?
+```
+
+> "Holly uses Cortex Analyst to translate questions into SQL against our semantic views."
+
+---
+
+### 3. Stock Price Analysis (3 min)
+
+**Query:**
 ```
 What was Microsoft's closing price over the last 2 weeks?
 ```
 
-**Expected Result:** Time series data showing MSFT closing prices.
-
-**Follow-up Query:**
+**Follow-up:**
 ```
-Compare this with Apple and Snowflake for the same period
+Compare this with Apple and Snowflake
 ```
 
-**Talking Points:**
-> "Holly is querying over 158 million stock price records. The semantic view understands ticker symbols, date ranges, and price variables like open, high, low, close."
+> "Holly queries millions of stock price records. The semantic view understands tickers, dates, and OHLC variables."
 
 ---
 
-### Scene 4: SEC Filing Research (4 minutes)
+### 4. SEC Filing Research (3 min)
 
-**Use Case:** Compliance officer needs to review recent company announcements.
-
-**Demo Query:**
+**Query:**
 ```
-What has Amazon announced in their 10-K filings this year?
+What has NVIDIA announced in SEC filings this year?
 ```
 
-**Expected Result:** List of SEC filing excerpts with dates and key topics.
-
-**Follow-up Query:**
+**Follow-up:**
 ```
-Are there any risk factors mentioned related to AI?
+Are there any risk factors about AI competition?
 ```
 
-**Talking Points:**
-> "Holly uses Cortex Search with vector embeddings to find semantically relevant content across 380,000+ SEC filings. This isn't keyword search - it understands meaning and context."
+> "Holly uses Cortex Search with vector embeddings to find semantically relevant content across SEC filings."
 
 ---
 
-### Scene 5: Expert Insights (3 minutes)
+### 5. Comprehensive Research (3 min)
 
-**Use Case:** Fund manager wants qualitative research on market trends.
-
-**Demo Query:**
+**Query:**
 ```
-What are experts saying about NVIDIA and AI chip demand?
+Give me a complete analysis of Snowflake Inc - stock performance, fundamentals, SEC filings, and transcripts
 ```
 
-**Expected Result:** Relevant excerpts from Third Bridge expert transcripts.
-
-**Follow-up Query:**
-```
-Find insights on competition from AMD or custom chips
-```
-
-**Talking Points:**
-> "Third Bridge transcripts provide expert opinions that complement quantitative data. Holly can surface relevant insights that would take hours to find manually."
+> "Holly orchestrates across all 5 tools to deliver comprehensive research in seconds."
 
 ---
 
-### Scene 6: Comprehensive Research (4 minutes)
+## Tools Reference
 
-**Use Case:** Investment committee needs a full research brief on a potential investment.
-
-**Demo Query:**
-```
-Give me a comprehensive analysis of Snowflake Inc - include recent stock performance, company fundamentals, any SEC filings, and expert opinions
-```
-
-**Expected Result:** Multi-source response combining:
-- Stock price trend from STOCK_PRICES
-- Company metrics from SP500_COMPANIES  
-- Recent filings from SEC_FILINGS_SEARCH
-- Expert insights from TRANSCRIPTS_SEARCH
-
-**Talking Points:**
-> "This is where Holly shines - orchestrating across all four tools to deliver comprehensive research in seconds. What used to take an analyst hours is now instant."
+| Tool | Type | Use For |
+|------|------|---------|
+| SEC_FILINGS_SEARCH | Cortex Search | 10-K, 10-Q, 8-K filings |
+| PUBLIC_TRANSCRIPTS_SEARCH | Cortex Search | Earnings calls, conferences |
+| TB_TRANSCRIPTS_SEARCH | Cortex Search | Third Bridge expert transcripts |
+| STOCK_PRICES | Cortex Analyst | Historical OHLC prices |
+| SP500_COMPANIES | Cortex Analyst | Company fundamentals |
 
 ---
 
-### Scene 7: Architecture Deep Dive (Optional - 2 minutes)
+## Key Value Props
 
-**Show the underlying components:**
-
-```sql
--- Show the agent definition
-DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY;
-
--- Show Cortex Search service status
-SELECT * FROM COLM_DB.INFORMATION_SCHEMA.CORTEX_SEARCH_SERVICES;
-
--- Show semantic view definitions
-SELECT * FROM COLM_DB.INFORMATION_SCHEMA.SEMANTIC_VIEWS;
-```
-
-**Talking Points:**
-> "Under the hood, Holly is a Cortex Agent that orchestrates between Cortex Search for unstructured data and Cortex Analyst for structured data. Everything runs on Snowflake's secure, governed platform."
+1. **Self-Service** - No SQL required
+2. **Speed** - Research in seconds
+3. **Comprehensive** - Multiple data sources
+4. **Governed** - Runs on your Snowflake account
 
 ---
 
-## 🎯 Key Value Props to Highlight
-
-1. **Self-Service** - No SQL knowledge required
-2. **Speed** - Research in seconds, not hours
-3. **Comprehensive** - Combines multiple data sources
-4. **Governed** - Full audit trail, role-based access
-5. **Scalable** - Handles millions of records effortlessly
-
----
-
-## ❓ Anticipated Questions
-
-**Q: How accurate is the text-to-SQL?**
-> A: Semantic views include verified queries and sample values that guide Cortex Analyst. Accuracy improves with well-defined semantic models.
-
-**Q: Can we add our own data sources?**
-> A: Absolutely. Add new Cortex Search services or semantic views and update the agent specification.
-
-**Q: What about real-time data?**
-> A: Data freshness depends on your pipeline. Stock prices can be updated daily or intraday. SEC filings are available within hours of publication.
-
-**Q: How is this different from ChatGPT?**
-> A: Holly queries YOUR data in YOUR Snowflake account with YOUR security policies. It's not sending data to external services.
-
----
-
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Agent not responding | Check warehouse is running |
-| "No results found" | Verify data is loaded in underlying tables |
-| Slow responses | Increase warehouse size for complex queries |
-| Permission denied | Verify user has USAGE on agent and underlying objects |
+| No response | Check warehouse is running |
+| No results | Verify tables have data |
+| Permission denied | Grant USAGE on agent |
 
 ---
 
-*Demo script for Agent Holly v1.0*
+*Holly v1.1*
