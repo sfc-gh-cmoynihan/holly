@@ -1,41 +1,25 @@
-create or replace semantic view STOCK_PRICE_TIMESERIES_SV
-	tables (
-		COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES
-	)
-	facts (
-		STOCK_PRICE_TIMESERIES.VALUE as VALUE comment='Value reported for the variable.'
-	)
-	dimensions (
-		STOCK_PRICE_TIMESERIES.ASSET_CLASS as ASSET_CLASS comment='Type of security.',
-		STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE as PRIMARY_EXCHANGE_CODE comment='The exchange code for the primary trading venue of a security.',
-		STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME as PRIMARY_EXCHANGE_NAME comment='The exchange name for the primary trading venue of a security.',
-		STOCK_PRICE_TIMESERIES.TICKER as TICKER comment='Alphanumeric code that represents a specific publicly traded security on the NASDAQ exchange.',
-		STOCK_PRICE_TIMESERIES.VARIABLE as VARIABLE comment='Unique identifier for a variable.',
-		STOCK_PRICE_TIMESERIES.VARIABLE_NAME as VARIABLE_NAME comment='Human-readable unique name for the variable.',
-		STOCK_PRICE_TIMESERIES.DATE as DATE comment='Date associated with the value.',
-		STOCK_PRICE_TIMESERIES.EVENT_TIMESTAMP_UTC as EVENT_TIMESTAMP_UTC comment='Timestamp when the event occurred in UTC.'
-	)
-	comment='SECURITIES'
-	with extension (CA='{
-		"tables":[{
-			"name":"STOCK_PRICE_TIMESERIES_IT",
-			"dimensions":[
-				{"name":"ASSET_CLASS","sample_values":["Common Shares","Closed-End Funds","Equity"]},
-				{"name":"PRIMARY_EXCHANGE_CODE","sample_values":["NYS","PSE","NAS"]},
-				{"name":"PRIMARY_EXCHANGE_NAME","sample_values":["NEW YORK STOCK EXCHANGE","NASDAQ CAPITAL MARKET","NYSE ARCA"]},
-				{"name":"TICKER","sample_values":["USB","CWT","MIT"]},
-				{"name":"VARIABLE","sample_values":["all-day_high_adjusted","pre-market_open","post-market_close"]},
-				{"name":"VARIABLE_NAME","sample_values":["Nasdaq Volume","All-Day High","Post-Market Close"]}
-			],
-			"facts":[
-				{"name":"VALUE","sample_values":["50.8","27.21","28.99"]}
-			],
-			"filters":[
-				{"name":"major_tech_stocks","description":"Filters for major technology stocks including Amazon (AMZN), Microsoft (MSFT), and Snowflake (SNOW). Use when questions ask about ''tech stocks'', ''major technology companies'', ''FAANG stocks'', ''cloud companies'', ''Amazon Microsoft Snowflake'', or specific analysis of these three securities. Helps analyze performance and trends among leading technology sector stocks.","expr":"ticker IN (''AMZN'', ''MSFT'', ''SNOW'')"}
-			],
-			"time_dimensions":[
-				{"name":"DATE","sample_values":["2022-10-12","2023-04-25","2019-07-17"]},
-				{"name":"EVENT_TIMESTAMP_UTC","sample_values":["2024-07-16T13:30:00.000+0000","2021-08-06T20:00:00.000+0000","2022-10-24T13:30:00.000+0000"]}
-			]
-		}]
-	}');
+CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
+    TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
+    FACTS (STOCK_PRICE_TIMESERIES.VALUE AS VALUE COMMENT 'Stock price or volume value')
+    DIMENSIONS (
+        STOCK_PRICE_TIMESERIES.TICKER AS TICKER COMMENT 'Stock ticker symbol (e.g., AAPL, MSFT, SNOW)',
+        STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS COMMENT 'Type of security',
+        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE COMMENT 'Exchange code',
+        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME COMMENT 'Exchange name',
+        STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE COMMENT 'Variable identifier',
+        STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME COMMENT 'Variable name (All-Day High, All-Day Low, etc.)',
+        STOCK_PRICE_TIMESERIES.DATE AS DATE COMMENT 'Trading date',
+        STOCK_PRICE_TIMESERIES.EVENT_TIMESTAMP_UTC AS EVENT_TIMESTAMP_UTC COMMENT 'Event timestamp'
+    )
+    COMMENT = 'Stock price timeseries for Cortex Analyst'
+    WITH EXTENSION (CA='{
+        "tables":[{
+            "name":"STOCK_PRICE_TIMESERIES",
+            "dimensions":[
+                {"name":"TICKER","sample_values":["AAPL","MSFT","SNOW","NVDA","AMZN"]},
+                {"name":"VARIABLE_NAME","sample_values":["All-Day High","All-Day Low","All-Day Close","Nasdaq Volume"]}
+            ],
+            "facts":[{"name":"VALUE","sample_values":["150.25","275.50","185.75"]}],
+            "time_dimensions":[{"name":"DATE","sample_values":["2025-01-15","2025-02-01","2025-02-20"]}]
+        }]
+    }');
