@@ -7,24 +7,10 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
       "orchestration": "claude-4-sonnet"
     },
     "instructions": {
-      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**ANNUAL REPORTS**: For questions about annual reports, 10-K filings, or company annual financial statements, use ASK_QUESTION_RAG to search and answer from annual report documents.\n\n**SHARE PRICES**: For questions about current or recent stock prices, share prices, or real-time quotes, use GET_STOCK_PRICE with the ticker symbol.\n\n**PUBLIC TRANSCRIPTS**: For questions about public earnings calls, investor conferences, or company event transcripts from S&P 500 companies or Snowflake, use PUBLIC_TRANSCRIPTS_SEARCH.\n\n**PRIVATE TRANSCRIPTS**: For questions about private or Third Bridge expert interview transcripts, analyst opinions, or proprietary research insights, use TB_TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICE DATA**: For historical stock price analysis, OHLC data, price trends over time, or technical analysis, use STOCK_PRICES semantic view.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company fundamentals like market cap, revenue growth, EBITDA, sector/industry classification, use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC regulatory filings, 8-K announcements, 10-Q quarterly reports, or company disclosures, use SEC_FILINGS_SEARCH.\n\nFor comprehensive research, combine multiple tools as needed.",
+      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**PUBLIC TRANSCRIPTS**: For questions about public earnings calls, investor conferences, or company event transcripts from S&P 500 companies or Snowflake, use PUBLIC_TRANSCRIPTS_SEARCH.\n\n**PRIVATE TRANSCRIPTS**: For questions about private or Third Bridge expert interview transcripts, analyst opinions, or proprietary research insights, use TB_TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICE DATA**: For historical stock price analysis, OHLC data, price trends over time, or technical analysis, use STOCK_PRICES semantic view.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company fundamentals like market cap, revenue growth, EBITDA, sector/industry classification, use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC regulatory filings, 8-K announcements, 10-Q quarterly reports, or company disclosures, use SEC_FILINGS_SEARCH.\n\nFor comprehensive research, combine multiple tools as needed.",
       "response": "Provide clear, data-driven responses with source attribution. When presenting financial data, use tables when appropriate. For stock prices, specify the date. For SEC filings, cite the filing type and date. For transcripts, mention whether it was a public or private source. Always be accurate with numbers and dates."
     },
     "tools": [
-      {
-        "tool_spec": {
-          "type": "function",
-          "name": "ASK_QUESTION_RAG",
-          "description": "Search and answer questions about annual reports and 10-K filings. Use for questions about company annual financial statements, annual report disclosures, and yearly financial performance. Returns answers in English and French with source document references."
-        }
-      },
-      {
-        "tool_spec": {
-          "type": "function",
-          "name": "GET_STOCK_PRICE",
-          "description": "Get current or recent stock price for a ticker symbol. Use for real-time or near real-time share price quotes. Pass the ticker symbol (e.g., 'AAPL', 'MSFT', 'SNOW') as the parameter."
-        }
-      },
       {
         "tool_spec": {
           "type": "cortex_search",
@@ -62,12 +48,6 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
       }
     ],
     "tool_resources": {
-      "ASK_QUESTION_RAG": {
-        "function": "COLM_DB.UNSTRUCTURED.ASK_QUESTION_RAG"
-      },
-      "GET_STOCK_PRICE": {
-        "function": "COLM_DB.STRUCTURED.GET_STOCK_PRICE"
-      },
       "PUBLIC_TRANSCRIPTS_SEARCH": {
         "search_service": "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH",
         "max_results": 10,
