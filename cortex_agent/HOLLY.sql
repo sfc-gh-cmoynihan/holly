@@ -1,5 +1,5 @@
 CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
-  COMMENT = 'Financial research assistant that orchestrates across SEC filings, expert transcripts, stock prices, and S&P 500 company data'
+  COMMENT = 'Financial research assistant that orchestrates across SEC filings, transcripts, stock prices, and S&P 500 company data'
   PROFILE = '{"display_name": "Holly - Financial Research Assistant", "avatar": "📊", "color": "#1E88E5"}'
   FROM SPECIFICATION $$
   {
@@ -7,49 +7,81 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
       "orchestration": "claude-4-sonnet"
     },
     "instructions": {
-      "orchestration": "You are Holly, a financial research assistant. Determine the best tool(s) for each query:\n\n1. SEC_FILINGS_SEARCH - Use for questions about company announcements, earnings reports, 10-K/10-Q filings, SEC disclosures, and regulatory filings. Search by company name, announcement type, or filing date.\n\n2. TRANSCRIPTS_SEARCH - Use for expert interview insights, analyst opinions, market commentary, and qualitative research from Third Bridge transcripts.\n\n3. STOCK_PRICES - Use for quantitative stock price analysis: historical prices, OHLC data, price trends, returns calculations, and technical analysis for tickers like AMZN, MSFT, SNOW.\n\n4. SP500_COMPANIES - Use for S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector/industry classification, employee counts, and company profiles.\n\nFor comprehensive research questions, combine multiple tools - e.g., search filings for context, then query stock prices for quantitative data.",
-      "response": "Provide clear, data-driven responses with source attribution. When presenting financial data, use tables when appropriate. For stock prices, specify the date range analyzed. For SEC filings, cite the filing type and date. For transcripts, mention the source context. Always be accurate with numbers and dates."
+      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**ANNUAL REPORTS**: For questions about annual reports, 10-K filings, or company annual financial statements, use ASK_QUESTION_RAG to search and answer from annual report documents.\n\n**SHARE PRICES**: For questions about current or recent stock prices, share prices, or real-time quotes, use GET_STOCK_PRICE with the ticker symbol.\n\n**PUBLIC TRANSCRIPTS**: For questions about public earnings calls, investor conferences, or company event transcripts from S&P 500 companies or Snowflake, use PUBLIC_TRANSCRIPTS_SEARCH.\n\n**PRIVATE TRANSCRIPTS**: For questions about private or Third Bridge expert interview transcripts, analyst opinions, or proprietary research insights, use TB_TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICE DATA**: For historical stock price analysis, OHLC data, price trends over time, or technical analysis, use STOCK_PRICES semantic view.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company fundamentals like market cap, revenue growth, EBITDA, sector/industry classification, use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC regulatory filings, 8-K announcements, 10-Q quarterly reports, or company disclosures, use SEC_FILINGS_SEARCH.\n\nFor comprehensive research, combine multiple tools as needed.",
+      "response": "Provide clear, data-driven responses with source attribution. When presenting financial data, use tables when appropriate. For stock prices, specify the date. For SEC filings, cite the filing type and date. For transcripts, mention whether it was a public or private source. Always be accurate with numbers and dates."
     },
     "tools": [
       {
         "tool_spec": {
-          "type": "cortex_search",
-          "name": "SEC_FILINGS_SEARCH",
-          "description": "Search SEC EDGAR filings including 10-K, 10-Q, 8-K reports and other regulatory disclosures. Contains company announcements, earnings reports, and financial statements. Searchable by company name with attributes for announcement type, filing date, fiscal period/year, and item details."
+          "type": "function",
+          "name": "ASK_QUESTION_RAG",
+          "description": "Search and answer questions about annual reports and 10-K filings. Use for questions about company annual financial statements, annual report disclosures, and yearly financial performance. Returns answers in English and French with source document references."
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "function",
+          "name": "GET_STOCK_PRICE",
+          "description": "Get current or recent stock price for a ticker symbol. Use for real-time or near real-time share price quotes. Pass the ticker symbol (e.g., 'AAPL', 'MSFT', 'SNOW') as the parameter."
         }
       },
       {
         "tool_spec": {
           "type": "cortex_search",
-          "name": "TRANSCRIPTS_SEARCH",
-          "description": "Search Third Bridge expert interview transcripts for qualitative research insights. Contains expert opinions on companies, industries, and market trends. Searchable by title with attributes for agenda, content type, target companies, and relevant companies."
+          "name": "PUBLIC_TRANSCRIPTS_SEARCH",
+          "description": "Search public company event transcripts including earnings calls, investor conferences, and company updates from S&P 500 companies and Snowflake. Use for questions about what companies said in public calls or events."
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "cortex_search",
+          "name": "TB_TRANSCRIPTS_SEARCH",
+          "description": "Search private Third Bridge expert interview transcripts for proprietary research insights. Use for private or confidential analyst opinions, expert interviews, and qualitative research not available publicly."
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "cortex_search",
+          "name": "SEC_FILINGS_SEARCH",
+          "description": "Search SEC EDGAR filings including 10-K, 10-Q, 8-K reports and other regulatory disclosures. Use for company announcements, earnings reports, and SEC regulatory filings."
         }
       },
       {
         "tool_spec": {
           "type": "cortex_analyst_text_to_sql",
           "name": "STOCK_PRICES",
-          "description": "Query historical stock price data with daily OHLC (Open, High, Low, Close) values. Contains 158M+ rows covering multiple exchanges. Use for price analysis, returns calculations, volatility analysis, and technical indicators. Supports tickers including major tech stocks (AMZN, MSFT, SNOW)."
+          "description": "Query historical stock price data with daily OHLC (Open, High, Low, Close) values. Use for historical price analysis, price trends over time, returns calculations, and technical indicators."
         }
       },
       {
         "tool_spec": {
           "type": "cortex_analyst_text_to_sql",
           "name": "SP500_COMPANIES",
-          "description": "Query S&P 500 company fundamentals including market cap, revenue growth, EBITDA, sector, industry, employee count, headquarters location, and business summaries. Use for company comparisons, sector analysis, and fundamental screening."
+          "description": "Query S&P 500 company fundamentals including market cap, revenue growth, EBITDA, sector, industry, employee count, headquarters location, and business summaries."
         }
       }
     ],
     "tool_resources": {
+      "ASK_QUESTION_RAG": {
+        "function": "COLM_DB.UNSTRUCTURED.ASK_QUESTION_RAG"
+      },
+      "GET_STOCK_PRICE": {
+        "function": "COLM_DB.STRUCTURED.GET_STOCK_PRICE"
+      },
+      "PUBLIC_TRANSCRIPTS_SEARCH": {
+        "search_service": "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH",
+        "max_results": 10,
+        "columns": ["COMPANY_NAME", "PRIMARY_TICKER", "EVENT_TYPE", "FISCAL_PERIOD", "FISCAL_YEAR", "EVENT_TIMESTAMP", "TRANSCRIPT_TEXT"]
+      },
+      "TB_TRANSCRIPTS_SEARCH": {
+        "search_service": "COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS",
+        "max_results": 5,
+        "columns": ["TITLE", "AGENDA", "CONTENT_TYPE", "TARGET_COMPANIES", "STARTS_AT", "TRANSCRIPT_URL", "RELEVANT_COMPANIES", "TRANSCRIPT"]
+      },
       "SEC_FILINGS_SEARCH": {
         "search_service": "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS",
         "max_results": 10,
         "columns": ["COMPANY_NAME", "ANNOUNCEMENT_TYPE", "FILED_DATE", "FISCAL_PERIOD", "FISCAL_YEAR", "ITEM_NUMBER", "ITEM_TITLE", "ANNOUNCEMENT_TEXT"]
-      },
-      "TRANSCRIPTS_SEARCH": {
-        "search_service": "COLM_DB.UNSTRUCTURED.TRANSCRIPTS",
-        "max_results": 5,
-        "columns": ["TITLE", "AGENDA", "CONTENT_TYPE", "TARGET_COMPANIES", "STARTS_AT", "TRANSCRIPT_URL", "RELEVANT_COMPANIES", "TRANSCRIPT"]
       },
       "STOCK_PRICES": {
         "semantic_view": "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV",
