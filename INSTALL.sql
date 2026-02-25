@@ -33,7 +33,7 @@
 -- STEP 1: SET UP CONTEXT
 -- ============================================================================
 USE ROLE ACCOUNTADMIN;
-CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'SMALL' AUTO_SUSPEND = 60;
+CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
 USE WAREHOUSE SMALL_WH;
 
 -- ============================================================================
@@ -340,7 +340,7 @@ GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 -- ============================================================================
 
 -- Create warehouse for scheduled tasks if not exists
-CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'SMALL' AUTO_SUSPEND = 60;
+CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
 
 -- Daily refresh task: Runs at 6:00 AM GMT/UTC
 CREATE OR REPLACE TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH
