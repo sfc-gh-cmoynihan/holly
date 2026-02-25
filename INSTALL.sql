@@ -10,11 +10,11 @@
   PREREQUISITES:
   --------------
   1. ACCOUNTADMIN role or equivalent privileges
-  2. Subscribe to Cybersyn marketplace data:
-     - Go to: Data Products > Marketplace
-     - Search for: "Cybersyn Financial & Economic Essentials"
-     - Click "Get" to subscribe (free tier available)
-     - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
+   2. Subscribe to Cybersyn marketplace data:
+      - Go to: Data Products > Marketplace
+      - Search for: "Cybersyn Financial & Economic Essentials"
+      - Click "Get" to subscribe (free tier available)
+      - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
   
   WHAT THIS SCRIPT CREATES:
   -------------------------
@@ -22,6 +22,7 @@
   - Tables: SP500_COMPANIES, STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, TB_TRANSCRIPTS
   - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH, TB_TRANSCRIPTS
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
+  - Task: DAILY_DATA_REFRESH (runs daily at 6:00 AM GMT)
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
@@ -335,7 +336,74 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
 -- ============================================================================
--- STEP 11: VERIFICATION
+-- STEP 11: CREATE SCHEDULED DATA REFRESH TASK
+-- ============================================================================
+
+-- Create warehouse for scheduled tasks if not exists
+CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'SMALL' AUTO_SUSPEND = 60;
+
+-- Daily refresh task: Runs at 6:00 AM GMT/UTC
+CREATE OR REPLACE TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH
+  WAREHOUSE = ADHOC_WH
+  SCHEDULE = 'USING CRON 0 6 * * * UTC'
+  COMMENT = 'Daily refresh of EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables at 6:00 AM GMT'
+AS
+BEGIN
+  -- Refresh EDGAR_FILINGS table with latest SEC filings
+  MERGE INTO COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS AS target
+  USING (
+    SELECT 
+      COMPANY_NAME,
+      FORM_TYPE AS ANNOUNCEMENT_TYPE,
+      FILED_DATE::DATE AS FILED_DATE,
+      FISCAL_PERIOD,
+      FISCAL_YEAR::FLOAT AS FISCAL_YEAR,
+      ITEM_NUMBER,
+      ITEM_TITLE,
+      PLAINTEXT_CONTENT AS ANNOUNCEMENT_TEXT
+    FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.SEC_CORPORATE_REPORT_ITEM_ATTRIBUTES
+    WHERE PLAINTEXT_CONTENT IS NOT NULL
+  ) AS source
+  ON target.COMPANY_NAME = source.COMPANY_NAME 
+     AND target.FILED_DATE = source.FILED_DATE 
+     AND target.ITEM_NUMBER = source.ITEM_NUMBER
+  WHEN NOT MATCHED THEN
+    INSERT (COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE, ANNOUNCEMENT_TEXT)
+    VALUES (source.COMPANY_NAME, source.ANNOUNCEMENT_TYPE, source.FILED_DATE, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.ITEM_NUMBER, source.ITEM_TITLE, source.ANNOUNCEMENT_TEXT);
+
+  -- Refresh PUBLIC_TRANSCRIPTS table with latest earnings call transcripts
+  MERGE INTO COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS target
+  USING (
+    SELECT 
+      COMPANY_ID,
+      CIK,
+      COMPANY_NAME,
+      PRIMARY_TICKER,
+      FISCAL_PERIOD,
+      FISCAL_YEAR,
+      EVENT_TYPE,
+      TRANSCRIPT_TYPE,
+      TRANSCRIPT,
+      EVENT_TIMESTAMP,
+      CREATED_AT,
+      UPDATED_AT
+    FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2
+    WHERE TRANSCRIPT IS NOT NULL
+  ) AS source
+  ON target.COMPANY_ID = source.COMPANY_ID 
+     AND target.EVENT_TIMESTAMP = source.EVENT_TIMESTAMP
+     AND target.FISCAL_PERIOD = source.FISCAL_PERIOD
+     AND target.FISCAL_YEAR = source.FISCAL_YEAR
+  WHEN NOT MATCHED THEN
+    INSERT (COMPANY_ID, CIK, COMPANY_NAME, PRIMARY_TICKER, FISCAL_PERIOD, FISCAL_YEAR, EVENT_TYPE, TRANSCRIPT_TYPE, TRANSCRIPT, EVENT_TIMESTAMP, CREATED_AT, UPDATED_AT)
+    VALUES (source.COMPANY_ID, source.CIK, source.COMPANY_NAME, source.PRIMARY_TICKER, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.EVENT_TYPE, source.TRANSCRIPT_TYPE, source.TRANSCRIPT, source.EVENT_TIMESTAMP, source.CREATED_AT, source.UPDATED_AT);
+END;
+
+-- Enable the task
+ALTER TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH RESUME;
+
+-- ============================================================================
+-- STEP 12: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES

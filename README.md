@@ -94,6 +94,26 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight.
 
 ---
 
+## Scheduled Data Refresh
+
+Holly includes a scheduled task that automatically keeps data fresh:
+
+| Task | Schedule | Description |
+|------|----------|-------------|
+| **DAILY_DATA_REFRESH** | 6:00 AM GMT daily | Refreshes EDGAR_FILINGS and PUBLIC_TRANSCRIPTS from Cybersyn |
+
+The task performs incremental MERGE operations to add new SEC filings and earnings transcripts. Cortex Search Services automatically detect changes and update their indexes.
+
+```sql
+-- Check task status
+SHOW TASKS LIKE 'DAILY_DATA_REFRESH' IN SCHEMA COLM_DB.STRUCTURED;
+
+-- View task history
+SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'DAILY_DATA_REFRESH')) ORDER BY SCHEDULED_TIME DESC LIMIT 10;
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -108,6 +128,8 @@ holly/
 ├── 📂 cortex_search/
 │   ├── EDGAR_FILINGS.sql
 │   └── TRANSCRIPTS.sql
+├── 📂 tasks/
+│   └── DAILY_DATA_REFRESH.sql  # Scheduled data refresh task
 ├── 📂 data/
 │   └── SP500_COMPANIES.csv
 └── 📄 DEMO_SCRIPT.md
