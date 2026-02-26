@@ -4,7 +4,7 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.2
+  Version: 1.3
   Date: 26th February 2026
   
   PREREQUISITES:
@@ -30,6 +30,7 @@
   - Tables: SP500_COMPANIES, STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
   - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
+  - External Function: GET_STOCK_PRICE (real-time Yahoo Finance data)
   - Task: DAILY_DATA_REFRESH (runs daily at 6:00 AM GMT)
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 
@@ -244,7 +245,70 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     );
 
 -- ============================================================================
--- STEP 9: CREATE HOLLY CORTEX AGENT
+-- STEP 9: CREATE YAHOO FINANCE EXTERNAL FUNCTION (Real-time Stock Prices)
+-- ============================================================================
+
+-- 9.1 Create Network Rule for Yahoo Finance API access
+CREATE OR REPLACE NETWORK RULE COLM_DB.STRUCTURED.YAHOO_FINANCE_RULE
+    MODE = EGRESS
+    TYPE = HOST_PORT
+    VALUE_LIST = ('query1.finance.yahoo.com', 'query2.finance.yahoo.com');
+
+-- 9.2 Create External Access Integration
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION YAHOO_FINANCE_INTEGRATION
+    ALLOWED_NETWORK_RULES = (COLM_DB.STRUCTURED.YAHOO_FINANCE_RULE)
+    ENABLED = TRUE;
+
+-- 9.3 Create the Python UDF for real-time stock prices
+CREATE OR REPLACE FUNCTION COLM_DB.STRUCTURED.GET_STOCK_PRICE(TICKER VARCHAR)
+RETURNS VARIANT
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.11'
+PACKAGES = ('requests')
+HANDLER = 'get_stock_price'
+EXTERNAL_ACCESS_INTEGRATIONS = (YAHOO_FINANCE_INTEGRATION)
+AS $$
+import requests
+from datetime import datetime
+
+def get_stock_price(ticker):
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+        
+        result = data.get("chart", {}).get("result", [])
+        if not result:
+            return {"error": "No data found for ticker", "ticker": ticker}
+        
+        meta = result[0].get("meta", {})
+        regular_market_time = meta.get("regularMarketTime")
+        
+        quote_date = None
+        quote_time = None
+        if regular_market_time:
+            dt = datetime.utcfromtimestamp(regular_market_time)
+            quote_date = dt.strftime('%d-%b-%Y')
+            quote_time = dt.strftime('%H:%M:%S GMT')
+        
+        return {
+            "ticker": ticker.upper(),
+            "price": meta.get("regularMarketPrice"),
+            "previous_close": meta.get("previousClose"),
+            "currency": meta.get("currency"),
+            "exchange": meta.get("exchangeName"),
+            "market_state": meta.get("marketState"),
+            "quote_date": quote_date,
+            "quote_time": quote_time
+        }
+    except Exception as e:
+        return {"error": str(e), "ticker": ticker}
+$$;
+
+-- ============================================================================
+-- STEP 10: CREATE HOLLY CORTEX AGENT
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
@@ -340,7 +404,7 @@ $$;
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
 -- ============================================================================
--- STEP 10: CREATE SCHEDULED DATA REFRESH TASK
+-- STEP 11: CREATE SCHEDULED DATA REFRESH TASK
 -- ============================================================================
 
 CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
@@ -402,7 +466,7 @@ END;
 ALTER TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH RESUME;
 
 -- ============================================================================
--- STEP 11: VERIFICATION
+-- STEP 12: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES
@@ -413,6 +477,9 @@ UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC
 SHOW CORTEX SEARCH SERVICES IN DATABASE COLM_DB;
 SHOW SEMANTIC VIEWS IN DATABASE COLM_DB;
 DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY;
+
+-- Test Yahoo Finance function
+SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS NVIDIA_REALTIME_PRICE;
 
 -- ============================================================================
 -- INSTALLATION COMPLETE!
