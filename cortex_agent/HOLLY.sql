@@ -1,6 +1,5 @@
 CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
   COMMENT = 'Financial research assistant for SEC filings, transcripts, stock prices, and company data'
-  PROFILE = '{"display_name": "Holly - Financial Research Assistant", "avatar": "📊", "color": "#1E88E5"}'
   FROM SPECIFICATION $$
 models:
   orchestration: claude-4-sonnet

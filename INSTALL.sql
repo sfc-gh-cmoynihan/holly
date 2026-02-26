@@ -209,66 +209,39 @@ AS (
 -- 8.1 Stock Price Timeseries Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
     TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
-    FACTS (STOCK_PRICE_TIMESERIES.VALUE AS VALUE COMMENT 'Stock price or volume value')
+    FACTS (STOCK_PRICE_TIMESERIES.VALUE AS VALUE)
     DIMENSIONS (
-        STOCK_PRICE_TIMESERIES.TICKER AS TICKER COMMENT 'Stock ticker symbol (e.g., AAPL, MSFT, SNOW)',
-        STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS COMMENT 'Type of security',
-        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE COMMENT 'Exchange code',
-        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME COMMENT 'Exchange name',
-        STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE COMMENT 'Variable identifier',
-        STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME COMMENT 'Variable name (All-Day High, All-Day Low, etc.)',
-        STOCK_PRICE_TIMESERIES.DATE AS DATE COMMENT 'Trading date',
-        STOCK_PRICE_TIMESERIES.EVENT_TIMESTAMP_UTC AS EVENT_TIMESTAMP_UTC COMMENT 'Event timestamp'
-    )
-    COMMENT = 'Stock price timeseries for Cortex Analyst'
-    WITH EXTENSION (CA='{
-        "tables":[{
-            "name":"STOCK_PRICE_TIMESERIES",
-            "dimensions":[
-                {"name":"TICKER","sample_values":["AAPL","MSFT","SNOW","NVDA","AMZN"]},
-                {"name":"VARIABLE_NAME","sample_values":["All-Day High","All-Day Low","All-Day Close","Nasdaq Volume"]}
-            ],
-            "facts":[{"name":"VALUE","sample_values":["150.25","275.50","185.75"]}],
-            "time_dimensions":[{"name":"DATE","sample_values":["2025-01-15","2025-02-01","2025-02-20"]}]
-        }]
-    }');
+        STOCK_PRICE_TIMESERIES.TICKER AS TICKER,
+        STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS,
+        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE,
+        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME,
+        STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE,
+        STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME,
+        STOCK_PRICE_TIMESERIES.DATE AS DATE
+    );
 
 -- 8.2 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
-    TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES COMMENT 'S&P 500 company fundamentals')
+    TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
     FACTS (
-        SP500_COMPANIES.CURRENTPRICE AS CURRENTPRICE COMMENT 'Current stock price in USD',
-        SP500_COMPANIES.REVENUEGROWTH AS REVENUEGROWTH COMMENT 'Revenue growth percentage'
+        SP500_COMPANIES.CURRENTPRICE AS CURRENTPRICE,
+        SP500_COMPANIES.REVENUEGROWTH AS REVENUEGROWTH
     )
     DIMENSIONS (
-        SP500_COMPANIES.SYMBOL AS SYMBOL COMMENT 'Stock ticker symbol',
-        SP500_COMPANIES.SHORTNAME AS SHORTNAME COMMENT 'Company short name',
-        SP500_COMPANIES.LONGNAME AS LONGNAME COMMENT 'Company full name',
-        SP500_COMPANIES.SECTOR AS SECTOR COMMENT 'Business sector',
-        SP500_COMPANIES.INDUSTRY AS INDUSTRY COMMENT 'Industry classification',
-        SP500_COMPANIES.MARKETCAP AS MARKETCAP COMMENT 'Market capitalization',
-        SP500_COMPANIES.EBITDA AS EBITDA COMMENT 'EBITDA',
-        SP500_COMPANIES.CITY AS CITY COMMENT 'Headquarters city',
-        SP500_COMPANIES.STATE AS STATE COMMENT 'Headquarters state',
-        SP500_COMPANIES.COUNTRY AS COUNTRY COMMENT 'Headquarters country',
-        SP500_COMPANIES.FULLTIMEEMPLOYEES AS FULLTIMEEMPLOYEES COMMENT 'Employee count',
-        SP500_COMPANIES.LONGBUSINESSSUMMARY AS LONGBUSINESSSUMMARY COMMENT 'Business description',
-        SP500_COMPANIES.WEIGHT AS WEIGHT COMMENT 'S&P 500 index weight'
-    )
-    WITH EXTENSION (CA='{
-        "tables":[{
-            "name":"SP500_COMPANIES",
-            "dimensions":[
-                {"name":"SECTOR","sample_values":["Technology","Consumer Cyclical","Communication Services","Financial Services"]},
-                {"name":"INDUSTRY","sample_values":["Consumer Electronics","Semiconductors","Software - Infrastructure","Internet Retail"]},
-                {"name":"SYMBOL","sample_values":["AAPL","MSFT","NVDA","AMZN","SNOW"]}
-            ],
-            "facts":[
-                {"name":"CURRENTPRICE","sample_values":["254.49","436.60","134.70"]},
-                {"name":"REVENUEGROWTH","sample_values":["0.061","0.160","1.224"]}
-            ]
-        }]
-    }');
+        SP500_COMPANIES.SYMBOL AS SYMBOL,
+        SP500_COMPANIES.SHORTNAME AS SHORTNAME,
+        SP500_COMPANIES.LONGNAME AS LONGNAME,
+        SP500_COMPANIES.SECTOR AS SECTOR,
+        SP500_COMPANIES.INDUSTRY AS INDUSTRY,
+        SP500_COMPANIES.MARKETCAP AS MARKETCAP,
+        SP500_COMPANIES.EBITDA AS EBITDA,
+        SP500_COMPANIES.CITY AS CITY,
+        SP500_COMPANIES.STATE AS STATE,
+        SP500_COMPANIES.COUNTRY AS COUNTRY,
+        SP500_COMPANIES.FULLTIMEEMPLOYEES AS FULLTIMEEMPLOYEES,
+        SP500_COMPANIES.LONGBUSINESSSUMMARY AS LONGBUSINESSSUMMARY,
+        SP500_COMPANIES.WEIGHT AS WEIGHT
+    );
 
 -- ============================================================================
 -- STEP 9: CREATE HOLLY CORTEX AGENT
@@ -279,28 +252,90 @@ CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
   COMMENT = 'Financial research assistant for SEC filings, transcripts, stock prices, and company data'
-  PROFILE = '{"display_name": "Holly - Financial Research Assistant", "avatar": "📊", "color": "#1E88E5"}'
   FROM SPECIFICATION $$
-  {
-    "models": {"orchestration": "claude-4-sonnet"},
-    "instructions": {
-      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**TRANSCRIPTS**: For earnings calls, investor conferences, or company event transcripts from S&P 500 companies, use TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.\n\nCombine multiple tools for comprehensive research.",
-      "response": "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
-    },
-    "tools": [
-      {"tool_spec": {"type": "cortex_search", "name": "TRANSCRIPTS_SEARCH", "description": "Search public company event transcripts (earnings calls, investor conferences) from S&P 500 companies and Snowflake."}},
-      {"tool_spec": {"type": "cortex_search", "name": "SEC_FILINGS_SEARCH", "description": "Search SEC EDGAR filings (10-K, 10-Q, 8-K) for company announcements and regulatory disclosures."}},
-      {"tool_spec": {"type": "cortex_analyst_text_to_sql", "name": "STOCK_PRICES", "description": "Query historical stock price data with daily OHLC values for price trends and analysis."}},
-      {"tool_spec": {"type": "cortex_analyst_text_to_sql", "name": "SP500_COMPANIES", "description": "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."}}
-    ],
-    "tool_resources": {
-      "TRANSCRIPTS_SEARCH": {"search_service": "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH", "max_results": 10, "columns": ["COMPANY_NAME", "PRIMARY_TICKER", "EVENT_TYPE", "FISCAL_PERIOD", "FISCAL_YEAR", "EVENT_TIMESTAMP", "TRANSCRIPT_TEXT"]},
-      "SEC_FILINGS_SEARCH": {"search_service": "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS", "max_results": 10, "columns": ["COMPANY_NAME", "ANNOUNCEMENT_TYPE", "FILED_DATE", "FISCAL_PERIOD", "FISCAL_YEAR", "ITEM_NUMBER", "ITEM_TITLE", "ANNOUNCEMENT_TEXT"]},
-      "STOCK_PRICES": {"semantic_view": "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV", "execution_environment": {"type": "warehouse", "warehouse": "SMALL_WH"}, "query_timeout": 120},
-      "SP500_COMPANIES": {"semantic_view": "COLM_DB.STRUCTURED.SP500", "execution_environment": {"type": "warehouse", "warehouse": "SMALL_WH"}, "query_timeout": 60}
-    }
-  }
-  $$;
+models:
+  orchestration: claude-4-sonnet
+
+instructions:
+  orchestration: |
+    You are Holly the FS Financial Agent. When a user first greets you or says hello, respond with: "Good afternoon, I am Holly the FS Financial Agent. How can I help you?"
+    
+    Route each query to the appropriate tool:
+    
+    **TRANSCRIPTS**: For earnings calls, investor conferences, or company event transcripts from S&P 500 companies, use TRANSCRIPTS_SEARCH.
+    
+    **HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.
+    
+    **COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.
+    
+    **SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
+    
+    Combine multiple tools for comprehensive research.
+  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
+  sample_questions:
+    - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
+    - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
+    - question: "What are the latest public transcripts for NVIDIA"
+    - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
+    - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
+    - question: "What is the latest share price of NVIDIA"
+    - question: "Would you recommend buying Nvidia Stock at 195"
+
+tools:
+  - tool_spec:
+      type: cortex_search
+      name: TRANSCRIPTS_SEARCH
+      description: "Search public company event transcripts (earnings calls, investor conferences) from S&P 500 companies and Snowflake."
+  - tool_spec:
+      type: cortex_search
+      name: SEC_FILINGS_SEARCH
+      description: "Search SEC EDGAR filings (10-K, 10-Q, 8-K) for company announcements and regulatory disclosures."
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: STOCK_PRICES
+      description: "Query historical stock price data with daily OHLC values for price trends and analysis."
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: SP500_COMPANIES
+      description: "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."
+
+tool_resources:
+  TRANSCRIPTS_SEARCH:
+    search_service: "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH"
+    max_results: 10
+    columns:
+      - COMPANY_NAME
+      - PRIMARY_TICKER
+      - EVENT_TYPE
+      - FISCAL_PERIOD
+      - FISCAL_YEAR
+      - EVENT_TIMESTAMP
+      - TRANSCRIPT_TEXT
+  SEC_FILINGS_SEARCH:
+    search_service: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS"
+    max_results: 10
+    columns:
+      - COMPANY_NAME
+      - ANNOUNCEMENT_TYPE
+      - FILED_DATE
+      - FISCAL_PERIOD
+      - FISCAL_YEAR
+      - ITEM_NUMBER
+      - ITEM_TITLE
+      - ANNOUNCEMENT_TEXT
+  STOCK_PRICES:
+    semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV"
+    execution_environment:
+      type: warehouse
+      warehouse: SMALL_WH
+    query_timeout: 120
+  SP500_COMPANIES:
+    semantic_view: "COLM_DB.STRUCTURED.SP500"
+    execution_environment:
+      type: warehouse
+      warehouse: SMALL_WH
+    query_timeout: 60
+$$;
 
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
