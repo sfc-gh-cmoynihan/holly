@@ -11,7 +11,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.1 | **Updated:** February 2026
+**Author:** Colm Moynihan | **Version:** 1.2 | **Updated:** February 2026
 
 </div>
 
@@ -23,6 +23,12 @@
 
 **Holly** is a self-service AI assistant that enables portfolio managers, analysts, and traders to perform comprehensive stock research using natural language.
 
+### 📋 Use Case
+
+You are a financial analyst in a hedge fund looking into AI Native Tech Stocks. You have 4 in mind: **SNOW**, **MSFT**, **AMZN**, and **NVDA**.
+
+Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth investigating further. But you want to drill down on the **unstructured data** - 10-K, 8-K, 10-Q filings, investor call transcripts, and annual reports - to get a holistic view of the security based on all the data available, not just the fundamental data which is all structured.
+
 <table>
 <tr>
 <td width="50%">
@@ -33,7 +39,6 @@
 - 🏢 **Company Research** - S&P 500 fundamentals
 - 📄 **SEC Filings** - 10-K, 10-Q, 8-K search
 - 🎤 **Transcripts** - Earnings calls, conferences
-- 🔍 **Expert Insights** - Third Bridge integration
 
 </td>
 <td width="50%">
@@ -87,8 +92,7 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight.
 | Tool | Type | Description |
 |------|------|-------------|
 | **SEC_FILINGS_SEARCH** | Cortex Search | SEC EDGAR 10-K, 10-Q, 8-K filings |
-| **PUBLIC_TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences |
-| **TB_TRANSCRIPTS_SEARCH** | Cortex Search | Third Bridge expert transcripts |
+| **TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences |
 | **STOCK_PRICES** | Cortex Analyst | Historical price data (OHLC) |
 | **SP500_COMPANIES** | Cortex Analyst | Company fundamentals |
 
@@ -145,7 +149,7 @@ holly/
 | "Find the top 5 companies by revenue growth" | SP500_COMPANIES |
 | "What did Amazon announce in their latest 10-K?" | SEC_FILINGS_SEARCH |
 | "Show me NVIDIA's fundamentals" | SP500_COMPANIES |
-| "Search for transcripts about AI investments" | PUBLIC_TRANSCRIPTS_SEARCH |
+| "Give me the latest public transcripts of NVIDIA" | TRANSCRIPTS_SEARCH |
 
 ---
 
