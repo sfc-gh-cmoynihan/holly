@@ -4,23 +4,23 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.1
-  Date: 24th February 2026
+  Version: 1.2
+  Date: 26th February 2026
   
   PREREQUISITES:
   --------------
   1. ACCOUNTADMIN role or equivalent privileges
-   2. Subscribe to Cybersyn marketplace data:
-      - Go to: Data Products > Marketplace
-      - Search for: "Cybersyn Financial & Economic Essentials"
-      - Click "Get" to subscribe (free tier available)
-      - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
+  2. Subscribe to Cybersyn marketplace data:
+     - Go to: Data Products > Marketplace
+     - Search for: "Cybersyn Financial & Economic Essentials"
+     - Click "Get" to subscribe (free tier available)
+     - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
   
   WHAT THIS SCRIPT CREATES:
   -------------------------
   - Database: COLM_DB (with STRUCTURED, SEMI_STRUCTURED, UNSTRUCTURED schemas)
-  - Tables: SP500_COMPANIES, STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, TB_TRANSCRIPTS
-  - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH, TB_TRANSCRIPTS
+  - Tables: SP500_COMPANIES, STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
+  - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
   - Task: DAILY_DATA_REFRESH (runs daily at 6:00 AM GMT)
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
@@ -165,35 +165,10 @@ WHERE a.EVENT_TIMESTAMP > '2025-01-01'
 ALTER TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
 
 -- ============================================================================
--- STEP 7: CREATE PRIVATE TRANSCRIPTS TABLE (Third Bridge - empty, for demo)
+-- STEP 7: CREATE CORTEX SEARCH SERVICES
 -- ============================================================================
 
-CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS (
-    ID VARCHAR,
-    UUID VARCHAR,
-    TITLE VARCHAR,
-    AGENDA VARCHAR,
-    COMPLIANCE_CLASSIFICATION ARRAY,
-    CONTENT_TYPE VARCHAR,
-    KEY_INSIGHTS VARCHAR,
-    LANGUAGE OBJECT,
-    SPECIALISTS ARRAY,
-    RELEVANT_COMPANIES ARRAY,
-    TARGET_COMPANIES ARRAY,
-    STARTS_AT TIMESTAMP_NTZ,
-    TRANSCRIPT ARRAY,
-    TRANSCRIPT_UPLOADED_AT TIMESTAMP_NTZ,
-    TRANSCRIPT_LAST_UPDATED_AT TIMESTAMP_NTZ,
-    TRANSCRIPT_URL VARCHAR
-);
-
-ALTER TABLE COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
-
--- ============================================================================
--- STEP 8: CREATE CORTEX SEARCH SERVICES
--- ============================================================================
-
--- 8.1 SEC Filings Search
+-- 7.1 SEC Filings Search
 CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
     ON ANNOUNCEMENT_TEXT
     ATTRIBUTES COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE
@@ -205,7 +180,7 @@ AS (
     FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
 );
 
--- 8.2 Public Transcripts Search
+-- 7.2 Public Transcripts Search
 CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH
     ON TRANSCRIPT_TEXT
     ATTRIBUTES COMPANY_NAME, PRIMARY_TICKER, EVENT_TYPE, FISCAL_PERIOD, FISCAL_YEAR
@@ -219,23 +194,11 @@ AS (
     WHERE TRANSCRIPT:text IS NOT NULL
 );
 
--- 8.3 Private Transcripts Search (Third Bridge)
-CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS
-    ON TITLE
-    ATTRIBUTES TITLE, AGENDA, CONTENT_TYPE, TARGET_COMPANIES, STARTS_AT, TRANSCRIPT_URL, RELEVANT_COMPANIES
-    WAREHOUSE = 'SMALL_WH'
-    TARGET_LAG = '1 day'
-    EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
-AS (
-    SELECT TITLE, AGENDA, CONTENT_TYPE, TARGET_COMPANIES, STARTS_AT, TRANSCRIPT_URL, RELEVANT_COMPANIES, TRANSCRIPT
-    FROM COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS
-);
-
 -- ============================================================================
--- STEP 9: CREATE SEMANTIC VIEWS FOR CORTEX ANALYST
+-- STEP 8: CREATE SEMANTIC VIEWS FOR CORTEX ANALYST
 -- ============================================================================
 
--- 9.1 Stock Price Timeseries Semantic View
+-- 8.1 Stock Price Timeseries Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
     TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
     FACTS (STOCK_PRICE_TIMESERIES.VALUE AS VALUE COMMENT 'Stock price or volume value')
@@ -262,7 +225,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
         }]
     }');
 
--- 9.2 S&P 500 Companies Semantic View
+-- 8.2 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES COMMENT 'S&P 500 company fundamentals')
     FACTS (
@@ -300,7 +263,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     }');
 
 -- ============================================================================
--- STEP 10: CREATE HOLLY CORTEX AGENT
+-- STEP 9: CREATE HOLLY CORTEX AGENT
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
@@ -313,19 +276,17 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
   {
     "models": {"orchestration": "claude-4-sonnet"},
     "instructions": {
-      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**PUBLIC TRANSCRIPTS**: For earnings calls, investor conferences, or company event transcripts from S&P 500 companies or Snowflake, use PUBLIC_TRANSCRIPTS_SEARCH.\n\n**PRIVATE TRANSCRIPTS**: For Third Bridge expert interview transcripts or proprietary research, use TB_TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.\n\nCombine multiple tools for comprehensive research.",
+      "orchestration": "You are Holly, a financial research assistant. Route each query to the appropriate tool:\n\n**TRANSCRIPTS**: For earnings calls, investor conferences, or company event transcripts from S&P 500 companies, use TRANSCRIPTS_SEARCH.\n\n**HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.\n\n**COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.\n\n**SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.\n\nCombine multiple tools for comprehensive research.",
       "response": "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
     },
     "tools": [
-      {"tool_spec": {"type": "cortex_search", "name": "PUBLIC_TRANSCRIPTS_SEARCH", "description": "Search public company event transcripts (earnings calls, investor conferences) from S&P 500 companies and Snowflake."}},
-      {"tool_spec": {"type": "cortex_search", "name": "TB_TRANSCRIPTS_SEARCH", "description": "Search private Third Bridge expert interview transcripts for proprietary research insights."}},
+      {"tool_spec": {"type": "cortex_search", "name": "TRANSCRIPTS_SEARCH", "description": "Search public company event transcripts (earnings calls, investor conferences) from S&P 500 companies and Snowflake."}},
       {"tool_spec": {"type": "cortex_search", "name": "SEC_FILINGS_SEARCH", "description": "Search SEC EDGAR filings (10-K, 10-Q, 8-K) for company announcements and regulatory disclosures."}},
       {"tool_spec": {"type": "cortex_analyst_text_to_sql", "name": "STOCK_PRICES", "description": "Query historical stock price data with daily OHLC values for price trends and analysis."}},
       {"tool_spec": {"type": "cortex_analyst_text_to_sql", "name": "SP500_COMPANIES", "description": "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."}}
     ],
     "tool_resources": {
-      "PUBLIC_TRANSCRIPTS_SEARCH": {"search_service": "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH", "max_results": 10, "columns": ["COMPANY_NAME", "PRIMARY_TICKER", "EVENT_TYPE", "FISCAL_PERIOD", "FISCAL_YEAR", "EVENT_TIMESTAMP", "TRANSCRIPT_TEXT"]},
-      "TB_TRANSCRIPTS_SEARCH": {"search_service": "COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS", "max_results": 5, "columns": ["TITLE", "AGENDA", "CONTENT_TYPE", "TARGET_COMPANIES", "STARTS_AT", "TRANSCRIPT_URL", "RELEVANT_COMPANIES", "TRANSCRIPT"]},
+      "TRANSCRIPTS_SEARCH": {"search_service": "COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEARCH", "max_results": 10, "columns": ["COMPANY_NAME", "PRIMARY_TICKER", "EVENT_TYPE", "FISCAL_PERIOD", "FISCAL_YEAR", "EVENT_TIMESTAMP", "TRANSCRIPT_TEXT"]},
       "SEC_FILINGS_SEARCH": {"search_service": "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS", "max_results": 10, "columns": ["COMPANY_NAME", "ANNOUNCEMENT_TYPE", "FILED_DATE", "FISCAL_PERIOD", "FISCAL_YEAR", "ITEM_NUMBER", "ITEM_TITLE", "ANNOUNCEMENT_TEXT"]},
       "STOCK_PRICES": {"semantic_view": "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV", "execution_environment": {"type": "warehouse", "warehouse": "SMALL_WH"}, "query_timeout": 120},
       "SP500_COMPANIES": {"semantic_view": "COLM_DB.STRUCTURED.SP500", "execution_environment": {"type": "warehouse", "warehouse": "SMALL_WH"}, "query_timeout": 60}
@@ -336,20 +297,17 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
 -- ============================================================================
--- STEP 11: CREATE SCHEDULED DATA REFRESH TASK
+-- STEP 10: CREATE SCHEDULED DATA REFRESH TASK
 -- ============================================================================
 
--- Create warehouse for scheduled tasks if not exists
 CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
 
--- Daily refresh task: Runs at 6:00 AM GMT/UTC
 CREATE OR REPLACE TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH
   WAREHOUSE = ADHOC_WH
   SCHEDULE = 'USING CRON 0 6 * * * UTC'
   COMMENT = 'Daily refresh of EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables at 6:00 AM GMT'
 AS
 BEGIN
-  -- Refresh EDGAR_FILINGS table with latest SEC filings
   MERGE INTO COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS AS target
   USING (
     SELECT 
@@ -371,7 +329,6 @@ BEGIN
     INSERT (COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE, ANNOUNCEMENT_TEXT)
     VALUES (source.COMPANY_NAME, source.ANNOUNCEMENT_TYPE, source.FILED_DATE, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.ITEM_NUMBER, source.ITEM_TITLE, source.ANNOUNCEMENT_TEXT);
 
-  -- Refresh PUBLIC_TRANSCRIPTS table with latest earnings call transcripts
   MERGE INTO COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS target
   USING (
     SELECT 
@@ -399,18 +356,16 @@ BEGIN
     VALUES (source.COMPANY_ID, source.CIK, source.COMPANY_NAME, source.PRIMARY_TICKER, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.EVENT_TYPE, source.TRANSCRIPT_TYPE, source.TRANSCRIPT, source.EVENT_TIMESTAMP, source.CREATED_AT, source.UPDATED_AT);
 END;
 
--- Enable the task
 ALTER TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH RESUME;
 
 -- ============================================================================
--- STEP 12: VERIFICATION
+-- STEP 11: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES
 UNION ALL SELECT 'STOCK_PRICE_TIMESERIES', COUNT(*) FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES
 UNION ALL SELECT 'EDGAR_FILINGS', COUNT(*) FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
-UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS
-UNION ALL SELECT 'TB_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.TB_TRANSCRIPTS;
+UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS;
 
 SHOW CORTEX SEARCH SERVICES IN DATABASE COLM_DB;
 SHOW SEMANTIC VIEWS IN DATABASE COLM_DB;
