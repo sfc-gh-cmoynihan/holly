@@ -13,7 +13,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.2 | **Updated:** February 2026
+**Author:** Colm Moynihan | **Version:** 1.3 | **Updated:** February 2026
 
 </div>
 
@@ -38,6 +38,7 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 ### ✨ Key Features
 
 - 📈 **Stock Analysis** - Historical prices, OHLC data
+- 💹 **Real-time Prices** - Live quotes via Yahoo Finance
 - 🏢 **Company Research** - S&P 500 fundamentals
 - 📄 **SEC Filings** - 10-K, 10-Q, 8-K search
 - 🎤 **Transcripts** - Earnings calls, conferences
@@ -55,8 +56,8 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
     ┌─────────┼─────────┐
     ▼         ▼         ▼
 ┌───────┐ ┌───────┐ ┌───────┐
-│Search │ │Analyst│ │Analyst│
-│SEC/TX │ │Prices │ │S&P500 │
+│Search │ │Analyst│ │Yahoo  │
+│SEC/TX │ │Prices │ │Finance│
 └───────┘ └───────┘ └───────┘
 ```
 
@@ -100,6 +101,38 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight.
 
 ---
 
+## 💹 Real-time Stock Prices (Yahoo Finance)
+
+Holly includes an external function that fetches **real-time stock prices** from Yahoo Finance:
+
+```sql
+-- Get real-time quote for any ticker
+SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA');
+
+-- Parse the response
+SELECT 
+    result:ticker::VARCHAR AS TICKER,
+    result:price::FLOAT AS PRICE,
+    result:previous_close::FLOAT AS PREVIOUS_CLOSE,
+    result:currency::VARCHAR AS CURRENCY,
+    result:exchange::VARCHAR AS EXCHANGE,
+    result:market_state::VARCHAR AS MARKET_STATE,
+    result:quote_date::VARCHAR AS QUOTE_DATE,
+    result:quote_time::VARCHAR AS QUOTE_TIME
+FROM (SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS result);
+```
+
+**Response fields:**
+- `ticker` - Stock symbol
+- `price` - Current/last traded price
+- `previous_close` - Previous day's closing price
+- `currency` - Trading currency (USD)
+- `exchange` - Exchange name (NMS, NYSE, etc.)
+- `market_state` - PRE, REGULAR, POST, CLOSED
+- `quote_date` / `quote_time` - Timestamp of quote
+
+---
+
 ## Scheduled Data Refresh
 
 Holly includes a scheduled task that automatically keeps data fresh:
@@ -126,20 +159,23 @@ SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'DAILY_DATA_REF
 holly/
 ├── 📄 README.md              # This file
 ├── 📄 INSTALL.sql            # Complete installation script
+├── 📄 UNINSTALL.sql          # Complete uninstall script
+├── 📄 DEMO_SCRIPT.md         # Demo walkthrough
 ├── 📂 cortex_agent/
-│   └── HOLLY.sql             # Agent definition
+│   ├── HOLLY.sql             # Agent definition
+│   ├── YAHOO_FINANCE.sql     # Real-time stock price function
+│   └── RAG_COMPONENTS.sql    # PDF document Q&A (optional)
 ├── 📂 cortex_analyst/
 │   ├── STOCK_PRICE_TIMESERIES_SV.sql
 │   └── SP500.sql
 ├── 📂 cortex_search/
 │   └── EDGAR_FILINGS.sql
 ├── 📂 tasks/
-│   └── DAILY_DATA_REFRESH.sql  # Scheduled data refresh task
+│   └── DAILY_DATA_REFRESH.sql
 ├── 📂 data/
 │   └── SP500_COMPANIES.csv
-├── 📂 images/
-│   └── holly.png
-└── 📄 DEMO_SCRIPT.md
+└── 📂 images/
+    └── holly.png
 ```
 
 ---
@@ -168,6 +204,6 @@ This project is proprietary software for demonstration purposes.
 
 **Built with ❄️ Snowflake Cortex**
 
-*Data Source: Snowflake Marketplace (Cybersyn)*
+*Data Source: Snowflake Marketplace (Cybersyn) + Yahoo Finance*
 
 </div>
