@@ -132,12 +132,13 @@ holly/
 │   ├── STOCK_PRICE_TIMESERIES_SV.sql
 │   └── SP500.sql
 ├── 📂 cortex_search/
-│   ├── EDGAR_FILINGS.sql
-│   └── TRANSCRIPTS.sql
+│   └── EDGAR_FILINGS.sql
 ├── 📂 tasks/
 │   └── DAILY_DATA_REFRESH.sql  # Scheduled data refresh task
 ├── 📂 data/
 │   └── SP500_COMPANIES.csv
+├── 📂 images/
+│   └── holly.png
 └── 📄 DEMO_SCRIPT.md
 ```
 
@@ -147,11 +148,13 @@ holly/
 
 | Query | Tool Used |
 |-------|-----------|
-| "What is Microsoft's stock price trend?" | STOCK_PRICES |
-| "Find the top 5 companies by revenue growth" | SP500_COMPANIES |
-| "What did Amazon announce in their latest 10-K?" | SEC_FILINGS_SEARCH |
-| "Show me NVIDIA's fundamentals" | SP500_COMPANIES |
-| "Give me the latest public transcripts of NVIDIA" | TRANSCRIPTS_SEARCH |
+| "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" | STOCK_PRICES |
+| "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500" | SP500_COMPANIES |
+| "What are the latest public transcripts for NVIDIA" | TRANSCRIPTS_SEARCH |
+| "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports" | SEC_FILINGS_SEARCH |
+| "What is the latest 10-K for Nvidia from the EDGAR Filings" | SEC_FILINGS_SEARCH |
+| "What is the latest share price of NVIDIA" | STOCK_PRICES |
+| "Would you recommend buying Nvidia Stock at 195" | Multiple Tools |
 
 ---
 
