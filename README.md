@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="images/holly.png" alt="Holly" width="200"/>
+
 # 📊 Holly - Financial Research Assistant
 
 **AI-Powered Stock Research with Snowflake Cortex**
