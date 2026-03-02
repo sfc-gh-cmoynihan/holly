@@ -13,7 +13,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.4 | **Updated:** March 2026
+**Author:** Colm Moynihan | **Version:** 1.5 | **Updated:** March 2026
 
 </div>
 
@@ -38,10 +38,9 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 ### ✨ Key Features
 
 - 📈 **Stock Analysis** - Historical prices, OHLC data
-- 💹 **Real-time Prices** - Live quotes via Yahoo Finance
-- 🏢 **Company Research** - Full S&P 500 (503 companies)
+- 🏢 **Company Research** - S&P 500 companies
 - 📄 **SEC Filings** - 10-K, 10-Q, 8-K search
-- 🎤 **Transcripts** - 60,000+ earnings calls
+- 🎤 **Transcripts** - Earnings calls & investor conferences
 
 </td>
 <td width="50%">
@@ -56,8 +55,8 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
     ┌─────────┼─────────┐
     ▼         ▼         ▼
 ┌───────┐ ┌───────┐ ┌───────┐
-│Search │ │Analyst│ │Yahoo  │
-│SEC/TX │ │Prices │ │Finance│
+│Search │ │Analyst│ │Analyst│
+│SEC/TX │ │Prices │ │SP500  │
 └───────┘ └───────┘ └───────┘
 ```
 
@@ -76,9 +75,11 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
   - Go to: **Data Products > Marketplace**
   - Search: "Snowflake Public Data (Free)"
   - Click "Get" (completely free)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE`
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN`
 
 ### 2️⃣ Installation via Workspaces (Recommended)
+
+#### Option A: If Git Integration Already Exists
 
 1. **Open Workspaces** in Snowsight:
    - Navigate to **Projects > Workspaces**
@@ -94,6 +95,34 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
    - Click **Run All** or press `Ctrl+Enter` / `Cmd+Enter`
    - Estimated runtime: 5-10 minutes
 
+#### Option B: Create Git Integration First (If Required)
+
+If you see "No API integration available", run this SQL first:
+
+```sql
+-- Run as ACCOUNTADMIN
+USE ROLE ACCOUNTADMIN;
+
+-- Create API integration for GitHub
+CREATE OR REPLACE API INTEGRATION GITHUB_INTEGRATION
+    API_PROVIDER = git_https_api
+    API_ALLOWED_PREFIXES = ('https://github.com/sfc-gh-cmoynihan')
+    ENABLED = TRUE;
+
+-- Grant usage to your role
+GRANT USAGE ON INTEGRATION GITHUB_INTEGRATION TO ROLE ACCOUNTADMIN;
+```
+
+Then follow Option A above.
+
+#### Option C: Manual Installation (No Git Required)
+
+1. Open the installation script directly: [INSTALL.sql](https://github.com/sfc-gh-cmoynihan/holly/blob/main/INSTALL.sql)
+2. Click **Raw** to view the raw SQL
+3. Copy all the SQL content
+4. Paste into a new Snowflake worksheet
+5. Click **Run All**
+
 ### 3️⃣ Access Holly
 
 Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly**.
@@ -107,68 +136,7 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly
 | **SEC_FILINGS_SEARCH** | Cortex Search | SEC EDGAR 10-K, 10-Q, 8-K filings |
 | **TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences |
 | **STOCK_PRICES** | Cortex Analyst | Historical price data (OHLC) |
-| **SP500_COMPANIES** | Cortex Analyst | S&P 500 company fundamentals |
-
----
-
-## 💹 Real-time Stock Prices (Yahoo Finance)
-
-Holly includes an external function that fetches **real-time stock prices** from Yahoo Finance:
-
-```sql
--- Get real-time quote for any ticker
-SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA');
-
--- Parse the response
-SELECT 
-    result:ticker::VARCHAR AS TICKER,
-    result:price::FLOAT AS PRICE,
-    result:previous_close::FLOAT AS PREVIOUS_CLOSE,
-    result:currency::VARCHAR AS CURRENCY,
-    result:exchange::VARCHAR AS EXCHANGE,
-    result:market_state::VARCHAR AS MARKET_STATE,
-    result:quote_date::VARCHAR AS QUOTE_DATE,
-    result:quote_time::VARCHAR AS QUOTE_TIME
-FROM (SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS result);
-```
-
-**Response fields:**
-- `ticker` - Stock symbol
-- `price` - Current/last traded price
-- `previous_close` - Previous day's closing price
-- `currency` - Trading currency (USD)
-- `exchange` - Exchange name (NMS, NYSE, etc.)
-- `market_state` - PRE, REGULAR, POST, CLOSED
-- `quote_date` / `quote_time` - Timestamp of quote
-
----
-
-## ⏰ Scheduled Data Refresh
-
-Holly includes scheduled tasks that automatically keep data fresh:
-
-| Task | Schedule | Description |
-|------|----------|-------------|
-| **REFRESH_SP500_WEEKLY** | Sundays 6 AM ET | Refreshes S&P 500 companies from Wikipedia |
-| **REFRESH_TRANSCRIPTS_DAILY** | Daily 7 AM ET | Refreshes earnings transcripts from Cybersyn |
-
-Cortex Search Services automatically detect changes and update their indexes.
-
-```sql
--- Check task status
-SHOW TASKS IN DATABASE COLM_DB;
-
--- View task history
-SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY()) 
-WHERE DATABASE_NAME = 'COLM_DB' 
-ORDER BY SCHEDULED_TIME DESC LIMIT 10;
-
--- Manually refresh S&P 500 data
-CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
-
--- Manually refresh transcripts
-CALL COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS();
-```
+| **SP500_COMPANIES** | Cortex Analyst | S&P 500 company information |
 
 ---
 
@@ -182,7 +150,6 @@ holly/
 ├── 📄 DEMO_SCRIPT.md         # Demo walkthrough
 ├── 📂 cortex_agent/
 │   ├── HOLLY.sql             # Agent definition
-│   ├── YAHOO_FINANCE.sql     # Real-time stock price function
 │   └── RAG_COMPONENTS.sql    # PDF document Q&A (optional)
 ├── 📂 cortex_analyst/
 │   ├── STOCK_PRICE_TIMESERIES_SV.sql
@@ -204,7 +171,6 @@ holly/
 | "What are the latest public transcripts for NVIDIA" | TRANSCRIPTS_SEARCH |
 | "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports" | SEC_FILINGS_SEARCH |
 | "What is the latest 10-K for Nvidia from the EDGAR Filings" | SEC_FILINGS_SEARCH |
-| "What is the latest share price of NVIDIA" | STOCK_PRICES |
 | "Would you recommend buying Nvidia Stock at 195" | Multiple Tools |
 
 ---
@@ -219,6 +185,6 @@ This project is proprietary software for demonstration purposes.
 
 **Built with ❄️ Snowflake Cortex**
 
-*Data Source: Snowflake Marketplace (Cybersyn) + Yahoo Finance + Wikipedia*
+*Data Source: Snowflake Marketplace (Cybersyn)*
 
 </div>

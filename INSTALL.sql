@@ -4,7 +4,7 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.4
+  Version: 1.5
   Date: 2nd March 2026
   
   PREREQUISITES:
@@ -25,8 +25,6 @@
   - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
   - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
-  - External Functions: GET_STOCK_PRICE (Yahoo Finance), REFRESH_SP500_COMPANIES (Wikipedia)
-  - Tasks: REFRESH_SP500_WEEKLY (Sundays 6 AM ET), REFRESH_TRANSCRIPTS_DAILY (7 AM ET)
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
@@ -49,21 +47,9 @@ CREATE SCHEMA IF NOT EXISTS COLM_DB.SEMI_STRUCTURED;
 CREATE SCHEMA IF NOT EXISTS COLM_DB.UNSTRUCTURED;
 
 -- ============================================================================
--- STEP 3: CREATE S&P 500 COMPANIES (Full 503 constituents from Wikipedia)
+-- STEP 3: CREATE S&P 500 COMPANIES TABLE
 -- ============================================================================
 
--- 3.1 Create Network Rule for Wikipedia access
-CREATE OR REPLACE NETWORK RULE COLM_DB.STRUCTURED.WIKIPEDIA_RULE
-    MODE = EGRESS
-    TYPE = HOST_PORT
-    VALUE_LIST = ('en.wikipedia.org');
-
--- 3.2 Create External Access Integration for Wikipedia
-CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION WIKIPEDIA_INTEGRATION
-    ALLOWED_NETWORK_RULES = (COLM_DB.STRUCTURED.WIKIPEDIA_RULE)
-    ENABLED = TRUE;
-
--- 3.3 Create the SP500 table
 CREATE OR REPLACE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES (
     SYMBOL VARCHAR,
     COMPANY_NAME VARCHAR,
@@ -75,80 +61,21 @@ CREATE OR REPLACE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES (
     FOUNDED VARCHAR
 );
 
--- 3.4 Create procedure to load S&P 500 data from Wikipedia
-CREATE OR REPLACE PROCEDURE COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES()
-RETURNS VARCHAR
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
-PACKAGES = ('snowflake-snowpark-python', 'requests', 'pandas', 'lxml')
-HANDLER = 'refresh_sp500'
-EXTERNAL_ACCESS_INTEGRATIONS = (WIKIPEDIA_INTEGRATION)
-EXECUTE AS CALLER
-AS $$
-import requests
-import pandas as pd
-from io import StringIO
-from snowflake.snowpark import Session
-
-def refresh_sp500(session: Session) -> str:
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
-    
-    try:
-        response = requests.get(url, headers=headers, timeout=30)
-        tables = pd.read_html(StringIO(response.text))
-        sp500_df = tables[0]
-        
-        session.sql("TRUNCATE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES").collect()
-        
-        for idx, row in sp500_df.iterrows():
-            date_added = "NULL"
-            if pd.notna(row.get('Date added')):
-                try:
-                    date_added = f"'{pd.to_datetime(row['Date added']).strftime('%Y-%m-%d')}'"
-                except:
-                    date_added = "NULL"
-            
-            symbol = row['Symbol'].replace("'", "''") if pd.notna(row.get('Symbol')) else None
-            company_name = row['Security'].replace("'", "''") if pd.notna(row.get('Security')) else None
-            sector = row['GICS Sector'].replace("'", "''") if pd.notna(row.get('GICS Sector')) else None
-            industry = row['GICS Sub-Industry'].replace("'", "''") if pd.notna(row.get('GICS Sub-Industry')) else None
-            headquarters = row['Headquarters Location'].replace("'", "''") if pd.notna(row.get('Headquarters Location')) else None
-            cik = str(row['CIK']) if pd.notna(row.get('CIK')) else None
-            founded = str(row['Founded']).replace("'", "''") if pd.notna(row.get('Founded')) else None
-            
-            sql = f"""INSERT INTO COLM_DB.STRUCTURED.SP500_COMPANIES 
-                     (SYMBOL, COMPANY_NAME, SECTOR, INDUSTRY, HEADQUARTERS, DATE_ADDED, CIK, FOUNDED)
-                     VALUES (
-                         {f"'{symbol}'" if symbol else "NULL"},
-                         {f"'{company_name}'" if company_name else "NULL"},
-                         {f"'{sector}'" if sector else "NULL"},
-                         {f"'{industry}'" if industry else "NULL"},
-                         {f"'{headquarters}'" if headquarters else "NULL"},
-                         {date_added},
-                         {f"'{cik}'" if cik else "NULL"},
-                         {f"'{founded}'" if founded else "NULL"}
-                     )"""
-            session.sql(sql).collect()
-        
-        count = session.sql("SELECT COUNT(*) FROM COLM_DB.STRUCTURED.SP500_COMPANIES").collect()[0][0]
-        return f"Successfully loaded {count} S&P 500 companies"
-    except Exception as e:
-        return f"Error: {str(e)}"
-$$;
-
--- 3.5 Load the S&P 500 data
-CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
-
--- 3.6 Create weekly task to refresh S&P 500 data
-CREATE OR REPLACE TASK COLM_DB.STRUCTURED.REFRESH_SP500_WEEKLY
-    WAREHOUSE = SMALL_WH
-    SCHEDULE = 'USING CRON 0 6 * * 0 America/New_York'
-    COMMENT = 'Weekly refresh of S&P 500 companies from Wikipedia every Sunday at 6 AM ET'
-AS
-    CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
-
-ALTER TASK COLM_DB.STRUCTURED.REFRESH_SP500_WEEKLY RESUME;
+-- Load S&P 500 companies from Cybersyn company index (matching tickers from stock price data)
+INSERT INTO COLM_DB.STRUCTURED.SP500_COMPANIES (SYMBOL, COMPANY_NAME, SECTOR, INDUSTRY, HEADQUARTERS, CIK)
+SELECT DISTINCT
+    s.TICKER AS SYMBOL,
+    COALESCE(c.COMPANY_NAME, s.TICKER) AS COMPANY_NAME,
+    NULL AS SECTOR,
+    NULL AS INDUSTRY,
+    NULL AS HEADQUARTERS,
+    c.CIK
+FROM SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN.STOCK_PRICE_TIMESERIES s
+LEFT JOIN SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN.SEC_CIK_INDEX c 
+    ON s.TICKER = UPPER(REGEXP_REPLACE(c.COMPANY_NAME, '[^A-Z]', ''))
+WHERE s.PRIMARY_EXCHANGE_CODE IN ('XNYS', 'XNAS')
+  AND s.DATE >= DATEADD(year, -1, CURRENT_DATE())
+QUALIFY ROW_NUMBER() OVER (PARTITION BY s.TICKER ORDER BY c.CIK) = 1;
 
 -- ============================================================================
 -- STEP 4: CREATE STOCK PRICE DATA (from Cybersyn Marketplace)
@@ -166,8 +93,7 @@ SELECT
     VARIABLE,
     VARIABLE_NAME,
     DATE,
-    VALUE,
-    EVENT_TIMESTAMP_UTC
+    VALUE
 FROM SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN.STOCK_PRICE_TIMESERIES
 WHERE TICKER IN (SELECT SYMBOL FROM COLM_DB.STRUCTURED.SP500_COMPANIES);
 
@@ -221,50 +147,6 @@ FROM SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2 
 INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s ON t.PRIMARY_TICKER = s.SYMBOL;
 
 ALTER TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
-
--- 6.1 Create procedure to refresh transcripts
-CREATE OR REPLACE PROCEDURE COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS()
-RETURNS VARCHAR
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
-PACKAGES = ('snowflake-snowpark-python')
-HANDLER = 'refresh_transcripts'
-EXECUTE AS CALLER
-AS $$
-def refresh_transcripts(session) -> str:
-    session.sql("""
-        CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS
-        SELECT 
-            ROW_NUMBER() OVER (ORDER BY t.EVENT_TIMESTAMP DESC) AS TRANSCRIPT_ID,
-            t.COMPANY_ID,
-            t.CIK,
-            t.COMPANY_NAME,
-            t.PRIMARY_TICKER,
-            t.FISCAL_PERIOD,
-            t.FISCAL_YEAR,
-            t.EVENT_TYPE,
-            t.TRANSCRIPT_TYPE,
-            t.TRANSCRIPT,
-            t.EVENT_TIMESTAMP,
-            t.CREATED_AT,
-            t.UPDATED_AT
-        FROM SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2 t
-        INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s ON t.PRIMARY_TICKER = s.SYMBOL
-    """).collect()
-    
-    count = session.sql("SELECT COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS").collect()[0][0]
-    return f"Successfully refreshed PUBLIC_TRANSCRIPTS with {count} transcripts"
-$$;
-
--- 6.2 Create daily task to refresh transcripts
-CREATE OR REPLACE TASK COLM_DB.UNSTRUCTURED.REFRESH_TRANSCRIPTS_DAILY
-    WAREHOUSE = SMALL_WH
-    SCHEDULE = 'USING CRON 0 7 * * * America/New_York'
-    COMMENT = 'Daily refresh of S&P 500 public transcripts from Cybersyn at 7 AM ET'
-AS
-    CALL COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS();
-
-ALTER TASK COLM_DB.UNSTRUCTURED.REFRESH_TRANSCRIPTS_DAILY RESUME;
 
 -- ============================================================================
 -- STEP 7: CREATE CORTEX SEARCH SERVICES
@@ -329,70 +211,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     );
 
 -- ============================================================================
--- STEP 9: CREATE YAHOO FINANCE EXTERNAL FUNCTION (Real-time Stock Prices)
--- ============================================================================
-
--- 9.1 Create Network Rule for Yahoo Finance API access
-CREATE OR REPLACE NETWORK RULE COLM_DB.STRUCTURED.YAHOO_FINANCE_RULE
-    MODE = EGRESS
-    TYPE = HOST_PORT
-    VALUE_LIST = ('query1.finance.yahoo.com', 'query2.finance.yahoo.com');
-
--- 9.2 Create External Access Integration
-CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION YAHOO_FINANCE_INTEGRATION
-    ALLOWED_NETWORK_RULES = (COLM_DB.STRUCTURED.YAHOO_FINANCE_RULE)
-    ENABLED = TRUE;
-
--- 9.3 Create the Python UDF for real-time stock prices
-CREATE OR REPLACE FUNCTION COLM_DB.STRUCTURED.GET_STOCK_PRICE(TICKER VARCHAR)
-RETURNS VARIANT
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
-PACKAGES = ('requests')
-HANDLER = 'get_stock_price'
-EXTERNAL_ACCESS_INTEGRATIONS = (YAHOO_FINANCE_INTEGRATION)
-AS $$
-import requests
-from datetime import datetime
-
-def get_stock_price(ticker):
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        data = response.json()
-        
-        result = data.get("chart", {}).get("result", [])
-        if not result:
-            return {"error": "No data found for ticker", "ticker": ticker}
-        
-        meta = result[0].get("meta", {})
-        regular_market_time = meta.get("regularMarketTime")
-        
-        quote_date = None
-        quote_time = None
-        if regular_market_time:
-            dt = datetime.utcfromtimestamp(regular_market_time)
-            quote_date = dt.strftime('%d-%b-%Y')
-            quote_time = dt.strftime('%H:%M:%S GMT')
-        
-        return {
-            "ticker": ticker.upper(),
-            "price": meta.get("regularMarketPrice"),
-            "previous_close": meta.get("previousClose"),
-            "currency": meta.get("currency"),
-            "exchange": meta.get("exchangeName"),
-            "market_state": meta.get("marketState"),
-            "quote_date": quote_date,
-            "quote_time": quote_time
-        }
-    except Exception as e:
-        return {"error": str(e), "ticker": ticker}
-$$;
-
--- ============================================================================
--- STEP 10: CREATE HOLLY CORTEX AGENT
+-- STEP 9: CREATE HOLLY CORTEX AGENT
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
@@ -414,7 +233,7 @@ instructions:
     
     **HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.
     
-    **COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.
+    **COMPANY FUNDAMENTALS**: For S&P 500 company data (sector, industry, headquarters), use SP500_COMPANIES.
     
     **SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
     
@@ -426,7 +245,6 @@ instructions:
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
     - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
-    - question: "What is the latest share price of NVIDIA"
     - question: "Would you recommend buying Nvidia Stock at 195"
 
 tools:
@@ -445,7 +263,7 @@ tools:
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: SP500_COMPANIES
-      description: "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."
+      description: "Query S&P 500 company fundamentals: sector, industry, headquarters."
 
 tool_resources:
   TRANSCRIPTS_SEARCH:
@@ -488,7 +306,7 @@ $$;
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
 -- ============================================================================
--- STEP 11: VERIFICATION
+-- STEP 10: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES
@@ -498,24 +316,16 @@ UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC
 
 SHOW CORTEX SEARCH SERVICES IN DATABASE COLM_DB;
 SHOW SEMANTIC VIEWS IN DATABASE COLM_DB;
-SHOW TASKS IN DATABASE COLM_DB;
 DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY;
-
--- Test Yahoo Finance function
-SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS NVIDIA_REALTIME_PRICE;
 
 -- ============================================================================
 -- INSTALLATION COMPLETE!
 -- 
 -- Expected row counts:
---   SP500_COMPANIES: ~503 companies
+--   SP500_COMPANIES: varies based on available tickers
 --   STOCK_PRICE_TIMESERIES: varies based on date range
 --   EDGAR_FILINGS: varies based on filings
---   PUBLIC_TRANSCRIPTS: ~60,000+ transcripts
---
--- Scheduled Tasks:
---   REFRESH_SP500_WEEKLY: Sundays at 6 AM ET
---   REFRESH_TRANSCRIPTS_DAILY: Daily at 7 AM ET
+--   PUBLIC_TRANSCRIPTS: varies based on available transcripts
 --
 -- Navigate to: AI & ML > Snowflake Intelligence > Holly
 -- ============================================================================
