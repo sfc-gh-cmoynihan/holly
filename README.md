@@ -75,7 +75,7 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
   - Go to: **Data Products > Marketplace**
   - Search: "Snowflake Public Data (Free)"
   - Click "Get" (completely free)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN`
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE`
 
 ### 2️⃣ Installation via Workspaces (Recommended)
 
