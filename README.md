@@ -71,11 +71,11 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 ### 1️⃣ Prerequisites
 
 - Snowflake account with ACCOUNTADMIN access
-- Subscribe to **Snowflake Public Data (Free)** from Marketplace:
+- Subscribe to **Cybersyn Financial & Economic Essentials** from Marketplace:
   - Go to: **Data Products > Marketplace**
-  - Search: "Snowflake Public Data (Free)"
-  - Click "Get" (completely free)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE`
+  - Search: "Cybersyn Financial & Economic Essentials"
+  - Click "Get" (free trial available)
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN`
 
 ### 2️⃣ Installation via Workspaces (Recommended)
 
@@ -185,6 +185,6 @@ This project is proprietary software for demonstration purposes.
 
 **Built with ❄️ Snowflake Cortex**
 
-*Data Source: Snowflake Marketplace (Snowflake Public Data Free)*
+*Data Source: Snowflake Marketplace (Cybersyn)*
 
 </div>
