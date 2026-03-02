@@ -35,7 +35,7 @@
 -- STEP 1: SET UP CONTEXT
 -- ============================================================================
 USE ROLE ACCOUNTADMIN;
-CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
+CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'XLARGE' AUTO_SUSPEND = 60;
 USE WAREHOUSE SMALL_WH;
 
 -- ============================================================================
