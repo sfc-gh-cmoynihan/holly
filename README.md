@@ -13,7 +13,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.3 | **Updated:** February 2026
+**Author:** Colm Moynihan | **Version:** 1.4 | **Updated:** March 2026
 
 </div>
 
@@ -39,9 +39,9 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 
 - 📈 **Stock Analysis** - Historical prices, OHLC data
 - 💹 **Real-time Prices** - Live quotes via Yahoo Finance
-- 🏢 **Company Research** - S&P 500 fundamentals
+- 🏢 **Company Research** - Full S&P 500 (503 companies)
 - 📄 **SEC Filings** - 10-K, 10-Q, 8-K search
-- 🎤 **Transcripts** - Earnings calls, conferences
+- 🎤 **Transcripts** - 60,000+ earnings calls
 
 </td>
 <td width="50%">
@@ -72,21 +72,31 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 ### 1️⃣ Prerequisites
 
 - Snowflake account with ACCOUNTADMIN access
-- Subscribe to **Cybersyn Financial & Economic Essentials** from Marketplace:
-  - Go to: Data Products > Marketplace
-  - Search: "Cybersyn Financial & Economic Essentials"
-  - Click "Get" (free tier available)
+- Subscribe to **Snowflake Public Data (Free)** from Marketplace:
+  - Go to: **Data Products > Marketplace**
+  - Search: "Snowflake Public Data (Free)"
+  - Click "Get" (completely free)
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_FREE.CYBERSYN`
 
-### 2️⃣ Installation
+### 2️⃣ Installation via Workspaces (Recommended)
 
-```sql
--- Copy and paste INSTALL.sql into a Snowflake worksheet and run
--- Estimated runtime: 5-10 minutes
-```
+1. **Open Workspaces** in Snowsight:
+   - Navigate to **Projects > Workspaces**
+   - Click **+ Workspace** (top right)
+
+2. **Connect to Git Repository**:
+   - Select **Create Workspace from Git Repository**
+   - Enter repository URL: `https://github.com/sfc-gh-cmoynihan/holly`
+   - Click **Create**
+
+3. **Run Installation Script**:
+   - Open `INSTALL.sql` from the file explorer
+   - Click **Run All** or press `Ctrl+Enter` / `Cmd+Enter`
+   - Estimated runtime: 5-10 minutes
 
 ### 3️⃣ Access Holly
 
-Navigate to **AI & ML > Snowflake Intelligence** in Snowsight.
+Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly**.
 
 ---
 
@@ -97,7 +107,7 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight.
 | **SEC_FILINGS_SEARCH** | Cortex Search | SEC EDGAR 10-K, 10-Q, 8-K filings |
 | **TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences |
 | **STOCK_PRICES** | Cortex Analyst | Historical price data (OHLC) |
-| **SP500_COMPANIES** | Cortex Analyst | Company fundamentals |
+| **SP500_COMPANIES** | Cortex Analyst | S&P 500 company fundamentals |
 
 ---
 
@@ -133,22 +143,31 @@ FROM (SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS result);
 
 ---
 
-## Scheduled Data Refresh
+## ⏰ Scheduled Data Refresh
 
-Holly includes a scheduled task that automatically keeps data fresh:
+Holly includes scheduled tasks that automatically keep data fresh:
 
 | Task | Schedule | Description |
 |------|----------|-------------|
-| **DAILY_DATA_REFRESH** | 6:00 AM GMT daily | Refreshes EDGAR_FILINGS and PUBLIC_TRANSCRIPTS from Cybersyn |
+| **REFRESH_SP500_WEEKLY** | Sundays 6 AM ET | Refreshes S&P 500 companies from Wikipedia |
+| **REFRESH_TRANSCRIPTS_DAILY** | Daily 7 AM ET | Refreshes earnings transcripts from Cybersyn |
 
-The task performs incremental MERGE operations to add new SEC filings and earnings transcripts. Cortex Search Services automatically detect changes and update their indexes.
+Cortex Search Services automatically detect changes and update their indexes.
 
 ```sql
 -- Check task status
-SHOW TASKS LIKE 'DAILY_DATA_REFRESH' IN SCHEMA COLM_DB.STRUCTURED;
+SHOW TASKS IN DATABASE COLM_DB;
 
 -- View task history
-SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY(TASK_NAME => 'DAILY_DATA_REFRESH')) ORDER BY SCHEDULED_TIME DESC LIMIT 10;
+SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY()) 
+WHERE DATABASE_NAME = 'COLM_DB' 
+ORDER BY SCHEDULED_TIME DESC LIMIT 10;
+
+-- Manually refresh S&P 500 data
+CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
+
+-- Manually refresh transcripts
+CALL COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS();
 ```
 
 ---
@@ -170,10 +189,6 @@ holly/
 │   └── SP500.sql
 ├── 📂 cortex_search/
 │   └── EDGAR_FILINGS.sql
-├── 📂 tasks/
-│   └── DAILY_DATA_REFRESH.sql
-├── 📂 data/
-│   └── SP500_COMPANIES.csv
 └── 📂 images/
     └── holly.png
 ```
@@ -204,6 +219,6 @@ This project is proprietary software for demonstration purposes.
 
 **Built with ❄️ Snowflake Cortex**
 
-*Data Source: Snowflake Marketplace (Cybersyn) + Yahoo Finance*
+*Data Source: Snowflake Marketplace (Cybersyn) + Yahoo Finance + Wikipedia*
 
 </div>
