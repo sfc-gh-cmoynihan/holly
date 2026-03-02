@@ -185,6 +185,6 @@ This project is proprietary software for demonstration purposes.
 
 **Built with ❄️ Snowflake Cortex**
 
-*Data Source: Snowflake Marketplace (Cybersyn)*
+*Data Source: Snowflake Marketplace (Snowflake Public Data Free)*
 
 </div>
