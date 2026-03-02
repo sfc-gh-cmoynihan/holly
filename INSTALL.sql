@@ -10,19 +10,13 @@
   PREREQUISITES:
   --------------
   1. ACCOUNTADMIN role or equivalent privileges
-  2. Subscribe to the following Marketplace listings:
+  2. Subscribe to the following Marketplace listing:
      
-     a) Cybersyn Financial & Economic Essentials (Required)
-        - Go to: Data Products > Marketplace
-        - Search for: "Cybersyn Financial & Economic Essentials"
-        - Click "Get" to subscribe (free tier available)
-        - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
-     
-     b) Snowflake Public Data (Free) (Optional - for additional data)
-        - Go to: Data Products > Marketplace
-        - Search for: "Snowflake Public Data (Free)"
-        - Click "Get" to subscribe (completely free)
-        - This provides: SNOWFLAKE_DATA_PUBLIC.CYBERSYN
+     Cybersyn Financial & Economic Essentials (Required)
+     - Go to: Data Products > Marketplace
+     - Search for: "Cybersyn Financial & Economic Essentials"
+     - Click "Get" to subscribe (free tier available)
+     - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN
   
   WHAT THIS SCRIPT CREATES:
   -------------------------
