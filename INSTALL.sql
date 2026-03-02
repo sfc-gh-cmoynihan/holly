@@ -307,6 +307,9 @@ $$;
 
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
+-- Scale down warehouse after heavy data loading
+ALTER WAREHOUSE SMALL_WH SET WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 300;
+
 -- ============================================================================
 -- STEP 10: VERIFICATION
 -- ============================================================================
