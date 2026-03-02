@@ -75,7 +75,7 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
   - Go to: **Data Products > Marketplace**
   - Search: "Cybersyn Financial & Economic Essentials"
   - Click "Get" (free trial available)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN`
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA`
 
 ### 2️⃣ Installation via Workspaces (Recommended)
 
