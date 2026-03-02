@@ -10,10 +10,11 @@
 [![Cortex Agent](https://img.shields.io/badge/Cortex-Agent-00D4AA?style=for-the-badge)](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents)
 [![Cortex Analyst](https://img.shields.io/badge/Cortex-Analyst-FF6B35?style=for-the-badge)](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst)
 [![Cortex Search](https://img.shields.io/badge/Cortex-Search-9B59B6?style=for-the-badge)](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search)
+[![Trial Compatible](https://img.shields.io/badge/Trial-Compatible-00C853?style=for-the-badge)](https://signup.snowflake.com/)
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.5 | **Updated:** March 2026
+**Author:** Colm Moynihan | **Version:** 1.6 | **Updated:** March 2026
 
 </div>
 
@@ -70,7 +71,7 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 
 ### 1️⃣ Prerequisites
 
-- Snowflake account with ACCOUNTADMIN access
+- Snowflake account with ACCOUNTADMIN access (✅ **Works with Trial Accounts!**)
 - Subscribe to **Cybersyn Financial & Economic Essentials** from Marketplace:
   - Go to: **Data Products > Marketplace**
   - Search: "Cybersyn Financial & Economic Essentials"
@@ -186,5 +187,11 @@ This project is proprietary software for demonstration purposes.
 **Built with ❄️ Snowflake Cortex**
 
 *Data Source: Snowflake Marketplace (Cybersyn)*
+
+---
+
+### ✅ Trial Account Compatible
+
+This demo works on **Snowflake Trial Accounts** with no external access integrations required. All data comes from Snowflake Marketplace.
 
 </div>
