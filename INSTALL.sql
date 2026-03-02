@@ -4,8 +4,8 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.3
-  Date: 26th February 2026
+  Version: 1.4
+  Date: 2nd March 2026
   
   PREREQUISITES:
   --------------
@@ -21,11 +21,11 @@
   WHAT THIS SCRIPT CREATES:
   -------------------------
   - Database: COLM_DB (with STRUCTURED, SEMI_STRUCTURED, UNSTRUCTURED schemas)
-  - Tables: SP500_COMPANIES, STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
+  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
   - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
-  - External Function: GET_STOCK_PRICE (real-time Yahoo Finance data)
-  - Task: DAILY_DATA_REFRESH (runs daily at 6:00 AM GMT)
+  - External Functions: GET_STOCK_PRICE (Yahoo Finance), REFRESH_SP500_COMPANIES (Wikipedia)
+  - Tasks: REFRESH_SP500_WEEKLY (Sundays 6 AM ET), REFRESH_TRANSCRIPTS_DAILY (7 AM ET)
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
@@ -48,40 +48,106 @@ CREATE SCHEMA IF NOT EXISTS COLM_DB.SEMI_STRUCTURED;
 CREATE SCHEMA IF NOT EXISTS COLM_DB.UNSTRUCTURED;
 
 -- ============================================================================
--- STEP 3: CREATE REFERENCE DATA (S&P 500 Companies - Top 10 + SNOW)
+-- STEP 3: CREATE S&P 500 COMPANIES (Full 503 constituents from Wikipedia)
 -- ============================================================================
 
+-- 3.1 Create Network Rule for Wikipedia access
+CREATE OR REPLACE NETWORK RULE COLM_DB.STRUCTURED.WIKIPEDIA_RULE
+    MODE = EGRESS
+    TYPE = HOST_PORT
+    VALUE_LIST = ('en.wikipedia.org');
+
+-- 3.2 Create External Access Integration for Wikipedia
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION WIKIPEDIA_INTEGRATION
+    ALLOWED_NETWORK_RULES = (COLM_DB.STRUCTURED.WIKIPEDIA_RULE)
+    ENABLED = TRUE;
+
+-- 3.3 Create the SP500 table
 CREATE OR REPLACE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES (
-    EXCHANGE VARCHAR,
     SYMBOL VARCHAR,
-    SHORTNAME VARCHAR,
-    LONGNAME VARCHAR,
+    COMPANY_NAME VARCHAR,
     SECTOR VARCHAR,
     INDUSTRY VARCHAR,
-    CURRENTPRICE NUMBER(38,2),
-    MARKETCAP NUMBER(38,0),
-    EBITDA NUMBER(38,0),
-    REVENUEGROWTH NUMBER(38,3),
-    CITY VARCHAR,
-    STATE VARCHAR,
-    COUNTRY VARCHAR,
-    FULLTIMEEMPLOYEES NUMBER(38,0),
-    LONGBUSINESSSUMMARY VARCHAR,
-    WEIGHT FLOAT
+    HEADQUARTERS VARCHAR,
+    DATE_ADDED DATE,
+    CIK VARCHAR,
+    FOUNDED VARCHAR
 );
 
-INSERT INTO COLM_DB.STRUCTURED.SP500_COMPANIES VALUES
-('NMS', 'AAPL', 'Apple Inc.', 'Apple Inc.', 'Technology', 'Consumer Electronics', 254.49, 3846819807232, 134660997120, 0.061, 'Cupertino', 'CA', 'United States', 164000, 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.', 0.0692),
-('NMS', 'NVDA', 'NVIDIA Corporation', 'NVIDIA Corporation', 'Technology', 'Semiconductors', 134.70, 3298803056640, 61184000000, 1.224, 'Santa Clara', 'CA', 'United States', 29600, 'NVIDIA Corporation provides graphics and compute solutions. The company operates through Graphics and Compute & Networking segments.', 0.0593),
-('NMS', 'MSFT', 'Microsoft Corporation', 'Microsoft Corporation', 'Technology', 'Software - Infrastructure', 436.60, 3246068596736, 136551997440, 0.160, 'Redmond', 'WA', 'United States', 228000, 'Microsoft Corporation develops and supports software, services, devices, and solutions worldwide.', 0.0584),
-('NMS', 'AMZN', 'Amazon.com, Inc.', 'Amazon.com, Inc.', 'Consumer Cyclical', 'Internet Retail', 224.92, 2365033807872, 111583002624, 0.110, 'Seattle', 'WA', 'United States', 1551000, 'Amazon.com, Inc. engages in the retail sale of consumer products, advertising, and subscriptions through online and physical stores.', 0.0425),
-('NMS', 'GOOGL', 'Alphabet Inc.', 'Alphabet Inc.', 'Communication Services', 'Internet Content & Information', 191.41, 2351625142272, 123469996032, 0.151, 'Mountain View', 'CA', 'United States', 181269, 'Alphabet Inc. offers various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America.', 0.0423),
-('NMS', 'GOOG', 'Alphabet Inc.', 'Alphabet Inc.', 'Communication Services', 'Internet Content & Information', 192.96, 2351623045120, 123469996032, 0.151, 'Mountain View', 'CA', 'United States', 181269, 'Alphabet Inc. offers various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America.', 0.0423),
-('NMS', 'META', 'Meta Platforms, Inc.', 'Meta Platforms, Inc.', 'Communication Services', 'Internet Content & Information', 585.25, 1477457739776, 79208996864, 0.189, 'Menlo Park', 'CA', 'United States', 72404, 'Meta Platforms, Inc. engages in the development of products that enable people to connect and share with friends and family.', 0.0266),
-('NMS', 'TSLA', 'Tesla, Inc.', 'Tesla, Inc.', 'Consumer Cyclical', 'Auto Manufacturers', 421.06, 1351627833344, 13244000256, 0.078, 'Austin', 'TX', 'United States', 140473, 'Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and energy generation and storage systems.', 0.0243),
-('NMS', 'AVGO', 'Broadcom Inc.', 'Broadcom Inc.', 'Technology', 'Semiconductors', 220.79, 1031217348608, 22958000128, 0.164, 'Palo Alto', 'CA', 'United States', 20000, 'Broadcom Inc. designs, develops, and supplies various semiconductor connectivity solutions.', 0.0186),
-('NYQ', 'BRK-B', 'Berkshire Hathaway Inc.', 'Berkshire Hathaway Inc.', 'Financial Services', 'Insurance - Diversified', 453.20, 978776031232, 149547008000, -0.002, 'Omaha', 'NE', 'United States', 396500, 'Berkshire Hathaway Inc. engages in insurance, freight rail transportation, and utility businesses.', 0.0176),
-('NMS', 'SNOW', 'Snowflake Inc.', 'Snowflake Inc.', 'Technology', 'Software - Application', 163.25, 55000000000, 1500000000, 0.350, 'Bozeman', 'MT', 'United States', 6000, 'Snowflake Inc. provides a cloud-based data platform for data warehousing, data lakes, data engineering, and data science.', 0.0099);
+-- 3.4 Create procedure to load S&P 500 data from Wikipedia
+CREATE OR REPLACE PROCEDURE COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES()
+RETURNS VARCHAR
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.11'
+PACKAGES = ('snowflake-snowpark-python', 'requests', 'pandas', 'lxml')
+HANDLER = 'refresh_sp500'
+EXTERNAL_ACCESS_INTEGRATIONS = (WIKIPEDIA_INTEGRATION)
+EXECUTE AS CALLER
+AS $$
+import requests
+import pandas as pd
+from io import StringIO
+from snowflake.snowpark import Session
+
+def refresh_sp500(session: Session) -> str:
+    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=30)
+        tables = pd.read_html(StringIO(response.text))
+        sp500_df = tables[0]
+        
+        session.sql("TRUNCATE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES").collect()
+        
+        for idx, row in sp500_df.iterrows():
+            date_added = "NULL"
+            if pd.notna(row.get('Date added')):
+                try:
+                    date_added = f"'{pd.to_datetime(row['Date added']).strftime('%Y-%m-%d')}'"
+                except:
+                    date_added = "NULL"
+            
+            symbol = row['Symbol'].replace("'", "''") if pd.notna(row.get('Symbol')) else None
+            company_name = row['Security'].replace("'", "''") if pd.notna(row.get('Security')) else None
+            sector = row['GICS Sector'].replace("'", "''") if pd.notna(row.get('GICS Sector')) else None
+            industry = row['GICS Sub-Industry'].replace("'", "''") if pd.notna(row.get('GICS Sub-Industry')) else None
+            headquarters = row['Headquarters Location'].replace("'", "''") if pd.notna(row.get('Headquarters Location')) else None
+            cik = str(row['CIK']) if pd.notna(row.get('CIK')) else None
+            founded = str(row['Founded']).replace("'", "''") if pd.notna(row.get('Founded')) else None
+            
+            sql = f"""INSERT INTO COLM_DB.STRUCTURED.SP500_COMPANIES 
+                     (SYMBOL, COMPANY_NAME, SECTOR, INDUSTRY, HEADQUARTERS, DATE_ADDED, CIK, FOUNDED)
+                     VALUES (
+                         {f"'{symbol}'" if symbol else "NULL"},
+                         {f"'{company_name}'" if company_name else "NULL"},
+                         {f"'{sector}'" if sector else "NULL"},
+                         {f"'{industry}'" if industry else "NULL"},
+                         {f"'{headquarters}'" if headquarters else "NULL"},
+                         {date_added},
+                         {f"'{cik}'" if cik else "NULL"},
+                         {f"'{founded}'" if founded else "NULL"}
+                     )"""
+            session.sql(sql).collect()
+        
+        count = session.sql("SELECT COUNT(*) FROM COLM_DB.STRUCTURED.SP500_COMPANIES").collect()[0][0]
+        return f"Successfully loaded {count} S&P 500 companies"
+    except Exception as e:
+        return f"Error: {str(e)}"
+$$;
+
+-- 3.5 Load the S&P 500 data
+CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
+
+-- 3.6 Create weekly task to refresh S&P 500 data
+CREATE OR REPLACE TASK COLM_DB.STRUCTURED.REFRESH_SP500_WEEKLY
+    WAREHOUSE = SMALL_WH
+    SCHEDULE = 'USING CRON 0 6 * * 0 America/New_York'
+    COMMENT = 'Weekly refresh of S&P 500 companies from Wikipedia every Sunday at 6 AM ET'
+AS
+    CALL COLM_DB.STRUCTURED.REFRESH_SP500_COMPANIES();
+
+ALTER TASK COLM_DB.STRUCTURED.REFRESH_SP500_WEEKLY RESUME;
 
 -- ============================================================================
 -- STEP 4: CREATE STOCK PRICE DATA (from Cybersyn Marketplace)
@@ -132,40 +198,72 @@ WHERE r.FILED_DATE >= '2025-01-01'
 ALTER TABLE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS SET CHANGE_TRACKING = TRUE;
 
 -- ============================================================================
--- STEP 6: CREATE PUBLIC TRANSCRIPTS DATA (from Cybersyn Marketplace)
+-- STEP 6: CREATE PUBLIC TRANSCRIPTS DATA (All S&P 500 transcripts from Cybersyn)
 -- ============================================================================
 
-CREATE OR REPLACE SEQUENCE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEQ
-    START = 1000 INCREMENT = 1;
-
-CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS (
-    TRANSCRIPT_ID NUMBER DEFAULT COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS_SEQ.NEXTVAL PRIMARY KEY,
-    COMPANY_ID VARCHAR,
-    CIK VARCHAR,
-    COMPANY_NAME VARCHAR,
-    PRIMARY_TICKER VARCHAR,
-    FISCAL_PERIOD VARCHAR,
-    FISCAL_YEAR VARCHAR,
-    EVENT_TYPE VARCHAR,
-    TRANSCRIPT_TYPE VARCHAR,
-    TRANSCRIPT VARIANT,
-    EVENT_TIMESTAMP TIMESTAMP_NTZ,
-    CREATED_AT TIMESTAMP_NTZ,
-    UPDATED_AT TIMESTAMP_NTZ
-);
-
-INSERT INTO COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS (
-    COMPANY_ID, CIK, COMPANY_NAME, PRIMARY_TICKER, FISCAL_PERIOD, FISCAL_YEAR,
-    EVENT_TYPE, TRANSCRIPT_TYPE, TRANSCRIPT, EVENT_TIMESTAMP, CREATED_AT, UPDATED_AT
-)
+CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS
 SELECT 
-    a.COMPANY_ID, a.CIK, a.COMPANY_NAME, a.PRIMARY_TICKER, a.FISCAL_PERIOD, a.FISCAL_YEAR,
-    a.EVENT_TYPE, a.TRANSCRIPT_TYPE, a.TRANSCRIPT, a.EVENT_TIMESTAMP, a.CREATED_AT, a.UPDATED_AT
-FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2 a
-WHERE a.EVENT_TIMESTAMP > '2025-01-01' 
-  AND a.PRIMARY_TICKER IN (SELECT SYMBOL FROM COLM_DB.STRUCTURED.SP500_COMPANIES);
+    ROW_NUMBER() OVER (ORDER BY t.EVENT_TIMESTAMP DESC) AS TRANSCRIPT_ID,
+    t.COMPANY_ID,
+    t.CIK,
+    t.COMPANY_NAME,
+    t.PRIMARY_TICKER,
+    t.FISCAL_PERIOD,
+    t.FISCAL_YEAR,
+    t.EVENT_TYPE,
+    t.TRANSCRIPT_TYPE,
+    t.TRANSCRIPT,
+    t.EVENT_TIMESTAMP,
+    t.CREATED_AT,
+    t.UPDATED_AT
+FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2 t
+INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s ON t.PRIMARY_TICKER = s.SYMBOL;
 
 ALTER TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
+
+-- 6.1 Create procedure to refresh transcripts
+CREATE OR REPLACE PROCEDURE COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS()
+RETURNS VARCHAR
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.11'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'refresh_transcripts'
+EXECUTE AS CALLER
+AS $$
+def refresh_transcripts(session) -> str:
+    session.sql("""
+        CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY t.EVENT_TIMESTAMP DESC) AS TRANSCRIPT_ID,
+            t.COMPANY_ID,
+            t.CIK,
+            t.COMPANY_NAME,
+            t.PRIMARY_TICKER,
+            t.FISCAL_PERIOD,
+            t.FISCAL_YEAR,
+            t.EVENT_TYPE,
+            t.TRANSCRIPT_TYPE,
+            t.TRANSCRIPT,
+            t.EVENT_TIMESTAMP,
+            t.CREATED_AT,
+            t.UPDATED_AT
+        FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2 t
+        INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s ON t.PRIMARY_TICKER = s.SYMBOL
+    """).collect()
+    
+    count = session.sql("SELECT COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS").collect()[0][0]
+    return f"Successfully refreshed PUBLIC_TRANSCRIPTS with {count} transcripts"
+$$;
+
+-- 6.2 Create daily task to refresh transcripts
+CREATE OR REPLACE TASK COLM_DB.UNSTRUCTURED.REFRESH_TRANSCRIPTS_DAILY
+    WAREHOUSE = SMALL_WH
+    SCHEDULE = 'USING CRON 0 7 * * * America/New_York'
+    COMMENT = 'Daily refresh of S&P 500 public transcripts from Cybersyn at 7 AM ET'
+AS
+    CALL COLM_DB.UNSTRUCTURED.REFRESH_PUBLIC_TRANSCRIPTS();
+
+ALTER TASK COLM_DB.UNSTRUCTURED.REFRESH_TRANSCRIPTS_DAILY RESUME;
 
 -- ============================================================================
 -- STEP 7: CREATE CORTEX SEARCH SERVICES
@@ -218,24 +316,15 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
 -- 8.2 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
-    FACTS (
-        SP500_COMPANIES.CURRENTPRICE AS CURRENTPRICE,
-        SP500_COMPANIES.REVENUEGROWTH AS REVENUEGROWTH
-    )
     DIMENSIONS (
         SP500_COMPANIES.SYMBOL AS SYMBOL,
-        SP500_COMPANIES.SHORTNAME AS SHORTNAME,
-        SP500_COMPANIES.LONGNAME AS LONGNAME,
+        SP500_COMPANIES.COMPANY_NAME AS COMPANY_NAME,
         SP500_COMPANIES.SECTOR AS SECTOR,
         SP500_COMPANIES.INDUSTRY AS INDUSTRY,
-        SP500_COMPANIES.MARKETCAP AS MARKETCAP,
-        SP500_COMPANIES.EBITDA AS EBITDA,
-        SP500_COMPANIES.CITY AS CITY,
-        SP500_COMPANIES.STATE AS STATE,
-        SP500_COMPANIES.COUNTRY AS COUNTRY,
-        SP500_COMPANIES.FULLTIMEEMPLOYEES AS FULLTIMEEMPLOYEES,
-        SP500_COMPANIES.LONGBUSINESSSUMMARY AS LONGBUSINESSSUMMARY,
-        SP500_COMPANIES.WEIGHT AS WEIGHT
+        SP500_COMPANIES.HEADQUARTERS AS HEADQUARTERS,
+        SP500_COMPANIES.DATE_ADDED AS DATE_ADDED,
+        SP500_COMPANIES.CIK AS CIK,
+        SP500_COMPANIES.FOUNDED AS FOUNDED
     );
 
 -- ============================================================================
@@ -398,69 +487,7 @@ $$;
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
 
 -- ============================================================================
--- STEP 11: CREATE SCHEDULED DATA REFRESH TASK
--- ============================================================================
-
-CREATE WAREHOUSE IF NOT EXISTS ADHOC_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 1800;
-
-CREATE OR REPLACE TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH
-  WAREHOUSE = ADHOC_WH
-  SCHEDULE = 'USING CRON 0 6 * * * UTC'
-  COMMENT = 'Daily refresh of EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables at 6:00 AM GMT'
-AS
-BEGIN
-  MERGE INTO COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS AS target
-  USING (
-    SELECT 
-      COMPANY_NAME,
-      FORM_TYPE AS ANNOUNCEMENT_TYPE,
-      FILED_DATE::DATE AS FILED_DATE,
-      FISCAL_PERIOD,
-      FISCAL_YEAR::FLOAT AS FISCAL_YEAR,
-      ITEM_NUMBER,
-      ITEM_TITLE,
-      PLAINTEXT_CONTENT AS ANNOUNCEMENT_TEXT
-    FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.SEC_CORPORATE_REPORT_ITEM_ATTRIBUTES
-    WHERE PLAINTEXT_CONTENT IS NOT NULL
-  ) AS source
-  ON target.COMPANY_NAME = source.COMPANY_NAME 
-     AND target.FILED_DATE = source.FILED_DATE 
-     AND target.ITEM_NUMBER = source.ITEM_NUMBER
-  WHEN NOT MATCHED THEN
-    INSERT (COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE, ANNOUNCEMENT_TEXT)
-    VALUES (source.COMPANY_NAME, source.ANNOUNCEMENT_TYPE, source.FILED_DATE, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.ITEM_NUMBER, source.ITEM_TITLE, source.ANNOUNCEMENT_TEXT);
-
-  MERGE INTO COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS target
-  USING (
-    SELECT 
-      COMPANY_ID,
-      CIK,
-      COMPANY_NAME,
-      PRIMARY_TICKER,
-      FISCAL_PERIOD,
-      FISCAL_YEAR,
-      EVENT_TYPE,
-      TRANSCRIPT_TYPE,
-      TRANSCRIPT,
-      EVENT_TIMESTAMP,
-      CREATED_AT,
-      UPDATED_AT
-    FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES_V2
-    WHERE TRANSCRIPT IS NOT NULL
-  ) AS source
-  ON target.COMPANY_ID = source.COMPANY_ID 
-     AND target.EVENT_TIMESTAMP = source.EVENT_TIMESTAMP
-     AND target.FISCAL_PERIOD = source.FISCAL_PERIOD
-     AND target.FISCAL_YEAR = source.FISCAL_YEAR
-  WHEN NOT MATCHED THEN
-    INSERT (COMPANY_ID, CIK, COMPANY_NAME, PRIMARY_TICKER, FISCAL_PERIOD, FISCAL_YEAR, EVENT_TYPE, TRANSCRIPT_TYPE, TRANSCRIPT, EVENT_TIMESTAMP, CREATED_AT, UPDATED_AT)
-    VALUES (source.COMPANY_ID, source.CIK, source.COMPANY_NAME, source.PRIMARY_TICKER, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.EVENT_TYPE, source.TRANSCRIPT_TYPE, source.TRANSCRIPT, source.EVENT_TIMESTAMP, source.CREATED_AT, source.UPDATED_AT);
-END;
-
-ALTER TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH RESUME;
-
--- ============================================================================
--- STEP 12: VERIFICATION
+-- STEP 11: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES
@@ -470,6 +497,7 @@ UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC
 
 SHOW CORTEX SEARCH SERVICES IN DATABASE COLM_DB;
 SHOW SEMANTIC VIEWS IN DATABASE COLM_DB;
+SHOW TASKS IN DATABASE COLM_DB;
 DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY;
 
 -- Test Yahoo Finance function
@@ -477,5 +505,16 @@ SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS NVIDIA_REALTIME_PRICE;
 
 -- ============================================================================
 -- INSTALLATION COMPLETE!
+-- 
+-- Expected row counts:
+--   SP500_COMPANIES: ~503 companies
+--   STOCK_PRICE_TIMESERIES: varies based on date range
+--   EDGAR_FILINGS: varies based on filings
+--   PUBLIC_TRANSCRIPTS: ~60,000+ transcripts
+--
+-- Scheduled Tasks:
+--   REFRESH_SP500_WEEKLY: Sundays at 6 AM ET
+--   REFRESH_TRANSCRIPTS_DAILY: Daily at 7 AM ET
+--
 -- Navigate to: AI & ML > Snowflake Intelligence > Holly
 -- ============================================================================
