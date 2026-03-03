@@ -16,7 +16,9 @@ instructions:
     
     **COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.
     
-    **SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
+    **SEC FILINGS SEARCH**: For searching SEC filing content (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
+    
+    **SEC FILINGS ANALYTICS**: For counting or aggregating SEC filings by company, type, date, or fiscal period, use SEC_FILINGS_ANALYST.
     
     Combine multiple tools for comprehensive research.
   response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
@@ -46,6 +48,10 @@ tools:
       type: cortex_analyst_text_to_sql
       name: SP500_COMPANIES
       description: "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: SEC_FILINGS_ANALYST
+      description: "Query SEC filing metadata and counts by company, filing type, date, or fiscal period."
 
 tool_resources:
   TRANSCRIPTS_SEARCH:
@@ -60,7 +66,7 @@ tool_resources:
       - EVENT_TIMESTAMP
       - TRANSCRIPT_TEXT
   SEC_FILINGS_SEARCH:
-    search_service: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS"
+    search_service: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS_SEARCH"
     max_results: 10
     columns:
       - COMPANY_NAME
@@ -79,6 +85,12 @@ tool_resources:
     query_timeout: 120
   SP500_COMPANIES:
     semantic_view: "COLM_DB.STRUCTURED.SP500"
+    execution_environment:
+      type: warehouse
+      warehouse: SMALL_WH
+    query_timeout: 60
+  SEC_FILINGS_ANALYST:
+    semantic_view: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS_SV"
     execution_environment:
       type: warehouse
       warehouse: SMALL_WH

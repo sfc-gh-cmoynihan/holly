@@ -1,0 +1,96 @@
+name: EDGAR_FILINGS_SV
+description: SEC EDGAR filings for S&P 500 companies including 10-K annual reports, 10-Q quarterly reports, and 8-K current event disclosures.
+
+tables:
+  - name: EDGAR_FILINGS
+    description: SEC filings containing company announcements, financial reports, and regulatory disclosures for S&P 500 companies.
+    base_table:
+      database: COLM_DB
+      schema: SEMI_STRUCTURED
+      table: EDGAR_FILINGS
+
+    dimensions:
+      - name: COMPANY_NAME
+        description: Name of the company that filed the SEC report
+        expr: COMPANY_NAME
+        data_type: TEXT
+        sample_values:
+          - Apple Inc.
+          - Microsoft Corporation
+          - Amazon.com, Inc.
+
+      - name: ANNOUNCEMENT_TYPE
+        description: Type of SEC filing - 10-K (annual report), 10-Q (quarterly report), or 8-K (current event disclosure)
+        expr: ANNOUNCEMENT_TYPE
+        data_type: TEXT
+        sample_values:
+          - 10-K
+          - 10-Q
+          - 8-K
+
+      - name: FISCAL_PERIOD
+        description: Fiscal period of the filing (Q1, Q2, Q3, Q4, FY)
+        expr: FISCAL_PERIOD
+        data_type: TEXT
+        sample_values:
+          - Q1
+          - Q2
+          - FY
+
+      - name: FISCAL_YEAR
+        description: Fiscal year of the filing
+        expr: FISCAL_YEAR
+        data_type: NUMBER
+
+      - name: ITEM_NUMBER
+        description: SEC form item number identifying the specific section of the filing
+        expr: ITEM_NUMBER
+        data_type: TEXT
+
+      - name: ITEM_TITLE
+        description: Title of the SEC form item/section
+        expr: ITEM_TITLE
+        data_type: TEXT
+
+      - name: ANNOUNCEMENT_TEXT
+        description: Full text content of the SEC filing section
+        expr: ANNOUNCEMENT_TEXT
+        data_type: TEXT
+
+    time_dimensions:
+      - name: FILED_DATE
+        description: Date the SEC filing was submitted
+        expr: FILED_DATE
+        data_type: DATE
+
+verified_queries:
+  - name: vqr_0
+    question: How many SEC filings are there by filing type?
+    sql: |
+      SELECT 
+        ANNOUNCEMENT_TYPE,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY ANNOUNCEMENT_TYPE
+      ORDER BY FILING_COUNT DESC
+
+  - name: vqr_1
+    question: Which companies have the most SEC filings?
+    sql: |
+      SELECT 
+        COMPANY_NAME,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY COMPANY_NAME
+      ORDER BY FILING_COUNT DESC
+      LIMIT 10
+
+  - name: vqr_2
+    question: How many filings were submitted each month?
+    sql: |
+      SELECT 
+        DATE_TRUNC('MONTH', FILED_DATE) AS FILING_MONTH,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY FILING_MONTH
+      ORDER BY FILING_MONTH

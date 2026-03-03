@@ -648,12 +648,11 @@ ALTER TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
 -- ============================================================================
 
 -- 7.1 SEC Filings Search
-CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS_SEARCH
     ON ANNOUNCEMENT_TEXT
     ATTRIBUTES COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE
-    WAREHOUSE = 'SMALL_WH'
+    WAREHOUSE = SMALL_WH
     TARGET_LAG = '1 day'
-    EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
 AS (
     SELECT COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE, ANNOUNCEMENT_TEXT
     FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
@@ -705,6 +704,108 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
         SP500_COMPANIES.FOUNDED AS FOUNDED
     );
 
+-- 8.3 SEC EDGAR Filings Semantic View
+CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
+  'COLM_DB.SEMI_STRUCTURED',
+  'name: EDGAR_FILINGS_SV
+description: SEC EDGAR filings for S&P 500 companies including 10-K annual reports, 10-Q quarterly reports, and 8-K current event disclosures.
+
+tables:
+  - name: EDGAR_FILINGS
+    description: SEC filings containing company announcements, financial reports, and regulatory disclosures for S&P 500 companies.
+    base_table:
+      database: COLM_DB
+      schema: SEMI_STRUCTURED
+      table: EDGAR_FILINGS
+
+    dimensions:
+      - name: COMPANY_NAME
+        description: Name of the company that filed the SEC report
+        expr: COMPANY_NAME
+        data_type: TEXT
+        sample_values:
+          - Apple Inc.
+          - Microsoft Corporation
+          - Amazon.com, Inc.
+
+      - name: ANNOUNCEMENT_TYPE
+        description: Type of SEC filing - 10-K (annual report), 10-Q (quarterly report), or 8-K (current event disclosure)
+        expr: ANNOUNCEMENT_TYPE
+        data_type: TEXT
+        sample_values:
+          - 10-K
+          - 10-Q
+          - 8-K
+
+      - name: FISCAL_PERIOD
+        description: Fiscal period of the filing (Q1, Q2, Q3, Q4, FY)
+        expr: FISCAL_PERIOD
+        data_type: TEXT
+        sample_values:
+          - Q1
+          - Q2
+          - FY
+
+      - name: FISCAL_YEAR
+        description: Fiscal year of the filing
+        expr: FISCAL_YEAR
+        data_type: NUMBER
+
+      - name: ITEM_NUMBER
+        description: SEC form item number identifying the specific section of the filing
+        expr: ITEM_NUMBER
+        data_type: TEXT
+
+      - name: ITEM_TITLE
+        description: Title of the SEC form item/section
+        expr: ITEM_TITLE
+        data_type: TEXT
+
+      - name: ANNOUNCEMENT_TEXT
+        description: Full text content of the SEC filing section
+        expr: ANNOUNCEMENT_TEXT
+        data_type: TEXT
+
+    time_dimensions:
+      - name: FILED_DATE
+        description: Date the SEC filing was submitted
+        expr: FILED_DATE
+        data_type: DATE
+
+verified_queries:
+  - name: vqr_0
+    question: How many SEC filings are there by filing type?
+    sql: |
+      SELECT 
+        ANNOUNCEMENT_TYPE,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY ANNOUNCEMENT_TYPE
+      ORDER BY FILING_COUNT DESC
+
+  - name: vqr_1
+    question: Which companies have the most SEC filings?
+    sql: |
+      SELECT 
+        COMPANY_NAME,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY COMPANY_NAME
+      ORDER BY FILING_COUNT DESC
+      LIMIT 10
+
+  - name: vqr_2
+    question: How many filings were submitted each month?
+    sql: |
+      SELECT 
+        DATE_TRUNC(''MONTH'', FILED_DATE) AS FILING_MONTH,
+        COUNT(*) AS FILING_COUNT
+      FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
+      GROUP BY FILING_MONTH
+      ORDER BY FILING_MONTH',
+  FALSE
+);
+
 -- ============================================================================
 -- STEP 9: CREATE HOLLY CORTEX AGENT
 -- ============================================================================
@@ -728,9 +829,11 @@ instructions:
     
     **HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.
     
-    **COMPANY FUNDAMENTALS**: For S&P 500 company data (sector, industry, headquarters), use SP500_COMPANIES.
+    **COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.
     
-    **SEC FILINGS**: For SEC filings (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
+    **SEC FILINGS SEARCH**: For searching SEC filing content (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
+    
+    **SEC FILINGS ANALYTICS**: For counting or aggregating SEC filings by company, type, date, or fiscal period, use SEC_FILINGS_ANALYST.
     
     Combine multiple tools for comprehensive research.
   response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
@@ -740,6 +843,7 @@ instructions:
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
     - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
+    - question: "What is the latest share price of NVIDIA"
     - question: "Would you recommend buying Nvidia Stock at 195"
 
 tools:
@@ -758,7 +862,11 @@ tools:
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: SP500_COMPANIES
-      description: "Query S&P 500 company fundamentals: sector, industry, headquarters."
+      description: "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: SEC_FILINGS_ANALYST
+      description: "Query SEC filing metadata and counts by company, filing type, date, or fiscal period."
 
 tool_resources:
   TRANSCRIPTS_SEARCH:
@@ -773,7 +881,7 @@ tool_resources:
       - EVENT_TIMESTAMP
       - TRANSCRIPT_TEXT
   SEC_FILINGS_SEARCH:
-    search_service: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS"
+    search_service: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS_SEARCH"
     max_results: 10
     columns:
       - COMPANY_NAME
@@ -792,6 +900,12 @@ tool_resources:
     query_timeout: 120
   SP500_COMPANIES:
     semantic_view: "COLM_DB.STRUCTURED.SP500"
+    execution_environment:
+      type: warehouse
+      warehouse: SMALL_WH
+    query_timeout: 60
+  SEC_FILINGS_ANALYST:
+    semantic_view: "COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS_SV"
     execution_environment:
       type: warehouse
       warehouse: SMALL_WH
