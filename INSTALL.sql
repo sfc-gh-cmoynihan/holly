@@ -4,7 +4,7 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.6
+  Version: 1.7
   Date: 2nd March 2026
   
   PREREQUISITES:
@@ -60,18 +60,69 @@ CREATE OR REPLACE TABLE COLM_DB.STRUCTURED.SP500_COMPANIES (
     FOUNDED VARCHAR
 );
 
--- Load companies from stock price data joined with SEC CIK index
+-- Load S&P 500 companies (503 constituents as of March 2026)
 INSERT INTO COLM_DB.STRUCTURED.SP500_COMPANIES (SYMBOL, COMPANY_NAME, CIK)
+WITH SP500_TICKERS AS (
+    SELECT column1 AS TICKER FROM VALUES
+    ('AAPL'),('ABBV'),('ABNB'),('ABT'),('ACGL'),('ACN'),('ADBE'),('ADI'),('ADM'),('ADP'),
+    ('ADSK'),('AEE'),('AEP'),('AES'),('AFL'),('AIG'),('AIZ'),('AJG'),('AKAM'),('ALB'),
+    ('ALGN'),('ALL'),('ALLE'),('AMAT'),('AMCR'),('AMD'),('AME'),('AMGN'),('AMP'),('AMT'),
+    ('AMZN'),('ANET'),('AON'),('AOS'),('APA'),('APD'),('APH'),('APO'),('APP'),('APTV'),
+    ('ARE'),('ATO'),('AVB'),('AVGO'),('AVY'),('AWK'),('AXON'),('AXP'),('AZO'),('BA'),
+    ('BAC'),('BALL'),('BAX'),('BBY'),('BDX'),('BEN'),('BG'),('BIIB'),('BK'),('BKNG'),
+    ('BKR'),('BLDR'),('BLK'),('BMY'),('BR'),('BRO'),('BSX'),('BX'),('BXP'),('C'),
+    ('CAG'),('CAH'),('CARR'),('CAT'),('CB'),('CBOE'),('CBRE'),('CCI'),('CCL'),('CDNS'),
+    ('CDW'),('CEG'),('CF'),('CFG'),('CHD'),('CHRW'),('CHTR'),('CI'),('CINF'),('CL'),
+    ('CLX'),('CMCSA'),('CME'),('CMG'),('CMI'),('CMS'),('CNC'),('CNP'),('COF'),('COO'),
+    ('COP'),('COR'),('COST'),('CPAY'),('CPB'),('CPRT'),('CPT'),('CRM'),('CRWD'),('CSCO'),
+    ('CSGP'),('CSX'),('CTAS'),('CTRA'),('CTSH'),('CTVA'),('CVS'),('CVX'),('D'),('DAL'),
+    ('DD'),('DE'),('DECK'),('DELL'),('DFS'),('DG'),('DGX'),('DHI'),('DHR'),('DIS'),
+    ('DLR'),('DLTR'),('DOV'),('DOW'),('DPZ'),('DRI'),('DTE'),('DUK'),('DVA'),('DVN'),
+    ('DXCM'),('EA'),('EBAY'),('ECL'),('ED'),('EFX'),('EG'),('EIX'),('EL'),('ELV'),
+    ('EMN'),('EMR'),('ENPH'),('EOG'),('EPAM'),('EQIX'),('EQR'),('EQT'),('ES'),('ESS'),
+    ('ETN'),('ETR'),('EVRG'),('EW'),('EXC'),('EXPD'),('EXPE'),('EXR'),('F'),('FANG'),
+    ('FAST'),('FCX'),('FDS'),('FDX'),('FE'),('FFIV'),('FI'),('FICO'),('FIS'),('FITB'),
+    ('FMC'),('FOX'),('FOXA'),('FRT'),('FSLR'),('FTNT'),('FTV'),('GD'),('GDDY'),('GE'),
+    ('GEHC'),('GEN'),('GEV'),('GILD'),('GIS'),('GL'),('GLW'),('GM'),('GNRC'),('GOOG'),
+    ('GOOGL'),('GPC'),('GPN'),('GRMN'),('GS'),('GWW'),('HAL'),('HAS'),('HBAN'),('HCA'),
+    ('HD'),('HES'),('HIG'),('HII'),('HLT'),('HOLX'),('HON'),('HPE'),('HPQ'),('HRL'),
+    ('HSIC'),('HST'),('HSY'),('HUBB'),('HUM'),('HWM'),('IBM'),('ICE'),('IDXX'),('IEX'),
+    ('IFF'),('INCY'),('INTC'),('INTU'),('INVH'),('IP'),('IPG'),('IQV'),('IR'),('IRM'),
+    ('ISRG'),('IT'),('ITW'),('IVZ'),('J'),('JBHT'),('JBL'),('JCI'),('JKHY'),('JNJ'),
+    ('JNPR'),('JPM'),('K'),('KDP'),('KEY'),('KEYS'),('KHC'),('KIM'),('KKR'),('KLAC'),
+    ('KMB'),('KMI'),('KMX'),('KO'),('KR'),('KVUE'),('L'),('LDOS'),('LEN'),('LH'),
+    ('LHX'),('LIN'),('LKQ'),('LLY'),('LMT'),('LNT'),('LOW'),('LRCX'),('LULU'),('LUV'),
+    ('LVS'),('LW'),('LYB'),('LYV'),('MA'),('MAA'),('MAR'),('MAS'),('MCD'),('MCHP'),
+    ('MCK'),('MCO'),('MDLZ'),('MDT'),('MET'),('META'),('MGM'),('MHK'),('MKC'),('MKTX'),
+    ('MLM'),('MMC'),('MMM'),('MNST'),('MO'),('MOH'),('MOS'),('MPC'),('MPWR'),('MRK'),
+    ('MRNA'),('MS'),('MSCI'),('MSFT'),('MSI'),('MTB'),('MTCH'),('MTD'),('MU'),('NCLH'),
+    ('NDAQ'),('NDSN'),('NEE'),('NEM'),('NFLX'),('NI'),('NKE'),('NOC'),('NOW'),('NRG'),
+    ('NSC'),('NTAP'),('NTRS'),('NUE'),('NVDA'),('NVR'),('NWS'),('NWSA'),('NXPI'),('O'),
+    ('ODFL'),('OKE'),('OMC'),('ON'),('ORCL'),('ORLY'),('OTIS'),('OXY'),('PANW'),('PARA'),
+    ('PAYC'),('PAYX'),('PCAR'),('PCG'),('PEG'),('PEP'),('PFE'),('PFG'),('PG'),('PGR'),
+    ('PH'),('PHM'),('PKG'),('PLD'),('PLTR'),('PM'),('PNC'),('PNR'),('PNW'),('PODD'),
+    ('POOL'),('PPG'),('PPL'),('PRU'),('PSA'),('PSX'),('PTC'),('PWR'),('PYPL'),('QCOM'),
+    ('QRVO'),('RCL'),('REG'),('REGN'),('RF'),('RJF'),('RL'),('RMD'),('ROK'),('ROL'),
+    ('ROP'),('ROST'),('RSG'),('RTX'),('RVTY'),('SBAC'),('SBUX'),('SCHW'),('SHW'),('SJM'),
+    ('SLB'),('SMCI'),('SNA'),('SNPS'),('SO'),('SOLV'),('SPG'),('SPGI'),('SRE'),('STE'),
+    ('STLD'),('STT'),('STX'),('STZ'),('SW'),('SWK'),('SWKS'),('SYF'),('SYK'),('SYY'),
+    ('T'),('TAP'),('TDG'),('TDY'),('TECH'),('TEL'),('TER'),('TFC'),('TFX'),('TGT'),
+    ('TJX'),('TMO'),('TMUS'),('TPR'),('TRGP'),('TRMB'),('TROW'),('TRV'),('TSCO'),('TSLA'),
+    ('TSN'),('TT'),('TTWO'),('TXN'),('TXT'),('TYL'),('UAL'),('UBER'),('UDR'),('UHS'),
+    ('ULTA'),('UNH'),('UNP'),('UPS'),('URI'),('USB'),('V'),('VFC'),('VICI'),('VLO'),
+    ('VLTO'),('VMC'),('VRSK'),('VRSN'),('VRTX'),('VST'),('VTR'),('VTRS'),('VZ'),('WAB'),
+    ('WAT'),('WBA'),('WBD'),('WDC'),('WEC'),('WELL'),('WFC'),('WM'),('WMB'),('WMT'),
+    ('WRB'),('WRK'),('WST'),('WTW'),('WY'),('WYNN'),('XEL'),('XOM'),('XYL'),('YUM'),
+    ('ZBH'),('ZBRA'),('ZTS'),('SNOW')
+)
 SELECT DISTINCT
-    s.TICKER AS SYMBOL,
-    COALESCE(c.COMPANY_NAME, s.TICKER) AS COMPANY_NAME,
+    t.TICKER AS SYMBOL,
+    COALESCE(c.COMPANY_NAME, t.TICKER) AS COMPANY_NAME,
     c.CIK
-FROM SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.STOCK_PRICE_TIMESERIES s
+FROM SP500_TICKERS t
 LEFT JOIN SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.SEC_CIK_INDEX c 
-    ON s.TICKER = UPPER(REGEXP_REPLACE(c.COMPANY_NAME, '[^A-Z0-9]', ''))
-WHERE s.PRIMARY_EXCHANGE_CODE IN ('NYS', 'NAS')
-  AND s.DATE >= DATEADD(year, -1, CURRENT_DATE())
-QUALIFY ROW_NUMBER() OVER (PARTITION BY s.TICKER ORDER BY c.CIK) = 1;
+    ON t.TICKER = UPPER(REGEXP_REPLACE(c.COMPANY_NAME, '[^A-Z0-9]', ''))
+QUALIFY ROW_NUMBER() OVER (PARTITION BY t.TICKER ORDER BY c.CIK) = 1;
 
 -- ============================================================================
 -- STEP 4: CREATE STOCK PRICE DATA (from Cybersyn Marketplace)
