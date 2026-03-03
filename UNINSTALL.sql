@@ -4,7 +4,7 @@
   Uninstall Script
   
   Author: Colm Moynihan
-  Version: 1.7
+  Version: 1.8
   Date: 2nd March 2026
   
   WARNING: This script will permanently delete all Holly components!
