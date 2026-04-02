@@ -1,21 +1,21 @@
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
-    FACTS (
-        SP500_COMPANIES.CURRENTPRICE AS CURRENTPRICE,
-        SP500_COMPANIES.REVENUEGROWTH AS REVENUEGROWTH
-    )
     DIMENSIONS (
-        SP500_COMPANIES.SYMBOL AS SYMBOL,
-        SP500_COMPANIES.SHORTNAME AS SHORTNAME,
-        SP500_COMPANIES.LONGNAME AS LONGNAME,
-        SP500_COMPANIES.SECTOR AS SECTOR,
-        SP500_COMPANIES.INDUSTRY AS INDUSTRY,
-        SP500_COMPANIES.MARKETCAP AS MARKETCAP,
-        SP500_COMPANIES.EBITDA AS EBITDA,
-        SP500_COMPANIES.CITY AS CITY,
-        SP500_COMPANIES.STATE AS STATE,
-        SP500_COMPANIES.COUNTRY AS COUNTRY,
-        SP500_COMPANIES.FULLTIMEEMPLOYEES AS FULLTIMEEMPLOYEES,
-        SP500_COMPANIES.LONGBUSINESSSUMMARY AS LONGBUSINESSSUMMARY,
-        SP500_COMPANIES.WEIGHT AS WEIGHT
-    );
+        SP500_COMPANIES.SYMBOL AS SYMBOL
+          comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, AMZN, GOOGL.',
+        SP500_COMPANIES.COMPANY_NAME AS COMPANY_NAME
+          comment='Full company name e.g. Apple Inc., Microsoft.',
+        SP500_COMPANIES.SECTOR AS SECTOR
+          comment='GICS sector e.g. Information Technology, Health Care, Financials.',
+        SP500_COMPANIES.INDUSTRY AS INDUSTRY
+          comment='GICS industry e.g. Semiconductors, Systems Software.',
+        SP500_COMPANIES.HEADQUARTERS AS HEADQUARTERS
+          comment='Company headquarters location e.g. Cupertino, California.',
+        SP500_COMPANIES.DATE_ADDED AS DATE_ADDED
+          comment='Date the company was added to the S&P 500 index.',
+        SP500_COMPANIES.CIK AS CIK
+          comment='SEC Central Index Key identifier.',
+        SP500_COMPANIES.FOUNDED AS FOUNDED
+          comment='Year the company was founded.'
+    )
+    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';

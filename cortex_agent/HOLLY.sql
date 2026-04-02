@@ -20,8 +20,10 @@ instructions:
     
     **SEC FILINGS ANALYTICS**: For counting or aggregating SEC filings by company, type, date, or fiscal period, use SEC_FILINGS_ANALYST.
     
+    **WEB SEARCH**: For current news, market updates, recent events, or any information not available in internal data sources, use WEB_SEARCH.
+    
     Combine multiple tools for comprehensive research.
-  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
+  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers. When plotting stock prices or time series data, always generate a smooth interpolated line chart with curved lines (interpolate: monotone) using the charting tool. Never use jagged or straight-segment line charts for price data."
   sample_questions:
     - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
     - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
@@ -52,6 +54,14 @@ tools:
       type: cortex_analyst_text_to_sql
       name: SEC_FILINGS_ANALYST
       description: "Query SEC filing metadata and counts by company, filing type, date, or fiscal period."
+  - tool_spec:
+      type: web_search
+      name: WEB_SEARCH
+      description: "Search the web for up-to-date information including current news, market updates, recent events, and general knowledge."
+  - tool_spec:
+      type: data_to_chart
+      name: DATA_TO_CHART
+      description: "Generate smooth line charts and other visualizations from query results. Always use smooth line charts for stock price time series data."
 
 tool_resources:
   TRANSCRIPTS_SEARCH:
@@ -98,3 +108,5 @@ tool_resources:
 $$;
 
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
+
+ALTER AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY SET PROFILE = '{"display_name": "Holly - FS Financial Agent", "avatar": "RobotAgentIcon", "color": "var(--chartDim_3-x11ij0mo)"}';

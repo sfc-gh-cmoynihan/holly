@@ -4,8 +4,8 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 1.8
-  Date: 2nd March 2026
+  Version: 2.0
+  Date: 2nd April 2026
   
   PREREQUISITES:
   --------------
@@ -24,7 +24,7 @@
   - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
   - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
-  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
+  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (7 tools incl. web search & charting)
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
 ================================================================================
@@ -35,6 +35,7 @@
 -- ============================================================================
 USE ROLE ACCOUNTADMIN;
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+ALTER ACCOUNT SET ENABLE_CORTEX_WEBSEARCH = TRUE;
 CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'XLARGE' AUTO_SUSPEND = 60;
 USE WAREHOUSE SMALL_WH;
 
@@ -678,31 +679,88 @@ AS (
 
 -- 8.1 Stock Price Timeseries Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
-    TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
-    FACTS (STOCK_PRICE_TIMESERIES.VALUE AS VALUE)
-    DIMENSIONS (
-        STOCK_PRICE_TIMESERIES.TICKER AS TICKER,
-        STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS,
-        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE,
-        STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME,
-        STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE,
-        STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME,
-        STOCK_PRICE_TIMESERIES.DATE AS DATE
-    );
+  TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
+  FACTS (
+    STOCK_PRICE_TIMESERIES.VALUE AS VALUE
+      comment='Value reported for the variable (price in USD or volume count).'
+  )
+  DIMENSIONS (
+    STOCK_PRICE_TIMESERIES.TICKER AS TICKER
+      comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, SNOW, AMZN, GOOGL. Contains all S&P 500 companies plus SNOW.',
+    STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS
+      comment='Type of security e.g. Common Shares.',
+    STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
+      comment='Exchange code e.g. NYS, NAS.',
+    STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME
+      comment='Full exchange name e.g. NEW YORK STOCK EXCHANGE, NASDAQ.',
+    STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE
+      comment='Unique variable identifier e.g. post-market_close, pre-market_open.',
+    STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME
+      comment='Human-readable variable name. Valid values: Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume. Use Post-Market Close for share price or closing price queries.',
+    STOCK_PRICE_TIMESERIES.DATE AS DATE
+      comment='Trading date for the price data.'
+  )
+  COMMENT = 'S&P 500 + SNOW daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
+  AI_VERIFIED_QUERIES (
+    "Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months" AS (
+      QUESTION 'Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months'
+      VERIFIED_AT 1743552000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''SNOW'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+    ),
+    "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
+      QUESTION 'Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
+      VERIFIED_AT 1743552000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''MSFT'', ''AMZN'', ''SNOW'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+    ),
+    "What is the closing price of NVDA for the last 30 days?" AS (
+      QUESTION 'What is the closing price of NVDA for the last 30 days?'
+      VERIFIED_AT 1743552000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION false
+      SQL 'SELECT DATE, TICKER, VALUE AS CLOSING_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(DAY, -30, CURRENT_DATE()) ORDER BY DATE'
+    ),
+    "What is the latest share price of NVIDIA?" AS (
+      QUESTION 'What is the latest share price of NVIDIA?'
+      VERIFIED_AT 1743552000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT TICKER, DATE, VALUE AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' ORDER BY DATE DESC LIMIT 1'
+    ),
+    "Compare the stock price of Microsoft and Google over the last 6 months" AS (
+      QUESTION 'Compare the stock price of Microsoft and Google over the last 6 months'
+      VERIFIED_AT 1743552000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''MSFT'', ''GOOGL'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -6, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+    )
+  );
 
 -- 8.2 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
     DIMENSIONS (
-        SP500_COMPANIES.SYMBOL AS SYMBOL,
-        SP500_COMPANIES.COMPANY_NAME AS COMPANY_NAME,
-        SP500_COMPANIES.SECTOR AS SECTOR,
-        SP500_COMPANIES.INDUSTRY AS INDUSTRY,
-        SP500_COMPANIES.HEADQUARTERS AS HEADQUARTERS,
-        SP500_COMPANIES.DATE_ADDED AS DATE_ADDED,
-        SP500_COMPANIES.CIK AS CIK,
+        SP500_COMPANIES.SYMBOL AS SYMBOL
+          comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, AMZN, GOOGL.',
+        SP500_COMPANIES.COMPANY_NAME AS COMPANY_NAME
+          comment='Full company name e.g. Apple Inc., Microsoft.',
+        SP500_COMPANIES.SECTOR AS SECTOR
+          comment='GICS sector e.g. Information Technology, Health Care, Financials.',
+        SP500_COMPANIES.INDUSTRY AS INDUSTRY
+          comment='GICS industry e.g. Semiconductors, Systems Software.',
+        SP500_COMPANIES.HEADQUARTERS AS HEADQUARTERS
+          comment='Company headquarters location e.g. Cupertino, California.',
+        SP500_COMPANIES.DATE_ADDED AS DATE_ADDED
+          comment='Date the company was added to the S&P 500 index.',
+        SP500_COMPANIES.CIK AS CIK
+          comment='SEC Central Index Key identifier.',
         SP500_COMPANIES.FOUNDED AS FOUNDED
-    );
+          comment='Year the company was founded.'
+    )
+    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';
 
 -- 8.3 SEC EDGAR Filings Semantic View
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
@@ -835,8 +893,10 @@ instructions:
     
     **SEC FILINGS ANALYTICS**: For counting or aggregating SEC filings by company, type, date, or fiscal period, use SEC_FILINGS_ANALYST.
     
+    **WEB SEARCH**: For current news, market updates, recent events, or any information not available in internal data sources, use WEB_SEARCH.
+    
     Combine multiple tools for comprehensive research.
-  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers."
+  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers. When plotting stock prices or time series data, always generate a smooth interpolated line chart with curved lines (interpolate: monotone) using the charting tool. Never use jagged or straight-segment line charts for price data."
   sample_questions:
     - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
     - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
@@ -867,6 +927,14 @@ tools:
       type: cortex_analyst_text_to_sql
       name: SEC_FILINGS_ANALYST
       description: "Query SEC filing metadata and counts by company, filing type, date, or fiscal period."
+  - tool_spec:
+      type: web_search
+      name: WEB_SEARCH
+      description: "Search the web for up-to-date information including current news, market updates, recent events, and general knowledge."
+  - tool_spec:
+      type: data_to_chart
+      name: DATA_TO_CHART
+      description: "Generate smooth line charts and other visualizations from query results. Always use smooth line charts for stock price time series data."
 
 tool_resources:
   TRANSCRIPTS_SEARCH:
@@ -913,6 +981,8 @@ tool_resources:
 $$;
 
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY TO ROLE PUBLIC;
+
+ALTER AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY SET PROFILE = '{"display_name": "Holly - FS Financial Agent", "avatar": "RobotAgentIcon", "color": "var(--chartDim_3-x11ij0mo)"}';
 
 -- Scale down warehouse after heavy data loading
 ALTER WAREHOUSE SMALL_WH SET WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 300;

@@ -2,7 +2,7 @@
 
 <img src="images/holly.png" alt="Holly" width="200"/>
 
-# 📊 Holly - Financial Research Assistant
+# Holly - Financial Research Assistant
 
 **AI-Powered Stock Research with Snowflake Cortex**
 
@@ -14,19 +14,19 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 1.8 | **Updated:** March 2026
+**Author:** Colm Moynihan | **Version:** 2.0 | **Updated:** April 2026
 
 </div>
 
-> ⚠️ **Disclaimer:** This is a custom demo for Financial Services clients. The code is provided under an open source license with no guarantee of maintenance, security updates, or support.
+> **Disclaimer:** This is a custom demo for Financial Services clients. The code is provided under an open source license with no guarantee of maintenance, security updates, or support.
 
 ---
 
-## 🎯 Overview
+## Overview
 
 **Holly** is a self-service AI assistant that enables portfolio managers, analysts, and traders to perform comprehensive stock research using natural language.
 
-### 📋 Use Case
+### Use Case
 
 You are a financial analyst in a hedge fund looking into AI Native Tech Stocks. You have 4 in mind: **SNOW**, **MSFT**, **AMZN**, and **NVDA**.
 
@@ -36,29 +36,31 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 <tr>
 <td width="50%">
 
-### ✨ Key Features
+### Key Features
 
-- 📈 **Stock Analysis** - Historical prices, OHLC data
-- 🏢 **Company Research** - S&P 500 companies
-- 📄 **SEC Filings** - 10-K, 10-Q, 8-K search
-- 🎤 **Transcripts** - Earnings calls & investor conferences
+- Stock Analysis - Historical prices, OHLC data, smooth charts
+- Company Research - S&P 500 companies
+- SEC Filings - 10-K, 10-Q, 8-K search & analytics
+- Transcripts - Earnings calls & investor conferences
+- Web Search - Live news & market updates
+- Charting - Smooth interpolated line charts
 
 </td>
 <td width="50%">
 
-### 🏗️ Architecture
+### Architecture
 
 ```
-      ┌────────────────┐
-      │  Agent Holly   │
-      └───────┬────────┘
-              │
-    ┌─────────┼─────────┐
-    ▼         ▼         ▼
-┌───────┐ ┌───────┐ ┌───────┐
-│Search │ │Analyst│ │Analyst│
-│SEC/TX │ │Prices │ │SP500  │
-└───────┘ └───────┘ └───────┘
+         ┌─────────────────┐
+         │   Agent Holly    │
+         └────────┬────────┘
+                  │
+   ┌──────┬──────┼──────┬──────┬──────┐
+   ▼      ▼      ▼      ▼      ▼      ▼
+┌──────┐┌──────┐┌──────┐┌──────┐┌─────┐┌─────┐
+│Search││Search││Anlyst││Anlyst││ Web ││Chart│
+│ SEC  ││ TX   ││Prices││SP500 ││Srch ││     │
+└──────┘└──────┘└──────┘└──────┘└─────┘└─────┘
 ```
 
 </td>
@@ -67,18 +69,18 @@ Because you know NVIDIA makes 90% of the GPUs for AI, you reckon this is worth i
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1️⃣ Prerequisites
+### 1. Prerequisites
 
-- Snowflake account with ACCOUNTADMIN access (✅ **Works with Trial Accounts!**)
+- Snowflake account with ACCOUNTADMIN access (Works with Trial Accounts)
 - Subscribe to **Cybersyn Financial & Economic Essentials** from Marketplace:
   - Go to: **Data Products > Marketplace**
   - Search: "Cybersyn Financial & Economic Essentials"
   - Click "Get" (free trial available)
   - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA`
 
-### 2️⃣ Installation via Workspaces (Recommended)
+### 2. Installation via Workspaces (Recommended)
 
 #### Option A: If Git Integration Already Exists
 
@@ -124,59 +126,71 @@ Then follow Option A above.
 4. Paste into a new Snowflake worksheet
 5. Click **Run All**
 
-### 3️⃣ Access Holly
+### 3. Access Holly
 
-Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly**.
+Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly - FS Financial Agent**.
 
 ---
 
-## 🛠️ Tools
+## Tools
 
 | Tool | Type | Description |
 |------|------|-------------|
-| **SEC_FILINGS_SEARCH** | Cortex Search | SEC EDGAR 10-K, 10-Q, 8-K filings |
-| **TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences |
-| **STOCK_PRICES** | Cortex Analyst | Historical price data (OHLC) |
-| **SP500_COMPANIES** | Cortex Analyst | S&P 500 company information |
+| **TRANSCRIPTS_SEARCH** | Cortex Search | Earnings calls, investor conferences from S&P 500 companies |
+| **SEC_FILINGS_SEARCH** | Cortex Search | SEC EDGAR 10-K, 10-Q, 8-K filings content search |
+| **STOCK_PRICES** | Cortex Analyst | Historical stock price data with smooth weekly aggregation |
+| **SP500_COMPANIES** | Cortex Analyst | S&P 500 company fundamentals (sector, industry, HQ) |
+| **SEC_FILINGS_ANALYST** | Cortex Analyst | SEC filing metadata counts & aggregations |
+| **WEB_SEARCH** | Built-in | Current news, market updates, recent events |
+| **DATA_TO_CHART** | Built-in | Smooth interpolated line charts and visualizations |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 holly/
-├── 📄 README.md              # This file
-├── 📄 INSTALL.sql            # Complete installation script
-├── 📄 UNINSTALL.sql          # Complete uninstall script
-├── 📄 DEMO_SCRIPT.md         # Demo walkthrough
-├── 📂 cortex_agent/
-│   ├── HOLLY.sql             # Agent definition
-│   └── RAG_COMPONENTS.sql    # PDF document Q&A (optional)
-├── 📂 cortex_analyst/
-│   ├── STOCK_PRICE_TIMESERIES_SV.sql
-│   └── SP500.sql
-├── 📂 cortex_search/
-│   └── EDGAR_FILINGS.sql
-└── 📂 images/
-    └── holly.png
+├── README.md                              # This file
+├── INSTALL.sql                            # Complete installation script
+├── UNINSTALL.sql                          # Complete uninstall script
+├── DEMO_SCRIPT.md                         # Demo walkthrough
+├── cortex_agent/
+│   ├── HOLLY.sql                          # Agent definition (7 tools)
+│   ├── YAHOO_FINANCE.sql                  # Real-time stock price UDF (standalone)
+│   └── RAG_COMPONENTS.sql                 # PDF document Q&A (optional)
+├── cortex_analyst/
+│   ├── STOCK_PRICE_TIMESERIES_SV.sql      # Stock price semantic view with VQRs
+│   └── SP500.sql                          # S&P 500 semantic view
+├── cortex_search/
+│   └── EDGAR_FILINGS.sql                  # SEC filings search service
+├── semantic_views/
+│   └── edgar_filings_sv.yaml              # EDGAR filings semantic view (YAML)
+├── tasks/
+│   └── DAILY_DATA_REFRESH.sql             # Daily data refresh task
+├── data/
+│   └── SP500_COMPANIES.csv                # S&P 500 companies data
+└── images/
+    └── holly.png                          # Holly avatar
 ```
 
 ---
 
-## 💬 Sample Questions
+## Sample Questions
 
 | Query | Tool Used |
 |-------|-----------|
-| "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" | STOCK_PRICES |
+| "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" | STOCK_PRICES + DATA_TO_CHART |
 | "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500" | SP500_COMPANIES |
 | "What are the latest public transcripts for NVIDIA" | TRANSCRIPTS_SEARCH |
 | "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports" | SEC_FILINGS_SEARCH |
 | "What is the latest 10-K for Nvidia from the EDGAR Filings" | SEC_FILINGS_SEARCH |
+| "What is the latest share price of NVIDIA" | STOCK_PRICES |
 | "Would you recommend buying Nvidia Stock at 195" | Multiple Tools |
+| "What is the latest news on NVIDIA" | WEB_SEARCH |
 
 ---
 
-## 📜 License
+## License
 
 This project is proprietary software for demonstration purposes.
 
@@ -184,13 +198,13 @@ This project is proprietary software for demonstration purposes.
 
 <div align="center">
 
-**Built with ❄️ Snowflake Cortex**
+**Built with Snowflake Cortex**
 
 *Data Source: Snowflake Marketplace (Cybersyn)*
 
 ---
 
-### ✅ Trial Account Compatible
+### Trial Account Compatible
 
 This demo works on **Snowflake Trial Accounts** with no external access integrations required. All data comes from Snowflake Marketplace.
 

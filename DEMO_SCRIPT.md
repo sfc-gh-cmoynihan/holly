@@ -14,7 +14,7 @@ We sourced all the data from the Snowflake Marketplace - EDGAR filings, stock pr
 
 ## Agent Overview
 
-This is Holly - it's under **AI & ML > Snowflake Intelligence** in Snowsight. It has four tools connected:
+This is Holly - it's under **AI & ML > Snowflake Intelligence** in Snowsight. It has seven tools connected:
 
 | Tool | Type | Purpose |
 |------|------|---------|
@@ -22,8 +22,9 @@ This is Holly - it's under **AI & ML > Snowflake Intelligence** in Snowsight. It
 | SEC_FILINGS_SEARCH | Cortex Search | 10-K, 10-Q, 8-K filings |
 | STOCK_PRICES | Cortex Analyst | Historical OHLC price data |
 | SP500_COMPANIES | Cortex Analyst | Company fundamentals |
-
-Holly also has access to a **real-time stock price function** via Yahoo Finance for live market quotes.
+| SEC_FILINGS_ANALYST | Cortex Analyst | Filing metadata counts & aggregations |
+| WEB_SEARCH | Built-in | Current news, market updates, recent events |
+| DATA_TO_CHART | Built-in | Smooth line charts and visualizations |
 
 ## Demo Questions
 
@@ -31,7 +32,7 @@ Holly also has access to a **real-time stock price function** via Yahoo Finance 
 
 > "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
 
-You'll see the output - Microsoft tracks up and down, NVIDIA started the year at $139 and is now around $186, which looks like an interesting buy.
+You'll see the output - Microsoft tracks up and down, NVIDIA started the year at $139 and is now around $186, which looks like an interesting buy. The chart uses smooth monotone interpolation for clean visualization.
 
 ### 2. S&P 500 Check
 
@@ -69,40 +70,22 @@ Holly queries the historical stock price data to show the most recent closing pr
 
 Holly doesn't give investment advice (which is correct), but provides the current price, summary, and historical trends to inform your decision.
 
-## Real-time Stock Prices (Bonus)
+### 8. Web Search (Live News)
 
-You can also get **live stock prices** directly from Yahoo Finance:
+> "What is the latest news on NVIDIA"
 
-```sql
--- Get real-time NVIDIA quote
-SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA');
-
--- Formatted output
-SELECT 
-    result:ticker::VARCHAR AS TICKER,
-    result:price::FLOAT AS PRICE,
-    result:previous_close::FLOAT AS PREVIOUS_CLOSE,
-    result:market_state::VARCHAR AS MARKET_STATE,
-    result:quote_date::VARCHAR AS QUOTE_DATE
-FROM (SELECT COLM_DB.STRUCTURED.GET_STOCK_PRICE('NVDA') AS result);
-```
-
-This returns real-time data including:
-- Current price
-- Previous close
-- Market state (PRE, REGULAR, POST, CLOSED)
-- Quote timestamp
+Holly uses the built-in web search tool to fetch current market news, analyst opinions, and recent events that aren't in the internal data sources.
 
 ## Summary
 
 In this demo we:
 
-- Plotted historical share prices for multiple stocks
+- Plotted historical share prices with smooth charts for multiple stocks
 - Checked S&P 500 membership
 - Searched public earnings transcripts
 - Retrieved SEC 10-K filings
 - Compared annual reports across companies
-- Accessed real-time stock prices via Yahoo Finance
+- Searched the web for live market news
 - Ran everything through Snowflake Intelligence
 
 This is how easy it is to build an AI for BI agent with Snowflake Cortex.
