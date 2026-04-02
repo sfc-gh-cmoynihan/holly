@@ -76,7 +76,7 @@ LANGUAGE SQL
 AS
 $$
 SELECT SNOWFLAKE.CORTEX.COMPLETE(
-    'claude-4-sonnet',
+    'claude-opus-4-6',
     CONCAT(
         'You are a financial analyst assistant. Answer the following question based on the provided context from company reports. ',
         'If the context does not contain relevant information, say so. Be precise and cite specific data when available.\n\n',
