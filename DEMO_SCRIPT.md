@@ -99,20 +99,26 @@ All data stays in Snowflake. The agent orchestrates across structured, semi-stru
 
 ### Q6. Revenue Deep Dive
 
-> **"What was Time Out Group's revenue in FY25?"**
+> **"What was Time Out Group's revenue in FY25 and how did it break down between Markets and Media?"**
 
-**Talk track:** "Let me drill into the financials. Holly searches the annual report PDF we uploaded and pulls out the exact revenue figures. Media revenue was down 26%, but the Markets division -- the food halls -- tells a different story. All of this comes from unstructured PDFs that we processed with Cortex."
+**Talk track:** "Let me drill into the financials. Holly searches the annual report PDF we uploaded and pulls out the exact revenue figures with the Markets vs Media breakdown. Markets revenue was up but Media revenue was down 26%. All of this comes from unstructured PDFs that we processed with Cortex -- the agent is extracting structured financial data from a 120-page annual report."
 
 **What to point out:**
 - Cortex Search over chunked PDF documents
 - Source attribution -- Holly references which document the data came from
 - Structured financial data extracted from unstructured annual reports
+- Markets vs Media breakdown shows the business model pivot
 
-### Q7. Strategic Context
+### Q7. Impairment & Strategic Context
 
-> **"How many Time Out Markets are currently open worldwide?"**
+> **"What caused the £35m impairment charge in Time Out Group's FY25 annual report?"**
 
-**Talk track:** "The Markets business is the growth engine. Holly searches the company documents and tells us about the current portfolio and pipeline -- Vancouver, Abu Dhabi, Delhi coming in 2026. This is the kind of detail that's buried on page 47 of a 120-page annual report. Holly finds it in seconds."
+**Talk track:** "This is the kind of deep-dive question that would normally send an analyst searching through footnotes and appendices. Holly finds the impairment details in the annual report -- goodwill write-downs, the strategic rationale, and what it means for the balance sheet. This is buried deep in the report and Holly surfaces it in seconds."
+
+**What to point out:**
+- Deep document search -- finding specific financial events in dense PDF content
+- Holly explains the context, not just the number
+- This is the kind of question that tests whether your RAG pipeline actually works on real financial documents
 
 ---
 
@@ -195,8 +201,8 @@ The entire agent was built with a single SQL statement. No infrastructure. No AP
 | 3 | Are Nvidia, Microsoft, Amazon, Snowflake in the SP500 | SP500_COMPANIES | Act 1 |
 | 4 | Plot the Time Out Group share price over the last 12 months | AIM_STOCK_PRICES, DATA_TO_CHART | Act 2 |
 | 5 | Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them | AIM_STOCK_PRICES, COMPANY_DOCS_SEARCH | Act 2 |
-| 6 | What was Time Out Group's revenue in FY25? | COMPANY_DOCS_SEARCH | Act 2 |
-| 7 | How many Time Out Markets are currently open worldwide? | COMPANY_DOCS_SEARCH | Act 2 |
+| 6 | What was Time Out Group's revenue in FY25 and how did it break down between Markets and Media? | COMPANY_DOCS_SEARCH | Act 2 |
+| 7 | What caused the £35m impairment charge in Time Out Group's FY25 annual report? | COMPANY_DOCS_SEARCH | Act 2 |
 | 8 | Plot the share price of Time Out Group over the last 12 months against Airbnb and Live Nation | AIM_STOCK_PRICES, STOCK_PRICES, DATA_TO_CHART | Act 3 |
 | 9 | What are the latest public transcripts for Live Nation? | TRANSCRIPTS_SEARCH | Act 3 |
 | 10 | Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics | SEC_FILINGS_SEARCH | Act 3 |
@@ -212,4 +218,4 @@ The entire agent was built with a single SQL statement. No infrastructure. No AP
 - **Q8 is the architecture moment** -- cross-market comparison (AIM + US) demonstrates why multi-tool orchestration matters.
 - **Pause after Q2** to explain the TMO ticker disambiguation -- same ticker, different exchanges, correct routing.
 - **If time is short**, cut Q3 (SP500 check) and Q10 (NVDA vs MSFT comparison) -- they're strong but not essential to the narrative.
-- **If you have extra time**, add: "What is Time Out Group's strategy for growth?" after Q7 -- it pulls a rich answer from the annual report about management agreements and new market openings.
+- **If you have extra time**, add: "How many Time Out Markets are currently open worldwide and which new markets are in the pipeline?" after Q7 -- it pulls a rich answer from the annual report about management agreements and new market openings.
