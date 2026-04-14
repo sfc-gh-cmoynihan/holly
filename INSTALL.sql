@@ -4,8 +4,8 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 2.0
-  Date: 2nd April 2026
+  Version: 2.2
+  Date: 14th April 2026
   
   PREREQUISITES:
   --------------
@@ -21,10 +21,10 @@
   WHAT THIS SCRIPT CREATES:
   -------------------------
   - Database: COLM_DB (with STRUCTURED, SEMI_STRUCTURED, UNSTRUCTURED schemas)
-  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS
-  - Cortex Search Services: EDGAR_FILINGS, PUBLIC_TRANSCRIPTS_SEARCH
-  - Semantic Views: STOCK_PRICE_TIMESERIES_SV, SP500
-  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (7 tools incl. web search & charting)
+  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, AIM_STOCK_PRICES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, DOCS_CHUNKS_TABLE
+  - Cortex Search Services: EDGAR_FILINGS_SEARCH, PUBLIC_TRANSCRIPTS_SEARCH, COMPANY_DOCS_SEARCH
+  - Semantic Views: STOCK_PRICE_TIMESERIES_SV, AIM_STOCK_PRICES_SV, SP500
+  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (9 tools incl. company docs, AIM prices, web search & charting)
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
 ================================================================================
@@ -673,6 +673,19 @@ AS (
     WHERE TRANSCRIPT:text IS NOT NULL
 );
 
+-- 7.3 Company Documents Search (Time Out Group PDFs)
+ALTER TABLE COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE SET CHANGE_TRACKING = TRUE;
+
+CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.UNSTRUCTURED.COMPANY_DOCS_SEARCH
+    ON CHUNK
+    ATTRIBUTES RELATIVE_PATH
+    WAREHOUSE = SMALL_WH
+    TARGET_LAG = '1 day'
+AS (
+    SELECT RELATIVE_PATH, CHUNK
+    FROM COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE
+);
+
 -- ============================================================================
 -- STEP 8: CREATE SEMANTIC VIEWS FOR CORTEX ANALYST
 -- ============================================================================
@@ -739,7 +752,66 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
     )
   );
 
--- 8.2 S&P 500 Companies Semantic View
+-- 8.2 AIM Stock Prices Semantic View (London AIM market - Time Out Group PLC)
+CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.AIM_STOCK_PRICES_SV
+  TABLES (COLM_DB.STRUCTURED.AIM_STOCK_PRICES)
+  FACTS (
+    AIM_STOCK_PRICES.OPEN_PRICE AS OPEN_PRICE
+      comment='Opening price in GBX (pence) for the trading day.',
+    AIM_STOCK_PRICES.HIGH_PRICE AS HIGH_PRICE
+      comment='Highest price in GBX (pence) during the trading day.',
+    AIM_STOCK_PRICES.LOW_PRICE AS LOW_PRICE
+      comment='Lowest price in GBX (pence) during the trading day.',
+    AIM_STOCK_PRICES.CLOSE_PRICE AS CLOSE_PRICE
+      comment='Closing price in GBX (pence) for the trading day. Use this for share price queries.',
+    AIM_STOCK_PRICES.VOLUME AS VOLUME
+      comment='Number of shares traded during the trading day.'
+  )
+  DIMENSIONS (
+    AIM_STOCK_PRICES.DATE AS DATE
+      comment='Trading date for the price data.',
+    AIM_STOCK_PRICES.TICKER AS TICKER
+      comment='Stock ticker symbol. Currently contains TMO (Time Out Group PLC).',
+    AIM_STOCK_PRICES.COMPANY_NAME AS COMPANY_NAME
+      comment='Full company name e.g. Time Out Group PLC.',
+    AIM_STOCK_PRICES.EXCHANGE AS EXCHANGE
+      comment='Stock exchange. AIM (Alternative Investment Market, London Stock Exchange).',
+    AIM_STOCK_PRICES.CURRENCY AS CURRENCY
+      comment='Price currency. GBX (pence sterling). Divide by 100 to get GBP.'
+  )
+  COMMENT = 'London AIM market daily stock prices for Time Out Group PLC (TMO). Prices are in GBX (pence). Use CLOSE_PRICE for share price queries. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
+  AI_VERIFIED_QUERIES (
+    "Plot the share price of Time Out Group over the last 12 months" AS (
+      QUESTION 'Plot the share price of Time Out Group over the last 12 months'
+      VERIFIED_AT 1744624000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(CLOSE_PRICE), 2) AS SHARE_PRICE_GBX FROM COLM_DB.STRUCTURED.AIM_STOCK_PRICES WHERE TICKER = ''TMO'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK'
+    ),
+    "What is the latest share price of Time Out Group?" AS (
+      QUESTION 'What is the latest share price of Time Out Group?'
+      VERIFIED_AT 1744624000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT TICKER, COMPANY_NAME, DATE, CLOSE_PRICE AS SHARE_PRICE_GBX, ROUND(CLOSE_PRICE / 100, 4) AS SHARE_PRICE_GBP, VOLUME FROM COLM_DB.STRUCTURED.AIM_STOCK_PRICES WHERE TICKER = ''TMO'' ORDER BY DATE DESC LIMIT 1'
+    ),
+    "What was the highest share price of TMO in the last year?" AS (
+      QUESTION 'What was the highest share price of TMO in the last year?'
+      VERIFIED_AT 1744624000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT TICKER, COMPANY_NAME, DATE, HIGH_PRICE AS HIGH_GBX, CLOSE_PRICE AS CLOSE_GBX, VOLUME FROM COLM_DB.STRUCTURED.AIM_STOCK_PRICES WHERE TICKER = ''TMO'' AND DATE >= DATEADD(YEAR, -1, CURRENT_DATE()) ORDER BY HIGH_PRICE DESC LIMIT 1'
+    ),
+    "Show the biggest daily price drops for Time Out Group in the last 12 months" AS (
+      QUESTION 'Show the biggest daily price drops for Time Out Group in the last 12 months'
+      VERIFIED_AT 1744624000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE, CLOSE_PRICE AS CLOSE_GBX, LAG(CLOSE_PRICE) OVER (ORDER BY DATE) AS PREV_CLOSE_GBX, ROUND((CLOSE_PRICE - LAG(CLOSE_PRICE) OVER (ORDER BY DATE)) / NULLIF(LAG(CLOSE_PRICE) OVER (ORDER BY DATE), 0) * 100, 2) AS PCT_CHANGE, VOLUME FROM COLM_DB.STRUCTURED.AIM_STOCK_PRICES WHERE TICKER = ''TMO'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) ORDER BY PCT_CHANGE ASC LIMIT 10'
+    )
+  );
+
+-- 8.3 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
     DIMENSIONS (
@@ -762,7 +834,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     )
     COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';
 
--- 8.3 SEC EDGAR Filings Semantic View
+-- 8.4 SEC EDGAR Filings Semantic View
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
   'COLM_DB.SEMI_STRUCTURED',
   'name: EDGAR_FILINGS_SV
@@ -872,7 +944,7 @@ CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
-  COMMENT = 'Financial research assistant for SEC filings, transcripts, stock prices, and company data'
+  COMMENT = 'Financial research assistant for SEC filings, transcripts, stock prices, company data, and Time Out Group documents'
   FROM SPECIFICATION $$
 models:
   orchestration: claude-opus-4-6
@@ -885,18 +957,26 @@ instructions:
     
     **TRANSCRIPTS**: For earnings calls, investor conferences, or company event transcripts from S&P 500 companies, use TRANSCRIPTS_SEARCH.
     
-    **HISTORICAL PRICES**: For historical stock price analysis, OHLC data, or price trends, use STOCK_PRICES.
+    **US STOCK PRICES**: For historical US stock price analysis (S&P 500, NYSE, NASDAQ), OHLC data, or price trends for US-listed companies, use STOCK_PRICES.
     
-    **COMPANY FUNDAMENTALS**: For S&P 500 company data (market cap, revenue growth, EBITDA, sector), use SP500_COMPANIES.
+    **AIM STOCK PRICES**: For London AIM market stock prices, Time Out Group PLC (TMO), or UK-listed equities, use AIM_STOCK_PRICES. Prices are in GBX (pence). To convert to GBP divide by 100.
+    
+    **COMPANY FUNDAMENTALS**: For S&P 500 company data (sector, industry, headquarters, date added), use SP500_COMPANIES.
     
     **SEC FILINGS SEARCH**: For searching SEC filing content (8-K, 10-K, 10-Q) or regulatory disclosures, use SEC_FILINGS_SEARCH.
     
     **SEC FILINGS ANALYTICS**: For counting or aggregating SEC filings by company, type, date, or fiscal period, use SEC_FILINGS_ANALYST.
     
+    **COMPANY DOCS**: For Time Out Group PLC annual reports, interim results, half year presentations, financial statements, strategic reviews, or any document-level questions about Time Out Group, use COMPANY_DOCS_SEARCH.
+    
     **WEB SEARCH**: For current news, market updates, recent events, or any information not available in internal data sources, use WEB_SEARCH.
     
+    When a user asks about "Time Out" or "TMO" stock price, always route to AIM_STOCK_PRICES (not STOCK_PRICES which only covers US markets).
+    When a user asks about Time Out Group financials, strategy, operations, revenue, EBITDA, Markets, Media division, or board of directors, use COMPANY_DOCS_SEARCH.
+    For comparison questions involving Time Out and US-listed companies, use both AIM_STOCK_PRICES and STOCK_PRICES tools together.
+    For questions about price drops or volatility linked to announcements, combine AIM_STOCK_PRICES with COMPANY_DOCS_SEARCH to correlate price moves with company news.
     Combine multiple tools for comprehensive research.
-  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers. When plotting stock prices or time series data, always generate a smooth interpolated line chart with curved lines (interpolate: monotone) using the charting tool. Never use jagged or straight-segment line charts for price data."
+  response: "Provide clear, data-driven responses with source attribution. Use tables for financial data. Specify dates for stock prices. Cite filing type and date for SEC filings. Be accurate with numbers. When plotting stock prices or time series data, always generate a smooth interpolated line chart with curved lines (interpolate: monotone) using the charting tool. Never use jagged or straight-segment line charts for price data. When returning AIM prices, always note the currency is GBX (pence). When citing Time Out Group documents, reference the source document name."
   sample_questions:
     - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
     - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
@@ -905,6 +985,14 @@ instructions:
     - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
     - question: "What is the latest share price of NVIDIA"
     - question: "Would you recommend buying Nvidia Stock at 195"
+    - question: "What is the latest share price of Time Out Group PLC?"
+    - question: "Plot the Time Out Group share price over the last 12 months"
+    - question: "What was the highest share price of TMO in the last year?"
+    - question: "What was Time Out Group's revenue in FY25?"
+    - question: "How many Time Out Markets are currently open worldwide?"
+    - question: "What is Time Out Group's strategy for growth?"
+    - question: "Plot the share price of Time Out Group over the last 12 months against Airbnb and Live Nation"
+    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
 
 tools:
   - tool_spec:
@@ -916,13 +1004,21 @@ tools:
       name: SEC_FILINGS_SEARCH
       description: "Search SEC EDGAR filings (10-K, 10-Q, 8-K) for company announcements and regulatory disclosures."
   - tool_spec:
+      type: cortex_search
+      name: COMPANY_DOCS_SEARCH
+      description: "Search Time Out Group PLC company documents including annual reports, interim results, and half year presentations. Use for questions about Time Out Group financials, strategy, operations, Markets, Media division, board of directors, and corporate governance."
+  - tool_spec:
       type: cortex_analyst_text_to_sql
       name: STOCK_PRICES
-      description: "Query historical stock price data with daily OHLC values for price trends and analysis."
+      description: "Query historical US stock price data (S&P 500, NYSE, NASDAQ) with daily OHLC values for price trends and analysis. Prices in USD."
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: AIM_STOCK_PRICES
+      description: "Query London AIM market stock prices for Time Out Group PLC (ticker TMO). Daily OHLC data since June 2016. Prices in GBX (pence)."
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: SP500_COMPANIES
-      description: "Query S&P 500 company fundamentals: market cap, revenue growth, EBITDA, sector, industry."
+      description: "Query S&P 500 company fundamentals: sector, industry, headquarters, date added, CIK."
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: SEC_FILINGS_ANALYST
@@ -960,8 +1056,20 @@ tool_resources:
       - ITEM_NUMBER
       - ITEM_TITLE
       - ANNOUNCEMENT_TEXT
+  COMPANY_DOCS_SEARCH:
+    search_service: "COLM_DB.UNSTRUCTURED.COMPANY_DOCS_SEARCH"
+    max_results: 10
+    columns:
+      - RELATIVE_PATH
+      - CHUNK
   STOCK_PRICES:
     semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV"
+    execution_environment:
+      type: warehouse
+      warehouse: SMALL_WH
+    query_timeout: 120
+  AIM_STOCK_PRICES:
+    semantic_view: "COLM_DB.STRUCTURED.AIM_STOCK_PRICES_SV"
     execution_environment:
       type: warehouse
       warehouse: SMALL_WH
