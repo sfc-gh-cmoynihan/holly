@@ -101,6 +101,8 @@ All of this would normally take most of the day across Bloomberg, SEC EDGAR, int
   - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID`
   - **Schema Note:** The default schema is `CYBERSYN`. Trial accounts use `PUBLIC_DATA`. The INSTALL.sql defaults to `CYBERSYN` — find-and-replace with `PUBLIC_DATA` if on a trial account.
 
+  <img src="images/snowflake_marketplace.png" alt="Snowflake Public Data (Paid) - Marketplace Listing" width="600"/>
+
 ### 2. Installation via Workspaces (Recommended)
 
 #### Option A: If Git Integration Already Exists
@@ -220,7 +222,8 @@ holly/
 ├── data/
 │   └── SP500_COMPANIES.csv                # S&P 500 companies data
 ├── images/
-│   └── holly.png                          # Holly avatar
+│   ├── holly.png                          # Holly avatar
+│   └── snowflake_marketplace.png           # Marketplace listing screenshot
 └── stock_price_forecast.ipynb             # Stock price forecasting notebook
 ```
 
