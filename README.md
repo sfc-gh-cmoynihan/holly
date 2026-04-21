@@ -29,7 +29,7 @@
 
 ### Use Case
 
-You are a **portfolio analyst at a mid-market PE firm**. Your firm holds a significant equity stake in **Time Out Group PLC** (ticker: TMO), listed on London's AIM market. You need to:
+You are a **Financial Analyst at a buy side firm**. Your Company holds equities, bonds, commodities and some investments in the **LSEG AIM Market**. You need to:
 
 - Monitor US and UK stock markets from a single interface
 - Analyse Time Out Group's share price, financial reports, and strategy

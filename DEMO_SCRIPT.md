@@ -2,7 +2,7 @@
 
 ## Scenario
 
-You are a **portfolio analyst at a mid-market PE firm** like Oakley Capital. Your firm invests across Education, Technology, Consumer, and Business Services. One of your key portfolio holdings is **Time Out Group PLC** (ticker: TMO), listed on London's AIM market. Your firm holds a significant equity stake.
+You are a **Financial Analyst at a buy side firm**. Your Company holds equities, bonds, commodities and some investments in the **LSEG AIM Market**.
 
 It's Monday morning. You have three things on your plate:
 
