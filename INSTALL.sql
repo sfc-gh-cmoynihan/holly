@@ -4,8 +4,8 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 3.0
-  Date: 14th April 2026
+  Version: 3.1
+  Date: 21st April 2026
   
   PREREQUISITES:
   --------------
@@ -16,12 +16,21 @@
      - Go to: Data Products > Marketplace
      - Search for: "Cybersyn Financial & Economic Essentials"
      - Click "Get" to subscribe (free trial available)
-     - This provides: SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA
+     - This provides: SNOWFLAKE_PUBLIC_DATA_PAID
+     
+  3. SCHEMA NOTE: Non-trial accounts use schema CYBERSYN; trial accounts use schema PUBLIC_DATA.
+     This script defaults to CYBERSYN. If you are on a trial account,
+     find-and-replace 'CYBERSYN' with 'PUBLIC_DATA' before running.
+  
+  4. Run the AIM stock price loader AFTER this script:
+     SNOWFLAKE_CONNECTION_NAME=<connection> python scripts/load_aim_stock_prices.py
   
   WHAT THIS SCRIPT CREATES:
   -------------------------
   - Database: COLM_DB (with STRUCTURED, SEMI_STRUCTURED, UNSTRUCTURED schemas)
-  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, AIM_STOCK_PRICES, EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, DOCS_CHUNKS_TABLE
+  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, AIM_STOCK_PRICES (empty, loaded by Python script), EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, DOCS_CHUNKS_TABLE
+  - Stage: COMPANY_ANNOUNCEMENTS (with Time Out Group PDFs for RAG)
+  - Functions: PDF_TEXT_CHUNKER (Python UDTF for PDF chunking)
   - Cortex Search Services: EDGAR_FILINGS_SEARCH, PUBLIC_TRANSCRIPTS_SEARCH, COMPANY_DOCS_SEARCH
   - Semantic Views: STOCK_PRICE_TIMESERIES_SV, AIM_STOCK_PRICES_SV, SP500
   - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (9 tools incl. company docs, AIM prices, web search & charting)
@@ -36,7 +45,7 @@
 USE ROLE ACCOUNTADMIN;
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 ALTER ACCOUNT SET ENABLE_CORTEX_WEBSEARCH = TRUE;
-CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'XLARGE' AUTO_SUSPEND = 60;
+CREATE WAREHOUSE IF NOT EXISTS SMALL_WH WITH WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 60;
 USE WAREHOUSE SMALL_WH;
 
 -- ============================================================================
@@ -588,10 +597,30 @@ SELECT
     VARIABLE_NAME,
     DATE,
     VALUE
-FROM SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.STOCK_PRICE_TIMESERIES
+FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.STOCK_PRICE_TIMESERIES
 WHERE TICKER IN (SELECT SYMBOL FROM COLM_DB.STRUCTURED.SP500_COMPANIES);
 
 ALTER TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES SET CHANGE_TRACKING = TRUE;
+
+-- ============================================================================
+-- STEP 4b: CREATE AIM STOCK PRICES TABLE (Time Out Group - London AIM)
+-- Data is loaded by: scripts/load_aim_stock_prices.py
+-- Run AFTER this script: SNOWFLAKE_CONNECTION_NAME=<conn> python scripts/load_aim_stock_prices.py
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS COLM_DB.STRUCTURED.AIM_STOCK_PRICES (
+    DATE DATE,
+    TICKER VARCHAR(10),
+    COMPANY_NAME VARCHAR(200),
+    EXCHANGE VARCHAR(10),
+    CURRENCY VARCHAR(5),
+    OPEN_PRICE FLOAT,
+    HIGH_PRICE FLOAT,
+    LOW_PRICE FLOAT,
+    CLOSE_PRICE FLOAT,
+    VOLUME INTEGER
+)
+COMMENT = 'London AIM daily stock prices for Time Out Group (TMO). Loaded via Yahoo Finance script.';
 
 -- ============================================================================
 -- STEP 5: CREATE SEC EDGAR FILINGS DATA (from Cybersyn Marketplace)
@@ -610,8 +639,8 @@ SELECT
     a.ITEM_NUMBER,
     a.ITEM_TITLE,
     a.PLAINTEXT_CONTENT AS ANNOUNCEMENT_TEXT
-FROM SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.SEC_CORPORATE_REPORT_ITEM_ATTRIBUTES a
-INNER JOIN SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.SEC_CORPORATE_REPORT_INDEX r
+FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.SEC_CORPORATE_REPORT_ITEM_ATTRIBUTES a
+INNER JOIN SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.SEC_CORPORATE_REPORT_INDEX r
     ON a.ADSH = r.ADSH 
 INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s
     ON LPAD(r.CIK, 10, '0') = LPAD(s.CIK, 10, '0')
@@ -634,12 +663,9 @@ SELECT
     t.FISCAL_PERIOD,
     t.FISCAL_YEAR,
     t.EVENT_TYPE,
-    t.TRANSCRIPT_TYPE,
     t.TRANSCRIPT,
-    t.EVENT_TIMESTAMP,
-    t.CREATED_AT,
-    t.UPDATED_AT
-FROM SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES t
+    t.EVENT_TIMESTAMP
+FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.COMPANY_EVENT_TRANSCRIPT_ATTRIBUTES t
 INNER JOIN COLM_DB.STRUCTURED.SP500_COMPANIES s ON t.PRIMARY_TICKER = s.SYMBOL;
 
 ALTER TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS SET CHANGE_TRACKING = TRUE;
@@ -674,8 +700,78 @@ AS (
 );
 
 -- 7.3 Company Documents Search (Time Out Group PDFs)
+-- 7.3.1 Create stage for PDF documents (with directory enabled for DIRECTORY() queries)
+CREATE STAGE IF NOT EXISTS COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS
+    DIRECTORY = (ENABLE = TRUE)
+    COMMENT = 'Stage for Time Out Group PDF reports (annual reports, interim results, presentations)';
+
+-- 7.3.2 Upload PDFs to the stage
+-- Run this manually before proceeding:
+--   PUT file:///path/to/time_out_group_plc_ar25_final_online.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
+--   PUT file:///path/to/time_out_group_plc_half_year_2026_presentation.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
+--   PUT file:///path/to/time_out_group_plc_interim_results_31_03_2026.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
+-- Then refresh the directory table:
+ALTER STAGE COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS REFRESH;
+
+-- 7.3.3 Create table to store document chunks
+CREATE TABLE IF NOT EXISTS COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE (
+    RELATIVE_PATH VARCHAR(16777216),
+    SIZE NUMBER(38,0),
+    FILE_URL VARCHAR(16777216),
+    SCOPED_FILE_URL VARCHAR(16777216),
+    CHUNK VARCHAR(16777216),
+    CHUNK_INDEX NUMBER(38,0),
+    CREATED_AT TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 7.3.4 Create PDF chunker function
+CREATE OR REPLACE FUNCTION COLM_DB.UNSTRUCTURED.PDF_TEXT_CHUNKER(file_url VARCHAR)
+RETURNS TABLE (chunk VARCHAR, chunk_index NUMBER)
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.11'
+PACKAGES = ('snowflake-snowpark-python', 'pypdf2')
+HANDLER = 'pdf_text_chunker'
+AS $$
+from snowflake.snowpark.files import SnowflakeFile
+import PyPDF2
+
+class pdf_text_chunker:
+    def process(self, file_url: str):
+        with SnowflakeFile.open(file_url, 'rb') as f:
+            pdf_reader = PyPDF2.PdfReader(f)
+            text = ""
+            for page in pdf_reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+        chunk_size = 1500
+        overlap = 300
+        start = 0
+        while start < len(text):
+            end = start + chunk_size
+            chunk = text[start:end]
+            yield (chunk, start // (chunk_size - overlap))
+            start = end - overlap
+$$;
+
+-- 7.3.5 Load PDFs from stage into chunks table (skip if already populated)
+INSERT INTO COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE (RELATIVE_PATH, SIZE, FILE_URL, SCOPED_FILE_URL, CHUNK, CHUNK_INDEX)
+SELECT 
+    d.relative_path,
+    d.size,
+    d.file_url,
+    BUILD_SCOPED_FILE_URL(@COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS, d.relative_path) AS scoped_file_url,
+    c.chunk,
+    c.chunk_index
+FROM 
+    DIRECTORY(@COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS) d,
+    TABLE(COLM_DB.UNSTRUCTURED.PDF_TEXT_CHUNKER(BUILD_SCOPED_FILE_URL(@COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS, d.relative_path))) c
+WHERE d.relative_path LIKE '%.pdf'
+  AND d.relative_path NOT IN (SELECT DISTINCT RELATIVE_PATH FROM COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE);
+
 ALTER TABLE COLM_DB.UNSTRUCTURED.DOCS_CHUNKS_TABLE SET CHANGE_TRACKING = TRUE;
 
+-- 7.3.6 Create Cortex Search Service for company documents
 CREATE OR REPLACE CORTEX SEARCH SERVICE COLM_DB.UNSTRUCTURED.COMPANY_DOCS_SEARCH
     ON CHUNK
     ATTRIBUTES RELATIVE_PATH

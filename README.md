@@ -15,7 +15,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 3.0 | **Updated:** April 2026
+**Author:** Colm Moynihan | **Version:** 3.1 | **Updated:** 21 April 2026
 
 </div>
 
@@ -98,7 +98,8 @@ All of this would normally take most of the day across Bloomberg, SEC EDGAR, int
   - Go to: **Data Products > Marketplace**
   - Search: "Cybersyn Financial & Economic Essentials"
   - Click "Get" (free trial available)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID.PUBLIC_DATA`
+  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID`
+  - **Schema Note:** Non-trial accounts use `CYBERSYN` schema; trial accounts use `PUBLIC_DATA`. The INSTALL.sql defaults to `CYBERSYN` — find-and-replace with `PUBLIC_DATA` if on a trial account.
 
 ### 2. Installation via Workspaces (Recommended)
 
@@ -145,33 +146,29 @@ Then follow Option A above.
 
 ### 3. Additional Data Setup
 
-The main `INSTALL.sql` creates all US market data, SEC filings, transcripts, and the agent automatically from Cybersyn Marketplace data. Two additional data sources require separate setup:
+The main `INSTALL.sql` creates all US market data, SEC filings, transcripts, company document search (PDF RAG pipeline), and the agent automatically. Two additional steps require manual action:
 
 #### AIM Stock Prices (Time Out Group)
 
-The AIM stock price data for Time Out Group PLC is loaded via a Python script that fetches historical daily OHLC data from Yahoo Finance:
+The INSTALL.sql creates the empty `AIM_STOCK_PRICES` table. Load data via the Python script:
 
 ```bash
 SNOWFLAKE_CONNECTION_NAME=<your_connection> python scripts/load_aim_stock_prices.py
 ```
 
-This creates `COLM_DB.STRUCTURED.AIM_STOCK_PRICES` with ~2,300 daily records from June 2016 to present.
+This populates `COLM_DB.STRUCTURED.AIM_STOCK_PRICES` with ~2,300 daily records from June 2016 to present.
 
 #### Company Documents (Time Out Group PDFs)
 
-Upload Time Out Group PDFs (annual reports, interim results, presentations) to a Snowflake stage:
+The INSTALL.sql creates the stage, chunks table, PDF chunker function, and Cortex Search service. You need to upload PDFs **before** running the INSTALL.sql INSERT step (7.3.5):
 
 ```sql
-CREATE STAGE IF NOT EXISTS COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS
-    DIRECTORY = (ENABLE = TRUE)
-    ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
-
-PUT file:///path/to/time_out_group_plc_ar25_final_online.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS;
-PUT file:///path/to/time_out_group_plc_interim_results_31_03_2026.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS;
-PUT file:///path/to/time_out_group_plc_half_year_2026_presentation.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS;
+PUT file:///path/to/time_out_group_plc_ar25_final_online.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
+PUT file:///path/to/time_out_group_plc_interim_results_31_03_2026.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
+PUT file:///path/to/time_out_group_plc_half_year_2026_presentation.pdf @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS AUTO_COMPRESS=FALSE;
 ```
 
-Then create the chunks table using Cortex PARSE_DOCUMENT and the COMPANY_DOCS_SEARCH service (see Step 7.3 in `INSTALL.sql`).
+The PDF chunker (`PDF_TEXT_CHUNKER`) uses PyPDF2 to extract and chunk text, then the chunks are indexed by the `COMPANY_DOCS_SEARCH` Cortex Search service.
 
 ### 4. Access Holly
 
@@ -207,7 +204,7 @@ holly/
 │   ├── HOLLY.sql                          # Agent definition (9 tools, v3 orchestration)
 │   ├── MCP_SERVER.sql                     # MCP Server setup for Cursor/Claude Desktop
 │   ├── YAHOO_FINANCE.sql                  # Real-time stock price UDF (standalone)
-│   └── RAG_COMPONENTS.sql                 # PDF document Q&A (optional)
+│   └── RAG_COMPONENTS.sql                 # PDF document Q&A (standalone version, now integrated in INSTALL.sql)
 ├── cortex_analyst/
 │   ├── STOCK_PRICE_TIMESERIES_SV.sql      # US stock price semantic view with VQRs
 │   ├── AIM_STOCK_PRICES_SV.sql            # London AIM stock price semantic view with VQRs
