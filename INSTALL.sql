@@ -12,15 +12,14 @@
   1. ACCOUNTADMIN role or equivalent privileges
   2. Subscribe to the following Marketplace listing:
      
-     Cybersyn Financial & Economic Essentials (Free Trial)
+     Snowflake Financial & Economic Essentials (Free)
      - Go to: Data Products > Marketplace
-     - Search for: "Cybersyn Financial & Economic Essentials"
-     - Click "Get" to subscribe (free trial available)
+     - Search for: "Snowflake Financial & Economic Essentials"
+     - Click "Get" to subscribe (free)
      - This provides: SNOWFLAKE_PUBLIC_DATA_PAID
      
-  3. SCHEMA NOTE: Non-trial accounts use schema CYBERSYN; trial accounts use schema PUBLIC_DATA.
-     This script defaults to CYBERSYN. If you are on a trial account,
-     find-and-replace 'CYBERSYN' with 'PUBLIC_DATA' before running.
+  3. SCHEMA NOTE: The default schema is CYBERSYN. Trial accounts use schema PUBLIC_DATA.
+     If you are on a trial account, find-and-replace 'CYBERSYN' with 'PUBLIC_DATA' before running.
   
   4. Run the AIM stock price loader AFTER this script:
      SNOWFLAKE_CONNECTION_NAME=<connection> python scripts/load_aim_stock_prices.py
@@ -581,7 +580,7 @@ SELECT * FROM VALUES
 
 
 -- ============================================================================
--- STEP 4: CREATE STOCK PRICE DATA (from Cybersyn Marketplace)
+-- STEP 4: CREATE STOCK PRICE DATA (from Snowflake Marketplace)
 -- ============================================================================
 
 CREATE OR REPLACE TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES 
@@ -623,7 +622,7 @@ CREATE TABLE IF NOT EXISTS COLM_DB.STRUCTURED.AIM_STOCK_PRICES (
 COMMENT = 'London AIM daily stock prices for Time Out Group (TMO). Loaded via Yahoo Finance script.';
 
 -- ============================================================================
--- STEP 5: CREATE SEC EDGAR FILINGS DATA (from Cybersyn Marketplace)
+-- STEP 5: CREATE SEC EDGAR FILINGS DATA (from Snowflake Marketplace)
 -- ============================================================================
 
 CREATE OR REPLACE TABLE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
@@ -650,7 +649,7 @@ WHERE r.FILED_DATE >= '2025-01-01'
 ALTER TABLE COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS SET CHANGE_TRACKING = TRUE;
 
 -- ============================================================================
--- STEP 6: CREATE PUBLIC TRANSCRIPTS DATA (All S&P 500 transcripts from Cybersyn)
+-- STEP 6: CREATE PUBLIC TRANSCRIPTS DATA (All S&P 500 transcripts from Snowflake Marketplace)
 -- ============================================================================
 
 CREATE OR REPLACE TABLE COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS
@@ -1037,6 +1036,7 @@ verified_queries:
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
+GRANT CREATE SCHEMA ON DATABASE SNOWFLAKE_INTELLIGENCE TO ROLE ACCOUNTADMIN;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 -- See cortex_agent/HOLLY.sql for the full agent definition with v3 orchestration.

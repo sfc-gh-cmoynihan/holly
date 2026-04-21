@@ -2,7 +2,7 @@
 ================================================================================
   DAILY_DATA_REFRESH Task
   
-  Refreshes EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables from Cybersyn Marketplace
+  Refreshes EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables from Snowflake Marketplace
   and triggers incremental updates to Cortex Search Services.
   
   Schedule: Daily at 6:00 AM GMT/UTC
