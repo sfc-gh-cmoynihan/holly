@@ -12,10 +12,12 @@
   1. ACCOUNTADMIN role or equivalent privileges
   2. Subscribe to the following Marketplace listing:
      
-     Snowflake Financial & Economic Essentials (Free)
+     Snowflake Public Data (Paid)
+     Near real-time 90+ sources of public domain data in one location
      - Go to: Data Products > Marketplace
-     - Search for: "Snowflake Financial & Economic Essentials"
-     - Click "Get" to subscribe (free)
+     - Search for: "Snowflake Public Data"
+     - Click "Get" to subscribe
+     - Note: Despite the name, a free trial is available
      - This provides: SNOWFLAKE_PUBLIC_DATA_PAID
      
   3. SCHEMA NOTE: The default schema is CYBERSYN. Trial accounts use schema PUBLIC_DATA.

@@ -94,10 +94,10 @@ All of this would normally take most of the day across Bloomberg, SEC EDGAR, int
 ### 1. Prerequisites
 
 - Snowflake account with ACCOUNTADMIN access (Works with Trial Accounts)
-- Subscribe to **Snowflake Financial & Economic Essentials** from Marketplace:
+- Subscribe to **Snowflake Public Data (Paid)** from Marketplace:
   - Go to: **Data Products > Marketplace**
-  - Search: "Snowflake Financial & Economic Essentials"
-  - Click "Get" (free)
+  - Search: "Snowflake Public Data"
+  - Click "Get" (free trial available)
   - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID`
   - **Schema Note:** The default schema is `CYBERSYN`. Trial accounts use `PUBLIC_DATA`. The INSTALL.sql defaults to `CYBERSYN` — find-and-replace with `PUBLIC_DATA` if on a trial account.
 
@@ -262,7 +262,7 @@ See [`cortex_agent/MCP_SERVER.sql`](cortex_agent/MCP_SERVER.sql) for setup instr
 
 | Source | Type | Coverage |
 |--------|------|----------|
-| **Snowflake Financial & Economic Essentials** | Marketplace | S&P 500 stock prices, SEC filings, earnings transcripts |
+| **Snowflake Public Data (Paid)** | Marketplace | S&P 500 stock prices, SEC filings, earnings transcripts |
 | **Yahoo Finance** | Script (`load_aim_stock_prices.py`) | Time Out Group AIM prices (daily OHLC since June 2016) |
 | **Company PDFs** | Snowflake Stage | Time Out Group annual report FY25, interim results H1 FY26, half year presentation |
 
@@ -278,7 +278,7 @@ This project is proprietary software for demonstration purposes.
 
 **Built with Snowflake Cortex**
 
-*Data Sources: Snowflake Marketplace (Snowflake Financial & Economic Essentials), Yahoo Finance, Time Out Group PLC*
+*Data Sources: Snowflake Marketplace (Snowflake Public Data), Yahoo Finance, Time Out Group PLC*
 
 ---
 
