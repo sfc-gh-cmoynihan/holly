@@ -17,8 +17,10 @@
      - Go to: Data Products > Marketplace
      - Search for: "Snowflake Public Data"
      - Click "Get" to subscribe
-     - Note: Despite the name, a free trial is available
+     - Note: Despite the name, a free unlimited 90-day trial is available
      - This provides: SNOWFLAKE_PUBLIC_DATA_PAID
+     - For detailed step-by-step instructions, see README.md Section 2
+       https://github.com/sfc-gh-cmoynihan/holly#2-subscribe-to-snowflake-public-data-paid
      
   3. SCHEMA NOTE: The default schema is CYBERSYN. Trial accounts use schema PUBLIC_DATA.
      If you are on a trial account, find-and-replace 'CYBERSYN' with 'PUBLIC_DATA' before running.

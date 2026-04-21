@@ -1,0 +1,1319 @@
+{
+  "content": [
+    {
+      "thinking": {
+        "text": "This question looks similar to a verified analyst query. Let me try to use the analyst tool."
+      },
+      "type": "thinking"
+    },
+    {
+      "tool_use": {
+        "client_side_execute": false,
+        "input": {
+          "previous_related_tool_result_id": "",
+          "query": "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026",
+          "reference_vqrs": [
+            {
+              "question": "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026",
+              "sql": "SELECT DATE_TRUNC('WEEK', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN ('MSFT', 'AMZN', 'SNOW', 'NVDA') AND VARIABLE_NAME = 'Post-Market Close' AND DATE >= '2025-02-20' AND DATE <= '2026-02-20' GROUP BY DATE_TRUNC('WEEK', DATE), TICKER ORDER BY WEEK, TICKER",
+              "confidence": 1,
+              "name": "\"Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026\"",
+              "verified_at": 1743552000,
+              "verified_by": "ADMIN"
+            }
+          ]
+        },
+        "name": "STOCK_PRICES",
+        "tool_use_id": "tooluse_d61b43c82cc14c7f9f3111",
+        "type": "cortex_analyst_text_to_sql"
+      },
+      "type": "tool_use"
+    },
+    {
+      "tool_result": {
+        "content": [
+          {
+            "json": {
+              "query_id": "01c3dbf1-0001-aad7-0000-00012fce94f5",
+              "result_set": {
+                "data": [
+                  [
+                    "2025-02-17",
+                    "AMZN",
+                    "220.03"
+                  ],
+                  [
+                    "2025-02-17",
+                    "MSFT",
+                    "412.01999999999998"
+                  ],
+                  [
+                    "2025-02-17",
+                    "NVDA",
+                    "137.44"
+                  ],
+                  [
+                    "2025-02-17",
+                    "SNOW",
+                    "181.09999999999999"
+                  ],
+                  [
+                    "2025-02-24",
+                    "AMZN",
+                    "212.53"
+                  ],
+                  [
+                    "2025-02-24",
+                    "MSFT",
+                    "398.20999999999998"
+                  ],
+                  [
+                    "2025-02-24",
+                    "NVDA",
+                    "127.12"
+                  ],
+                  [
+                    "2025-02-24",
+                    "SNOW",
+                    "174.02000000000001"
+                  ],
+                  [
+                    "2025-03-03",
+                    "AMZN",
+                    "203.83000000000001"
+                  ],
+                  [
+                    "2025-03-03",
+                    "MSFT",
+                    "393.82999999999998"
+                  ],
+                  [
+                    "2025-03-03",
+                    "NVDA",
+                    "114.55"
+                  ],
+                  [
+                    "2025-03-03",
+                    "SNOW",
+                    "168.30000000000001"
+                  ],
+                  [
+                    "2025-03-10",
+                    "AMZN",
+                    "196.31999999999999"
+                  ],
+                  [
+                    "2025-03-10",
+                    "MSFT",
+                    "382.11000000000001"
+                  ],
+                  [
+                    "2025-03-10",
+                    "NVDA",
+                    "113.81"
+                  ],
+                  [
+                    "2025-03-10",
+                    "SNOW",
+                    "151.13"
+                  ],
+                  [
+                    "2025-03-17",
+                    "AMZN",
+                    "195.28"
+                  ],
+                  [
+                    "2025-03-17",
+                    "MSFT",
+                    "387.99000000000001"
+                  ],
+                  [
+                    "2025-03-17",
+                    "NVDA",
+                    "117.77"
+                  ],
+                  [
+                    "2025-03-17",
+                    "SNOW",
+                    "156.38999999999999"
+                  ],
+                  [
+                    "2025-03-24",
+                    "AMZN",
+                    "200.59999999999999"
+                  ],
+                  [
+                    "2025-03-24",
+                    "MSFT",
+                    "389.06999999999999"
+                  ],
+                  [
+                    "2025-03-24",
+                    "NVDA",
+                    "114.81"
+                  ],
+                  [
+                    "2025-03-24",
+                    "SNOW",
+                    "158.27000000000001"
+                  ],
+                  [
+                    "2025-03-31",
+                    "AMZN",
+                    "182.99000000000001"
+                  ],
+                  [
+                    "2025-03-31",
+                    "MSFT",
+                    "371.80000000000001"
+                  ],
+                  [
+                    "2025-03-31",
+                    "NVDA",
+                    "103.33"
+                  ],
+                  [
+                    "2025-03-31",
+                    "SNOW",
+                    "142.13"
+                  ],
+                  [
+                    "2025-04-07",
+                    "AMZN",
+                    "180.84999999999999"
+                  ],
+                  [
+                    "2025-04-07",
+                    "MSFT",
+                    "374.32999999999998"
+                  ],
+                  [
+                    "2025-04-07",
+                    "NVDA",
+                    "104.39"
+                  ],
+                  [
+                    "2025-04-07",
+                    "SNOW",
+                    "140.44"
+                  ],
+                  [
+                    "2025-04-14",
+                    "AMZN",
+                    "175.08000000000001"
+                  ],
+                  [
+                    "2025-04-14",
+                    "MSFT",
+                    "374.93000000000001"
+                  ],
+                  [
+                    "2025-04-14",
+                    "NVDA",
+                    "103.26000000000001"
+                  ],
+                  [
+                    "2025-04-14",
+                    "SNOW",
+                    "144.59999999999999"
+                  ],
+                  [
+                    "2025-04-21",
+                    "AMZN",
+                    "181.65000000000001"
+                  ],
+                  [
+                    "2025-04-21",
+                    "MSFT",
+                    "378.06"
+                  ],
+                  [
+                    "2025-04-21",
+                    "NVDA",
+                    "104.05"
+                  ],
+                  [
+                    "2025-04-21",
+                    "SNOW",
+                    "149.55000000000001"
+                  ],
+                  [
+                    "2025-04-28",
+                    "AMZN",
+                    "187.78"
+                  ],
+                  [
+                    "2025-04-28",
+                    "MSFT",
+                    "413.82999999999998"
+                  ],
+                  [
+                    "2025-04-28",
+                    "NVDA",
+                    "110.64"
+                  ],
+                  [
+                    "2025-04-28",
+                    "SNOW",
+                    "163.19"
+                  ],
+                  [
+                    "2025-05-05",
+                    "AMZN",
+                    "189.63999999999999"
+                  ],
+                  [
+                    "2025-05-05",
+                    "MSFT",
+                    "436.56"
+                  ],
+                  [
+                    "2025-05-05",
+                    "NVDA",
+                    "115.59999999999999"
+                  ],
+                  [
+                    "2025-05-05",
+                    "SNOW",
+                    "171.24000000000001"
+                  ],
+                  [
+                    "2025-05-12",
+                    "AMZN",
+                    "207.13999999999999"
+                  ],
+                  [
+                    "2025-05-12",
+                    "MSFT",
+                    "450.25999999999999"
+                  ],
+                  [
+                    "2025-05-12",
+                    "NVDA",
+                    "131.43000000000001"
+                  ],
+                  [
+                    "2025-05-12",
+                    "SNOW",
+                    "181.15000000000001"
+                  ],
+                  [
+                    "2025-05-19",
+                    "AMZN",
+                    "202.86000000000001"
+                  ],
+                  [
+                    "2025-05-19",
+                    "MSFT",
+                    "454.70999999999998"
+                  ],
+                  [
+                    "2025-05-19",
+                    "NVDA",
+                    "132.94999999999999"
+                  ],
+                  [
+                    "2025-05-19",
+                    "SNOW",
+                    "192.06"
+                  ],
+                  [
+                    "2025-05-26",
+                    "AMZN",
+                    "206.86000000000001"
+                  ],
+                  [
+                    "2025-05-26",
+                    "MSFT",
+                    "459.56"
+                  ],
+                  [
+                    "2025-05-26",
+                    "NVDA",
+                    "137.33000000000001"
+                  ],
+                  [
+                    "2025-05-26",
+                    "SNOW",
+                    "205.08000000000001"
+                  ],
+                  [
+                    "2025-06-02",
+                    "AMZN",
+                    "208.28999999999999"
+                  ],
+                  [
+                    "2025-06-02",
+                    "MSFT",
+                    "465.25999999999999"
+                  ],
+                  [
+                    "2025-06-02",
+                    "NVDA",
+                    "140.22"
+                  ],
+                  [
+                    "2025-06-02",
+                    "SNOW",
+                    "210.00999999999999"
+                  ],
+                  [
+                    "2025-06-09",
+                    "AMZN",
+                    "214.30000000000001"
+                  ],
+                  [
+                    "2025-06-09",
+                    "MSFT",
+                    "472.87"
+                  ],
+                  [
+                    "2025-06-09",
+                    "NVDA",
+                    "142.96000000000001"
+                  ],
+                  [
+                    "2025-06-09",
+                    "SNOW",
+                    "209.66"
+                  ],
+                  [
+                    "2025-06-16",
+                    "AMZN",
+                    "212.65000000000001"
+                  ],
+                  [
+                    "2025-06-16",
+                    "MSFT",
+                    "477.64999999999998"
+                  ],
+                  [
+                    "2025-06-16",
+                    "NVDA",
+                    "143.99000000000001"
+                  ],
+                  [
+                    "2025-06-16",
+                    "SNOW",
+                    "210.00999999999999"
+                  ],
+                  [
+                    "2025-06-23",
+                    "AMZN",
+                    "215.27000000000001"
+                  ],
+                  [
+                    "2025-06-23",
+                    "MSFT",
+                    "492.92000000000002"
+                  ],
+                  [
+                    "2025-06-23",
+                    "NVDA",
+                    "152.16"
+                  ],
+                  [
+                    "2025-06-23",
+                    "SNOW",
+                    "220.99000000000001"
+                  ],
+                  [
+                    "2025-06-30",
+                    "AMZN",
+                    "220.78999999999999"
+                  ],
+                  [
+                    "2025-06-30",
+                    "MSFT",
+                    "494.63"
+                  ],
+                  [
+                    "2025-06-30",
+                    "NVDA",
+                    "156.72"
+                  ],
+                  [
+                    "2025-06-30",
+                    "SNOW",
+                    "219.68000000000001"
+                  ],
+                  [
+                    "2025-07-07",
+                    "AMZN",
+                    "222.68000000000001"
+                  ],
+                  [
+                    "2025-07-07",
+                    "MSFT",
+                    "500.5"
+                  ],
+                  [
+                    "2025-07-07",
+                    "NVDA",
+                    "162.13999999999999"
+                  ],
+                  [
+                    "2025-07-07",
+                    "SNOW",
+                    "219.46000000000001"
+                  ],
+                  [
+                    "2025-07-14",
+                    "AMZN",
+                    "224.94999999999999"
+                  ],
+                  [
+                    "2025-07-14",
+                    "MSFT",
+                    "506.74000000000001"
+                  ],
+                  [
+                    "2025-07-14",
+                    "NVDA",
+                    "170.21000000000001"
+                  ],
+                  [
+                    "2025-07-14",
+                    "SNOW",
+                    "213.31999999999999"
+                  ],
+                  [
+                    "2025-07-21",
+                    "AMZN",
+                    "230.38"
+                  ],
+                  [
+                    "2025-07-21",
+                    "MSFT",
+                    "510"
+                  ],
+                  [
+                    "2025-07-21",
+                    "NVDA",
+                    "171.72999999999999"
+                  ],
+                  [
+                    "2025-07-21",
+                    "SNOW",
+                    "215.13"
+                  ],
+                  [
+                    "2025-07-28",
+                    "AMZN",
+                    "227.06999999999999"
+                  ],
+                  [
+                    "2025-07-28",
+                    "MSFT",
+                    "528.89999999999998"
+                  ],
+                  [
+                    "2025-07-28",
+                    "NVDA",
+                    "177.13999999999999"
+                  ],
+                  [
+                    "2025-07-28",
+                    "SNOW",
+                    "218.55000000000001"
+                  ],
+                  [
+                    "2025-08-04",
+                    "AMZN",
+                    "218.69"
+                  ],
+                  [
+                    "2025-08-04",
+                    "MSFT",
+                    "527.14999999999998"
+                  ],
+                  [
+                    "2025-08-04",
+                    "NVDA",
+                    "180.46000000000001"
+                  ],
+                  [
+                    "2025-08-04",
+                    "SNOW",
+                    "205.13999999999999"
+                  ],
+                  [
+                    "2025-08-11",
+                    "AMZN",
+                    "225.69999999999999"
+                  ],
+                  [
+                    "2025-08-11",
+                    "MSFT",
+                    "523.77999999999997"
+                  ],
+                  [
+                    "2025-08-11",
+                    "NVDA",
+                    "181.58000000000001"
+                  ],
+                  [
+                    "2025-08-11",
+                    "SNOW",
+                    "195.13"
+                  ],
+                  [
+                    "2025-08-18",
+                    "AMZN",
+                    "226.63"
+                  ],
+                  [
+                    "2025-08-18",
+                    "MSFT",
+                    "508.81999999999999"
+                  ],
+                  [
+                    "2025-08-18",
+                    "NVDA",
+                    "177.19"
+                  ],
+                  [
+                    "2025-08-18",
+                    "SNOW",
+                    "195.50999999999999"
+                  ],
+                  [
+                    "2025-08-25",
+                    "AMZN",
+                    "229"
+                  ],
+                  [
+                    "2025-08-25",
+                    "MSFT",
+                    "505.94"
+                  ],
+                  [
+                    "2025-08-25",
+                    "NVDA",
+                    "178.37"
+                  ],
+                  [
+                    "2025-08-25",
+                    "SNOW",
+                    "220.59999999999999"
+                  ],
+                  [
+                    "2025-09-01",
+                    "AMZN",
+                    "230.06"
+                  ],
+                  [
+                    "2025-09-01",
+                    "MSFT",
+                    "502.31999999999999"
+                  ],
+                  [
+                    "2025-09-01",
+                    "NVDA",
+                    "169.34"
+                  ],
+                  [
+                    "2025-09-01",
+                    "SNOW",
+                    "226.41999999999999"
+                  ],
+                  [
+                    "2025-09-08",
+                    "AMZN",
+                    "232.41999999999999"
+                  ],
+                  [
+                    "2025-09-08",
+                    "MSFT",
+                    "503.63"
+                  ],
+                  [
+                    "2025-09-08",
+                    "NVDA",
+                    "174.87"
+                  ],
+                  [
+                    "2025-09-08",
+                    "SNOW",
+                    "225.38999999999999"
+                  ],
+                  [
+                    "2025-09-15",
+                    "AMZN",
+                    "232.21000000000001"
+                  ],
+                  [
+                    "2025-09-15",
+                    "MSFT",
+                    "512.60000000000002"
+                  ],
+                  [
+                    "2025-09-15",
+                    "NVDA",
+                    "175.25"
+                  ],
+                  [
+                    "2025-09-15",
+                    "SNOW",
+                    "222.72"
+                  ],
+                  [
+                    "2025-09-22",
+                    "AMZN",
+                    "221.78"
+                  ],
+                  [
+                    "2025-09-22",
+                    "MSFT",
+                    "510.43000000000001"
+                  ],
+                  [
+                    "2025-09-22",
+                    "NVDA",
+                    "178.33000000000001"
+                  ],
+                  [
+                    "2025-09-22",
+                    "SNOW",
+                    "224.47999999999999"
+                  ],
+                  [
+                    "2025-09-29",
+                    "AMZN",
+                    "220.80000000000001"
+                  ],
+                  [
+                    "2025-09-29",
+                    "MSFT",
+                    "516.54999999999995"
+                  ],
+                  [
+                    "2025-09-29",
+                    "NVDA",
+                    "186.08000000000001"
+                  ],
+                  [
+                    "2025-09-29",
+                    "SNOW",
+                    "231.40000000000001"
+                  ],
+                  [
+                    "2025-10-06",
+                    "AMZN",
+                    "222.15000000000001"
+                  ],
+                  [
+                    "2025-10-06",
+                    "MSFT",
+                    "522.13"
+                  ],
+                  [
+                    "2025-10-06",
+                    "NVDA",
+                    "187.18000000000001"
+                  ],
+                  [
+                    "2025-10-06",
+                    "SNOW",
+                    "244.36000000000001"
+                  ],
+                  [
+                    "2025-10-13",
+                    "AMZN",
+                    "215.91"
+                  ],
+                  [
+                    "2025-10-13",
+                    "MSFT",
+                    "512.99000000000001"
+                  ],
+                  [
+                    "2025-10-13",
+                    "NVDA",
+                    "182.94"
+                  ],
+                  [
+                    "2025-10-13",
+                    "SNOW",
+                    "241.91"
+                  ],
+                  [
+                    "2025-10-20",
+                    "AMZN",
+                    "219.96000000000001"
+                  ],
+                  [
+                    "2025-10-20",
+                    "MSFT",
+                    "520.00999999999999"
+                  ],
+                  [
+                    "2025-10-20",
+                    "NVDA",
+                    "182.38999999999999"
+                  ],
+                  [
+                    "2025-10-20",
+                    "SNOW",
+                    "249.44999999999999"
+                  ],
+                  [
+                    "2025-10-27",
+                    "AMZN",
+                    "236.41"
+                  ],
+                  [
+                    "2025-10-27",
+                    "MSFT",
+                    "528.33000000000004"
+                  ],
+                  [
+                    "2025-10-27",
+                    "NVDA",
+                    "202.16"
+                  ],
+                  [
+                    "2025-10-27",
+                    "SNOW",
+                    "270.39999999999998"
+                  ],
+                  [
+                    "2025-11-03",
+                    "AMZN",
+                    "248.28"
+                  ],
+                  [
+                    "2025-11-03",
+                    "MSFT",
+                    "506.70999999999998"
+                  ],
+                  [
+                    "2025-11-03",
+                    "NVDA",
+                    "195.88"
+                  ],
+                  [
+                    "2025-11-03",
+                    "SNOW",
+                    "266.94"
+                  ],
+                  [
+                    "2025-11-10",
+                    "AMZN",
+                    "242.94999999999999"
+                  ],
+                  [
+                    "2025-11-10",
+                    "MSFT",
+                    "507.44999999999999"
+                  ],
+                  [
+                    "2025-11-10",
+                    "NVDA",
+                    "192.66"
+                  ],
+                  [
+                    "2025-11-10",
+                    "SNOW",
+                    "264.91000000000003"
+                  ],
+                  [
+                    "2025-11-17",
+                    "AMZN",
+                    "224.16999999999999"
+                  ],
+                  [
+                    "2025-11-17",
+                    "MSFT",
+                    "488.45999999999998"
+                  ],
+                  [
+                    "2025-11-17",
+                    "NVDA",
+                    "184.88"
+                  ],
+                  [
+                    "2025-11-17",
+                    "SNOW",
+                    "248.77000000000001"
+                  ],
+                  [
+                    "2025-11-24",
+                    "AMZN",
+                    "229.66999999999999"
+                  ],
+                  [
+                    "2025-11-24",
+                    "MSFT",
+                    "482.63999999999999"
+                  ],
+                  [
+                    "2025-11-24",
+                    "NVDA",
+                    "178.27000000000001"
+                  ],
+                  [
+                    "2025-11-24",
+                    "SNOW",
+                    "248.08000000000001"
+                  ],
+                  [
+                    "2025-12-01",
+                    "AMZN",
+                    "232.02000000000001"
+                  ],
+                  [
+                    "2025-12-01",
+                    "MSFT",
+                    "483.99000000000001"
+                  ],
+                  [
+                    "2025-12-01",
+                    "NVDA",
+                    "181.33000000000001"
+                  ],
+                  [
+                    "2025-12-01",
+                    "SNOW",
+                    "246.59"
+                  ],
+                  [
+                    "2025-12-08",
+                    "AMZN",
+                    "228.50999999999999"
+                  ],
+                  [
+                    "2025-12-08",
+                    "MSFT",
+                    "484.43000000000001"
+                  ],
+                  [
+                    "2025-12-08",
+                    "NVDA",
+                    "182.13999999999999"
+                  ],
+                  [
+                    "2025-12-08",
+                    "SNOW",
+                    "219.96000000000001"
+                  ],
+                  [
+                    "2025-12-15",
+                    "AMZN",
+                    "224.13"
+                  ],
+                  [
+                    "2025-12-15",
+                    "MSFT",
+                    "479.05000000000001"
+                  ],
+                  [
+                    "2025-12-15",
+                    "NVDA",
+                    "176.09999999999999"
+                  ],
+                  [
+                    "2025-12-15",
+                    "SNOW",
+                    "219.31"
+                  ],
+                  [
+                    "2025-12-22",
+                    "AMZN",
+                    "231.28999999999999"
+                  ],
+                  [
+                    "2025-12-22",
+                    "MSFT",
+                    "486.70999999999998"
+                  ],
+                  [
+                    "2025-12-22",
+                    "NVDA",
+                    "187.5"
+                  ],
+                  [
+                    "2025-12-22",
+                    "SNOW",
+                    "224.15000000000001"
+                  ],
+                  [
+                    "2025-12-29",
+                    "AMZN",
+                    "230.43000000000001"
+                  ],
+                  [
+                    "2025-12-29",
+                    "MSFT",
+                    "482.88"
+                  ],
+                  [
+                    "2025-12-29",
+                    "NVDA",
+                    "187.59999999999999"
+                  ],
+                  [
+                    "2025-12-29",
+                    "SNOW",
+                    "220.28"
+                  ],
+                  [
+                    "2026-01-05",
+                    "AMZN",
+                    "241.77000000000001"
+                  ],
+                  [
+                    "2026-01-05",
+                    "MSFT",
+                    "478.25999999999999"
+                  ],
+                  [
+                    "2026-01-05",
+                    "NVDA",
+                    "187.02000000000001"
+                  ],
+                  [
+                    "2026-01-05",
+                    "SNOW",
+                    "227.25"
+                  ],
+                  [
+                    "2026-01-12",
+                    "AMZN",
+                    "240.34999999999999"
+                  ],
+                  [
+                    "2026-01-12",
+                    "MSFT",
+                    "464.56999999999999"
+                  ],
+                  [
+                    "2026-01-12",
+                    "NVDA",
+                    "185.44999999999999"
+                  ],
+                  [
+                    "2026-01-12",
+                    "SNOW",
+                    "210.63999999999999"
+                  ],
+                  [
+                    "2026-01-19",
+                    "AMZN",
+                    "234.28999999999999"
+                  ],
+                  [
+                    "2026-01-19",
+                    "MSFT",
+                    "454.37"
+                  ],
+                  [
+                    "2026-01-19",
+                    "NVDA",
+                    "183.46000000000001"
+                  ],
+                  [
+                    "2026-01-19",
+                    "SNOW",
+                    "208.41"
+                  ],
+                  [
+                    "2026-01-26",
+                    "AMZN",
+                    "241.08000000000001"
+                  ],
+                  [
+                    "2026-01-26",
+                    "MSFT",
+                    "453.31"
+                  ],
+                  [
+                    "2026-01-26",
+                    "NVDA",
+                    "189.43000000000001"
+                  ],
+                  [
+                    "2026-01-26",
+                    "SNOW",
+                    "205.59"
+                  ],
+                  [
+                    "2026-02-02",
+                    "AMZN",
+                    "224.86000000000001"
+                  ],
+                  [
+                    "2026-02-02",
+                    "MSFT",
+                    "408.23000000000002"
+                  ],
+                  [
+                    "2026-02-02",
+                    "NVDA",
+                    "179.63999999999999"
+                  ],
+                  [
+                    "2026-02-02",
+                    "SNOW",
+                    "170.78"
+                  ],
+                  [
+                    "2026-02-09",
+                    "AMZN",
+                    "203.77000000000001"
+                  ],
+                  [
+                    "2026-02-09",
+                    "MSFT",
+                    "407.44999999999999"
+                  ],
+                  [
+                    "2026-02-09",
+                    "NVDA",
+                    "188.03"
+                  ],
+                  [
+                    "2026-02-09",
+                    "SNOW",
+                    "178.97"
+                  ],
+                  [
+                    "2026-02-16",
+                    "AMZN",
+                    "205.19999999999999"
+                  ],
+                  [
+                    "2026-02-16",
+                    "MSFT",
+                    "398.12"
+                  ],
+                  [
+                    "2026-02-16",
+                    "NVDA",
+                    "187.78"
+                  ],
+                  [
+                    "2026-02-16",
+                    "SNOW",
+                    "176.16999999999999"
+                  ]
+                ],
+                "resultSetMetaData": {
+                  "format": "jsonv2",
+                  "numRows": 212,
+                  "partition": 0,
+                  "partitionInfo": [
+                    {
+                      "rowCount": 212,
+                      "uncompressedSize": 8453
+                    }
+                  ],
+                  "rowType": [
+                    {
+                      "length": 0,
+                      "name": "WEEK",
+                      "nullable": true,
+                      "precision": 0,
+                      "scale": 0,
+                      "type": "date"
+                    },
+                    {
+                      "length": 16777216,
+                      "name": "TICKER",
+                      "nullable": true,
+                      "precision": 0,
+                      "scale": 0,
+                      "type": "text"
+                    },
+                    {
+                      "length": 0,
+                      "name": "SHARE_PRICE",
+                      "nullable": true,
+                      "precision": 0,
+                      "scale": 0,
+                      "type": "real"
+                    }
+                  ]
+                },
+                "statementHandle": "01c3dbf1-0001-aad7-0000-00012fce94f5"
+              },
+              "result_set_truncated": false,
+              "sql": "WITH __stock_price_timeseries AS (\n  SELECT\n    date,\n    ticker,\n    variable_name,\n    value\n  FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES\n)\nSELECT\n  DATE_TRUNC('WEEK', date) AS week,\n  ticker,\n  ROUND(AVG(value), 2) AS share_price\nFROM __stock_price_timeseries\nWHERE\n  ticker IN ('MSFT', 'AMZN', 'SNOW', 'NVDA')\n  AND variable_name = 'Post-Market Close'\n  AND date >= '2025-02-20'\n  AND date <= '2026-02-20'\nGROUP BY\n  DATE_TRUNC('WEEK', date),\n  ticker\nORDER BY\n  week,\n  ticker\n -- Generated by Cortex Analyst (request_id: 78fca706-4e5b-4290-886a-c82025c2b541)\n;",
+              "text": "The question is clear and I can answer it with the following SQL.",
+              "verified_query_used": true
+            },
+            "type": "json"
+          }
+        ],
+        "name": "STOCK_PRICES",
+        "status": "success",
+        "tool_use_id": "tooluse_d61b43c82cc14c7f9f3111",
+        "type": "cortex_analyst_text_to_sql"
+      },
+      "type": "tool_result"
+    },
+    {
+      "thinking": {
+        "text": "\nThe data is returned successfully. Now I need to generate a chart. Let me load the chart generation instructions skill first.\n"
+      },
+      "type": "thinking"
+    },
+    {
+      "tool_use": {
+        "client_side_execute": false,
+        "input": {
+          "skill_name": "chart_generation_instructions"
+        },
+        "name": "server_skill",
+        "tool_use_id": "toolu_bdrk_0181uU3uwd14x8BRMzwpm1cT",
+        "type": "server_skill"
+      },
+      "type": "tool_use"
+    },
+    {
+      "tool_result": {
+        "content": [
+          {
+            "json": {
+              "content": "# Skill: chart_generation_instructions\n\n**Description**: Provides instructions for deciding WHEN to generate a chart and HOW to generate a chart to enhance answers with beautiful visualizations\n\n## Instructions\n\n\n# WHEN\n\nThis section describes WHEN to generate a chart - read it carefully.\n\n**PHASE 1: DECIDING TO GENERATE A CHART** (happens DURING your reasoning, BEFORE you have a chart tool result)\n\nInspecting results from cortex_analyst_text_to_sql, you MUST evaluate in <thinking>:\n\n**Step 1: Should I generate a chart?**\n  - Prefer charts over tables for: comparisons, trends, rankings, distributions, time-series\n  - MUST generate charts when SQL results have 2+ rows with numerical metrics (revenue, sales, counts, growth rates, percentages)\n  - Example of MANDATORY chart scenarios:\n    - Comparisons: revenue by region, sales by product, performance by team\n    - Rankings: top 10 customers, bottom performers, leaderboards\n    - Time series: monthly trends, year-over-year growth, daily metrics\n    - Distributions: category breakdowns, segment analysis\n  - Do NOT chart: singular values (e.g., \"What is total revenue?\" \u2192 just answer \"The total revenue is $X\")\n  - For generic tools: ONLY chartable if \"execution_type\": \"table_function\" (check the execution_type field in the result)\n  - Use the tool_use_id (not the query_id value) when calling the chart tool\n\n**Step 2: Is the SQL result visualization-ready?**\n  - Check: row count, column names, aggregation level, data shape\n  - Check if the question mentions a specific chart type that should be generated. If it does, check if the SQL result is visualization-ready for the requested chart type. Remember that you should call data_to_chart with specific chart type in the question.\n  - **IMPORTANT - Check custom instructions**: Review the system prompt for any custom response instructions or chart-related preferences. Custom instructions should take precedence over recommendations in this guide, unless they are breaking the system. For example, if custom instructions say \"always use bar charts for time series\", you MUST use a bar chart even though this guide recommends line charts for time series. Double-check any instructions under \"[Important Case-specific Instructions]\" section in the system prompt, and apply any chart-relevant guidance.\n\n**Step 3: Prepare data and generate a chart**\n  - If data is NOT visualization-ready \u2192 Use vega-lite transform to filter the data (preferred) OR execute a new SQL query to transform the data (BEFORE calling data_to_chart again).\n  - Always provide context text BEFORE the chart block, then show the chart (all within the <answer> block).\n\n**Step 4: Consider generating multiple charts**\n  - You CAN generate multiple charts when a single chart would be insufficient or misleading:\n    - **Different scales**: When metrics have vastly different magnitudes (e.g., revenue in millions vs. growth rate in percentages), a single chart may hide patterns in smaller values. Create separate charts for each scale.\n    - **Different perspectives**: When the user's question benefits from multiple views (e.g., \"analyze sales performance\" could show both a trend over time AND a breakdown by category).\n    - **Comparison clarity**: When comparing items with very different value ranges, separate charts can make each comparison more straightforward.\n  - To generate multiple charts:\n    1. Call data_to_chart multiple times, once for each chart\n    2. In Phase 2, present each chart with a brief label explaining what it shows. Remember to cite each chart separately\n    3. Example: \"Here's the revenue trend:\" followed by chart 1, then \"And here's the growth rate trend:\" followed by chart 2\n  - Do NOT generate multiple charts just to show more visualizations - only when it genuinely improves understanding.\n\n**PHASE 2: PRESENTING THE CHART** (happens AFTER you have a chart tool result in conversation history)\n\nOnce you have called data_to_chart tool and received a tool result:\n  * Find the data_to_chart tool result with the chart in conversation history\n  * Say \"Please find the visualization below.\" (or similar context) inside the <answer> block\n  * Provide the <chart>toolUseId</chart> block inside the <answer> block where toolUseId is from the data_to_chart tool result\n  * Valid chart block format: <chart>tooluse_8n3P5qRk7aWzJ1cYxTvEfg</chart>\n  * If you cannot find ANY valid tool results from data_to_chart tool in conversation history, just say \"I couldn't generate a valid visualization.\"\n  * **AVOID REPETITION**: When user did not ask for a chart explicitly, your chart response comes AFTER your initial response in the conversation. Do NOT repeat information already provided in <answer> tags before generating the chart:\n    - Do NOT repeat the summary or analysis from your first response\n    - Introduce the chart and optionally add NEW observations visible only in the visualization (e.g., visual patterns, outliers that stand out graphically) or new findings that you were not aware of before.\n  * **DO NOT CITE CHARTS WITH WARNINGS**: If the data_to_chart tool result contains ANY warnings (e.g., \"too many unique categories\" etc.), you MUST:\n    1. Do NOT cite the chart - charts with warnings will render incorrectly or fail\n    2. Understand the warning returned and try to improve:\n      a. if error is about too many elements (e.g. too many bar charts), issue new cortex_analyst_text_to_sql call to filter the data\n      b. if error is about chart specification itself (e.g. column used in multiple encodings), call data_to_chart with fixed specification\n    3. The only possible scenario where you can cite a chart with a warning is when the user explicitly asked for a chart that would have properties described in the warning (e.g., a multi-line chart with more than 5 colors).\n  * All chart blocks must be placed inside the <answer> block, not outside of it.\n  * DO NOT use tool IDs from cortex_analyst_text_to_sql tool results to generate a chart block. These will cause rendering errors. ONLY use data_to_chart tool use IDs in chart blocks.\n  * DO NOT reference or describe chart colors (e.g., \"the blue line\", \"red bars\") in your <thinking> or <answer> sections, as colors can be customized by users and may differ from the chart specification.\n\n# HOW\n\nThis section describes how chart specification should be generated.\n\n## Available chart types\nBelow is the full list of chart types that you should generate. You should reject asks for any other chart types.\n\n* Bar chart\n  * ideal for comparisons, top N, rankings\n  * supports up to 20 unique values per nominal axis (after applying transforms)\n  * supports up to 5 unique values per color axis\n  * For larger datasets, ALWAYS use top-N transforms to limit results to 10-15 items\n\n* Line chart\n  * ideal for trends over time\n  * supports up to 5 unique values per color axis\n  * **CRITICAL**: x-axis values MUST be unique within each color series (no duplicate x values). If data has duplicate x values, aggregate them first with SQL or choose a different chart type\n* Pie chart\n  * ideal for part-to-whole relationships\n  * supports up to 15 values\n* Scatter chart\n  * should be used only for showing correlations between two numerical variables\n  * should NOT be used for top X questions, use bar or line chart instead\n  * requires at least 5 distinct values per axis (both x and y must have 5+ unique values)\n* Heatmap chart\n  * should be used only for showing patterns in data across two categorical dimensions\n  * should NOT be used for top X questions, use bar or line chart instead\n  * requires data with at least 3 columns for x, y (categorical) and color (quantitative) axes\n  * requires at least 2 distinct values per x and y axes, but not more than 20 distinct values per x and y axes\n  * you should not create a heatmap with temporal or ordinal data on x or y axes, unless specifically asked by the user\n\n\n## Chart specification\n\nWhen you want to generate a chart you just need to provide vega lite chart specification as a json string and use data_to_chart tool to validate chart correctness.\n\nProvide the minimum required configuration: mark, encoding (with field and type), and title. Optionally include transform (for fold, top-N, custom colors) and config. The data field will be added by the system in postprocessing.\nDo not include aggregations or transformations when not required.\n\nFor marks, use only one of the following:\n- \"bar\" for bar charts\n- \"line\" for line charts\n- \"arc\" for pie charts\n- \"point\" for scatter charts\n- \"rect\" for heatmaps\n\nEncoding types can be: \"quantitative\", \"temporal\", \"ordinal\", or \"nominal\".\nUse: \"quantitative\" for numbers, \"temporal\" for years, times and data-times, \"ordinal\" for ordered categories, and \"nominal\" for unordered categories.\nTitle should be a string.\n\n### IMPORTANT INSTRUCTIONS FOR TRANSFORMS:\n* Use the \"fold\" transform ONLY when charting data from multiple columns that need to be pivoted.\n* The column names in the fold array MUST exactly match column names from the SQL result (case-sensitive). Verify each column exists before using it.\n* When the user question is best visualized using a top-N bar chart (e.g. \"top 10\", \"highest value\", etc.), you MUST use transforms to filter the data to show only the selected top-N items.\n* To filter to top-N for bar charts, use this exact pattern in the \"transform\" array (place it BEFORE any other transforms like fold):\n  1. Add a window transform to rank the data: {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"<quantitative_field>\", \"order\": \"descending\"}]}\n  2. Add a filter transform: {\"filter\": \"datum.rank <= N\"}\nwhere <quantitative_field> is the field you're ranking by (the measure/metric), and N is the number you want to limit to.\n* The \"sort\" field in the window transform should be the quantitative field (y-axis for horizontal bars, x-axis for vertical bars).\n* Use \"descending\" order for \"top\" or \"highest\", and \"ascending\" order for \"bottom\" or \"lowest\".\n* When combining top-N filtering with other transforms (like fold or calculate), ALWAYS place the window and filter transforms FIRST in the transform array, then add other transforms after.\n* Only use window/filter transforms for limiting to top-N when necessary to produce a top-N bar chart - do not add them otherwise.\n* N should always be less than 20.\n* IMPORTANT: top-N transforms should ONLY be used for bar charts (mark: bar). NEVER use window, sort and filter transform with line charts.\n* When user asks for a top-N line chart, you should see that data is already filtered to top-N. Generate a line chart config without the window, sort and filter transform.\n\n### CRITICAL RULES (violating these will cause chart generation to fail):\n* **NEVER use the same field in multiple encodings** - each field can only appear ONCE across x, y, color, theta, yOffset, xOffset, etc.\n  - Example: If you use \"SALES\" for x-axis, you CANNOT also use \"SALES\" for color or y-axis\n  - Example: If you have a grouped bar chart with yOffset, the yOffset field must be different from x and y fields\n  - **Before creating your encoding, list out all the fields you plan to use and verify each field is used only once**\n* **Verify column names exist in the data** - before using any column name in encoding or fold transform, check that it exists exactly as shown in the SQL result columns. Column names are case-sensitive \u2014 use the casing EXACTLY as shown in the TABLE with data.\n* Do not use color encoding for quantitative, temporal, or ordinal fields for bar and line charts - color must be nominal type only.\n* **For scatter charts**: Both x and y axes must have at least 5 distinct values. If the data has fewer distinct values on either axis, use a different chart type (like bar chart).\n\n### Additional rules:\n* Pay attention to the requested chart type and generate the chart accordingly. If the chart type was not explicitly provided, you should suggest the best possible chart type from the available types.\n* Do not generate line charts where all fields are either ordinal or temporal.\n* Do not generate bar charts where all fields are ordinal.\n* If you selected \"bar\" for the mark, use horizontal bars (\"x\" and \"y\" swapped - \"y\" field is ordinal/nominal and \"x\" field is quantitative), whenever the ordinal/nominal field does not resemble time (e.g. year, day number, date).\n* In-particular, if you selected \"bar\" for the mark, always use horizontal bars when the bar labels (ordinal/nominal field values) are long strings in the TABLE with data.\n* For bar charts, ensure each (categorical_field, color_field) tuple is unique. If duplicates exist, add one of the transforms:\n  - Filter: {\"filter\": \"datum.<field> == '<value>'\"}\n  - Aggregate: {\"aggregate\": [{\"op\": \"sum\", \"field\": \"<quant>\", \"as\": \"<quant>\"}], \"groupby\": [\"<category>\", \"<color>\"]}\n* Do not use \"x\" and \"y\" encodings for arc mark. USE \"theta\" and \"color\" encodings instead.\n* Do not generate scatter (point) charts where any of the fields is temporal or ordinal.\n* To generate heatmap, you must choose categorical fields for both \"x\" and \"y\" encodings and a quantitative field for the \"color\" encoding.\n* NEVER generate concatenated views (NEVER use hconcat, vconcat, concat).\n* Add readable axis titles as \"title\" in both \"x\", \"y\" and \"color\" field, if applicable.\n* When using the fold transform, always include a calculate transform to rename the folded field names to a more readable format.\n* If you know the data is incomplete (e.g., partial month), include this context in the chart title (e.g., \"June 2025 (Partial)\").\n\n### Examples\n\nEach example shows: User Question \u2192 Data Shape \u2192 Why This Chart \u2192 Spec\n\n---\n\n**Example 1: Line Chart - Time Series Trend**\n\n**User Question**: \"How did monthly sales change over the past year?\"\n\n**SQL Result** (12 rows):\n| DATE       | TOTAL_SALES |\n|------------|-------------|\n| 2024-01-01 | 45000       |\n| 2024-02-01 | 52000       |\n| ... (12 rows total) |    |\n\n**Why Line Chart**: Time series data showing change over time \u2192 Line chart is ideal for trends.\n\n**Chart Spec**:\n{\n  \"title\": \"Monthly Sales Trend (2024)\",\n  \"mark\": \"line\",\n  \"encoding\": {\n    \"x\": {\"field\": \"DATE\", \"title\": \"Month\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"TOTAL_SALES\", \"title\": \"Total Sales\", \"type\": \"quantitative\"}\n  }\n}\n\n---\n\n**Example 2: Horizontal Bar Chart - Rankings**\n\n**User Question**: \"Which are the top 10 accounts by usage?\"\n\n**SQL Result** (50 rows):\n| ACCOUNT_NAME        | TOTAL_USAGE |\n|---------------------|-------------|\n| Acme Corporation    | 15420       |\n| Global Industries   | 12350       |\n| ... (50 rows total) |             |\n\n**Why Horizontal Bar Chart**: Ranking question with text labels (account names are long strings) \u2192 Horizontal bar chart. Need top-N transform since data has 50 rows but question asks for top 10.\n\n**Chart Spec**:\n{\n  \"title\": \"Top 10 Accounts by Usage\",\n  \"transform\": [\n    {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"TOTAL_USAGE\", \"order\": \"descending\"}]},\n    {\"filter\": \"datum.rank <= 10\"}\n  ],\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"TOTAL_USAGE\", \"title\": \"Total Usage\", \"type\": \"quantitative\"},\n    \"y\": {\"field\": \"ACCOUNT_NAME\", \"title\": \"Account\", \"type\": \"nominal\", \"sort\": \"-x\"}\n  }\n}\n\n---\n\n**Example 3: Vertical Bar Chart - Time-Based Categories**\n\n**User Question**: \"Show daily page views for last week\"\n\n**SQL Result** (7 rows):\n| DATE_DAY   | TOTAL_VIEWS |\n|------------|-------------|\n| 2024-03-18 | 8500        |\n| 2024-03-19 | 9200        |\n| ... (7 rows) |           |\n\n**Why Vertical Bar Chart**: Time-based categories (dates) on x-axis \u2192 Vertical bar chart (x is temporal, y is quantitative). Small number of rows, no transform needed.\n\n**Chart Spec**:\n{\n  \"title\": \"Daily Page Views (March 18-24, 2024)\",\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"DATE_DAY\", \"title\": \"Date\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"TOTAL_VIEWS\", \"title\": \"Daily Views\", \"type\": \"quantitative\"}\n  }\n}\n\n---\n\n**Example 4: Multi-Line Chart with Fold Transform**\n\n**User Question**: \"Compare sales of Product A, B, and C over time\"\n\n**SQL Result** (12 rows, multiple value columns):\n| WEEK       | PRODUCT_A | PRODUCT_B | PRODUCT_C |\n|------------|-----------|-----------|-----------|\n| 2024-01-07 | 1200      | 800       | 1500      |\n| 2024-01-14 | 1350      | 950       | 1420      |\n| ... (12 rows) |        |           |           |\n\n**Why Multi-Line with Fold**: Comparing multiple series over time. Data has separate columns for each product \u2192 Need fold transform to pivot columns into rows, then use \"key\" for color.\n\n**Chart Spec**:\n{\n  \"title\": \"Product Sales Comparison by Week\",\n  \"transform\": [\n    {\"fold\": [\"PRODUCT_A\", \"PRODUCT_B\", \"PRODUCT_C\"]},\n    {\"calculate\": \"({'PRODUCT_A': 'Product A', 'PRODUCT_B': 'Product B', 'PRODUCT_C': 'Product C'})[datum.key]\", \"as\": \"key\"}\n  ],\n  \"mark\": \"line\",\n  \"encoding\": {\n    \"x\": {\"field\": \"WEEK\", \"title\": \"Week\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"value\", \"title\": \"Sales\", \"type\": \"quantitative\"},\n    \"color\": {\"field\": \"key\", \"type\": \"nominal\", \"title\": \"Product\"}\n  }\n}\n\n---\n\n**Example 5: Pie Chart - Part-to-Whole**\n\n**User Question**: \"What percentage of revenue comes from each product category?\"\n\n**SQL Result** (5 rows):\n| CATEGORY    | REVENUE_PCT |\n|-------------|-------------|\n| Electronics | 35.2        |\n| Clothing    | 28.1        |\n| Home        | 18.5        |\n| Sports      | 12.0        |\n| Other       | 6.2         |\n\n**Why Pie Chart**: Showing percentages that sum to 100% (part-to-whole relationship) with small number of categories (5) \u2192 Pie chart is ideal.\n\n**Chart Spec**:\n{\n  \"title\": \"Revenue Distribution by Category\",\n  \"mark\": \"arc\",\n  \"encoding\": {\n    \"theta\": {\"field\": \"REVENUE_PCT\", \"type\": \"quantitative\", \"title\": \"Revenue %\"},\n    \"color\": {\"field\": \"CATEGORY\", \"type\": \"nominal\", \"title\": \"Category\"}\n  }\n}\n\n---\n\n**Example 6: Scatter Chart - Correlation Analysis**\n\n**User Question**: \"Is there a relationship between marketing spend and sales?\"\n\n**SQL Result** (100 rows):\n| MARKETING_SPEND | SALES_AMOUNT |\n|-----------------|--------------|\n| 5000            | 42000        |\n| 12000           | 78000        |\n| ... (100 rows, both columns have many distinct values) |\n\n**Why Scatter Chart**: Two quantitative variables, looking for correlation. Both axes have many distinct values (100+ data points) \u2192 Scatter chart is appropriate.\n\n**Chart Spec**:\n{\n  \"title\": \"Marketing Spend vs. Sales Correlation\",\n  \"mark\": \"point\",\n  \"encoding\": {\n    \"x\": {\"field\": \"MARKETING_SPEND\", \"type\": \"quantitative\", \"title\": \"Marketing Spend\"},\n    \"y\": {\"field\": \"SALES_AMOUNT\", \"type\": \"quantitative\", \"title\": \"Sales Amount\"}\n  }\n}\n\n---\n\n**Example 7: Heatmap - Two Categorical Dimensions**\n\n**User Question**: \"Show sales performance across regions and product categories\"\n\n**SQL Result** (20 rows):\n| REGION      | CATEGORY    | SALES   |\n|-------------|-------------|---------|\n| North       | Electronics | 125000  |\n| North       | Clothing    | 89000   |\n| South       | Electronics | 142000  |\n| ... (4 regions x 5 categories = 20 rows) |\n\n**Why Heatmap**: Two categorical dimensions (region, category) with one quantitative measure (sales). Shows patterns across the matrix \u2192 Heatmap is ideal.\n\n**Chart Spec**:\n{\n  \"title\": \"Sales by Region and Category\",\n  \"mark\": \"rect\",\n  \"encoding\": {\n    \"x\": {\"field\": \"CATEGORY\", \"type\": \"nominal\", \"title\": \"Product Category\"},\n    \"y\": {\"field\": \"REGION\", \"type\": \"nominal\", \"title\": \"Region\"},\n    \"color\": {\"field\": \"SALES\", \"type\": \"quantitative\", \"title\": \"Sales\"}\n  }\n}\n\n---\n\n**Example 8: Bottom-N Bar Chart**\n\n**User Question**: \"Which 5 regions have the lowest market share?\"\n\n**SQL Result** (25 rows):\n| REGION          | MARKET_SHARE |\n|-----------------|--------------|\n| Central Europe  | 2.1          |\n| Southeast Asia  | 3.4          |\n| ... (25 rows)   |              |\n\n**Why Horizontal Bar with Ascending Sort**: Bottom-N question \u2192 Use window transform with ascending order to get lowest values first.\n\n**Chart Spec**:\n{\n  \"title\": \"Bottom 5 Regions by Market Share\",\n  \"transform\": [\n    {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"MARKET_SHARE\", \"order\": \"ascending\"}]},\n    {\"filter\": \"datum.rank <= 5\"}\n  ],\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"MARKET_SHARE\", \"title\": \"Market Share (%)\", \"type\": \"quantitative\"},\n    \"y\": {\"field\": \"REGION\", \"title\": \"Region\", \"type\": \"nominal\", \"sort\": \"x\"}\n  }\n}\n\n---\n\n**Example 9: Grouped Bar Chart with Top-N and Fold**\n\n**User Question**: \"Show capacity and utilization for our top 5 accounts\"\n\n**SQL Result** (50 rows, two metrics per account):\n| ACCOUNT_NAME     | CAPACITY | UTILIZATION_RATE |\n|------------------|----------|------------------|\n| Acme Corp        | 10000    | 78.5             |\n| Global Inc       | 8500     | 92.1             |\n| ... (50 rows)    |          |                  |\n\n**Why Grouped Bar with Transforms**: Need to show two metrics side-by-side for top 5 accounts. Requires: (1) top-N filter first, (2) fold to combine metrics, (3) yOffset for grouping.\n\n**Chart Spec**:\n{\n  \"title\": \"Top 5 Accounts: Capacity vs Utilization\",\n  \"transform\": [\n    {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"CAPACITY\", \"order\": \"descending\"}]},\n    {\"filter\": \"datum.rank <= 5\"},\n    {\"fold\": [\"CAPACITY\", \"UTILIZATION_RATE\"]},\n    {\"calculate\": \"({'CAPACITY': 'Capacity', 'UTILIZATION_RATE': 'Utilization Rate (%)'})[datum.key]\", \"as\": \"key\"}\n  ],\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"value\", \"title\": \"Value\", \"type\": \"quantitative\"},\n    \"y\": {\"field\": \"ACCOUNT_NAME\", \"title\": \"Account\", \"type\": \"nominal\", \"sort\": \"-x\"},\n    \"yOffset\": {\"field\": \"key\", \"type\": \"nominal\"},\n    \"color\": {\"field\": \"key\", \"title\": \"Metric\", \"type\": \"nominal\"}\n  }\n}\n\n---\n\n**Example 11: Custom Instructions Override - Chart Type and Colors**\n\n**Custom Instructions**: \"Always use bar charts instead of line charts for time series data. Use blue for revenue.\"\n\n**User Question**: \"Show monthly revenue for 2024\"\n\n**SQL Result** (12 rows):\n| MONTH      | REVENUE   |\n|------------|-----------|\n| 2024-01-01 | 125000    |\n| 2024-02-01 | 142000    |\n| ... (12 rows) |        |\n\n**Why Bar Chart (NOT Line) with Custom Color**: Even though this is time series data (which would normally use a line chart), the custom instructions explicitly require bar charts for time series. The custom color is applied via `scale` in the color encoding. Always follow custom instructions when they override default chart type or color selection.\n\n**Chart Spec**:\n{\n  \"title\": \"Monthly Revenue (2024)\",\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"MONTH\", \"title\": \"Month\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"REVENUE\", \"title\": \"Revenue\", \"type\": \"quantitative\"},\n    \"color\": {\"datum\": \"Revenue\", \"scale\": {\"range\": [\"#1E90FF\"]}}\n  }\n}\n\n**Key Takeaway**: When custom instructions specify chart type or color preferences, they take priority over the default recommendations in this guide. Check the system prompt/custom instructions before deciding on chart type or colors.\n\n---\n\n**Example 12: Bar Chart with Duplicate Category-Color Tuples**\n\n**User Question**: \"Show total sales by region and product category\"\n\n**SQL Result** (12 rows \u2014 multiple rows per region/category pair due to sub-categories):\n| REGION | CATEGORY    | SUBCATEGORY | SALES  |\n|--------|-------------|-------------|--------|\n| North  | Electronics | Phones      | 50000  |\n| North  | Electronics | Laptops     | 75000  |\n| North  | Clothing    | Shoes       | 30000  |\n| South  | Electronics | Phones      | 60000  |\n| South  | Electronics | Laptops     | 40000  |\n| South  | Clothing    | Shoes       | 35000  |\n| ... (12 rows) |      |             |        |\n\n**Why Aggregate Transform**: The data has duplicate (REGION, CATEGORY) tuples (e.g., \"North + Electronics\" appears twice for Phones and Laptops). A bar chart with color encoding requires each (categorical_field, color_field) pair to be unique. Use an aggregate transform to sum SALES per (REGION, CATEGORY).\n\n**Chart Spec**:\n{\n  \"title\": \"Total Sales by Region and Category\",\n  \"transform\": [\n    {\"aggregate\": [{\"op\": \"sum\", \"field\": \"SALES\", \"as\": \"SALES\"}], \"groupby\": [\"REGION\", \"CATEGORY\"]}\n  ],\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"SALES\", \"title\": \"Total Sales\", \"type\": \"quantitative\"},\n    \"y\": {\"field\": \"REGION\", \"title\": \"Region\", \"type\": \"nominal\"},\n    \"color\": {\"field\": \"CATEGORY\", \"title\": \"Category\", \"type\": \"nominal\"}\n  }\n}\n\n---\n\n**Example 13: Custom Instructions - Colors, Background, and Styling**\n\n**Custom Instructions**: \"Use red for North, blue for South. Use a light gray background.\"\n\n**User Question**: \"Show monthly sales by region over the past year\"\n\n**SQL Result** (36 rows):\n| MONTH      | REGION | SALES  |\n|------------|--------|--------|\n| 2024-01-01 | North  | 85000  |\n| 2024-01-01 | South  | 62000  |\n| 2024-01-01 | West   | 73000  |\n| ... (36 rows, 3 regions) |  |\n\n**Why Line Chart with Custom Colors and Config**: Time series comparing multiple series \u2192 line chart with color encoding. Custom instructions specify colors for SOME series (North=red, South=blue) while other series (West) should get automatic colors \u2192 use a `calculate` transform to assign explicit colors to `_color`, then reference it via `scale.range.field` in the color encoding. The system will automatically add a fallback palette for series without explicit colors. Global styling like background color belongs in the `config` object.\n\n**Chart Spec**:\n{\n  \"title\": \"Monthly Sales by Region (2024)\",\n  \"config\": {\n    \"background\": \"lightgray\"\n  },\n  \"transform\": [{\n    \"calculate\": \"datum.REGION === 'North' ? 'red' : datum.REGION === 'South' ? 'blue' : ''\",\n    \"as\": \"_color\"\n  }],\n  \"mark\": \"line\",\n  \"encoding\": {\n    \"x\": {\"field\": \"MONTH\", \"title\": \"Month\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"SALES\", \"title\": \"Sales\", \"type\": \"quantitative\"},\n    \"color\": {\"field\": \"REGION\", \"type\": \"nominal\", \"title\": \"Region\", \"scale\": {\"range\": {\"field\": \"_color\"}}}\n  }\n}\n\n**Key Takeaway**: When custom instructions specify colors or styling:\n1. **Per-series colors** \u2192 use a `calculate` transform with conditional color assignments (ternary chain), storing the result as `_color`. Use `\"scale\": {\"range\": {\"field\": \"_color\"}}` in the color encoding. End the ternary chain with `: ''` (empty string) \u2014 a fallback palette for unspecified series is added automatically. The color encoding's `field` should be the categorical field (e.g., `REGION`), NOT `_color`.\n2. **Global styling** (background, fonts, sizes, default colors) \u2192 use the `config` object:\n   - `background`: chart background color (e.g., `\"lightgray\"`, `\"#f0f0f0\"`)\n   - `axis.labelFontSize`, `axis.titleFontSize`: axis font sizes\n   - `title.fontSize`, `title.font`: chart title styling\n   - `mark.color`: default mark color when no color encoding is used\n   These defaults belong in `config`, NOT in individual encoding channels.\n\n---\n\n**Example 14: Custom Instructions - Highlight Specific Values (No Color Column)**\n\n**Custom Instructions**: \"Make the Marketing bar orange\"\n\n**User Question**: \"Show top 10 departments by budget\"\n\n**SQL Result** (25 rows):\n| DEPARTMENT  | BUDGET  |\n|-------------|---------|\n| Marketing   | 150000  |\n| Engineering | 120000  |\n| ... (25 rows)|        |\n\n**Why Horizontal Bar with Custom Highlighting**: Ranking question with text labels \u2192 horizontal bar chart with top-N. Custom instructions want specific values highlighted. Since there is no color column for multi-series grouping, use the \"simple\" color pattern: a `calculate` transform assigns hex colors to `_color`, and `scale: null` uses them as literal colors.\n\n**Chart Spec**:\n{\n  \"title\": \"Top 10 Departments by Budget\",\n  \"transform\": [\n    {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"BUDGET\", \"order\": \"descending\"}]},\n    {\"filter\": \"datum.rank <= 10\"},\n    {\"calculate\": \"datum.DEPARTMENT === 'Marketing' ? '#FF6B35' : '#4c78a8'\", \"as\": \"_color\"}\n  ],\n  \"mark\": \"bar\",\n  \"encoding\": {\n    \"x\": {\"field\": \"BUDGET\", \"title\": \"Budget\", \"type\": \"quantitative\"},\n    \"y\": {\"field\": \"DEPARTMENT\", \"title\": \"Department\", \"type\": \"nominal\", \"sort\": \"-x\"},\n    \"color\": {\"field\": \"_color\", \"type\": \"nominal\", \"scale\": null, \"legend\": null}\n  }\n}\n\n**Key Takeaway**: When custom instructions specify colors but the chart does NOT have an explicit color column (no multi-series grouping via color encoding), use the \"simple\" color pattern:\n1. **Color transform** \u2192 add a `calculate` transform that assigns hex colors to `_color` via ternary conditions. End with a fallback color for unmatched values (e.g., `'#4c78a8'`).\n2. **Color encoding** \u2192 use `\"color\": {\"field\": \"_color\", \"type\": \"nominal\", \"scale\": null, \"legend\": null}` \u2014 `scale: null` tells Vega-Lite to use the raw hex values as literal colors.\n3. **Transform ordering** \u2192 the `_color` calculate transform MUST be the LAST transform in the array (after window, filter, fold, etc.).\n4. **When to use** \u2192 use this pattern when color is for visual emphasis only, NOT for multi-series grouping. For multi-series charts (charts with a color column for grouping), use Example 13's `scale.range.field` pattern instead.\n\n---\n\n**IMPORTANT NOTES:**\n- Top-N transforms (window + filter) should ONLY be used for bar charts. NEVER use them with line charts.\n- When user asks for \"top N line chart\", you should see SQL already filtered the data. Generate line chart without window/filter transforms.\n- Always use \"sort\": \"-x\" on the categorical axis when using top-N transforms to preserve the ranking order (and \"sort\": \"x\" when asking about bottom-N).\n\nNow please provide a suggestion for the best possible chart.\nJust provide the JSON object representing a Vega-lite specification as in examples above and use it only as an input to the data_to_chart tool.\n\n---\n\n# WARNING HANDLING\n\nIf the chart tool returns a warning, you must fix the issue before citing the chart, unless some behaviour is explicitly requested by the user. Below are the most common warnings and how to resolve them:\n\n## 1. \"Bar chart has too many unique categories (bars)\"\n\n**Cause**: The bar chart has more than 20 unique values on the categorical axis.\n\n**Fix**:\n- Preferred solution is to use window + filter transforms to limit to top-N (N <= 15 recommended):\n  - Add: {\"window\": [{\"op\": \"rank\", \"as\": \"rank\"}], \"sort\": [{\"field\": \"METRIC_FIELD\", \"order\": \"descending\"}]}\n  - Add: {\"filter\": \"datum.rank <= 15\"}\n- Alternative solution (only if applicable):\n  - Run a new SQL query with LIMIT or TOP clause to reduce rows before charting\n\n## 2. \"Same field used in multiple axes\"\n\n**Cause**: The same column name appears in multiple encodings (e.g., same field for both x and color, or y and yOffset).\n\n**Fix**: Each field can ONLY be used in ONE encoding. Before creating your chart spec:\n  1. List all fields you plan to use\n  2. Verify each field is assigned to exactly one encoding\n  - BAD: x=\"CATEGORY\", color=\"CATEGORY\" (same field twice)\n  - GOOD: x=\"CATEGORY\", color=\"REGION\" (different fields)\n  - For grouped bar charts: yOffset field MUST be different from x and y fields\n\n## 3. \"Color encoding has too many distinct values\"\n\n**Cause**: The color field has more than 5 unique values (for bar/line charts) or 15 values (for pie charts).\n\n**Fix**: Reduce the number of color categories:\n  - Run new SQL to GROUP BY and aggregate data into fewer categories (e.g., \"Other\" bucket)\n  - Use top-N transform to filter to top 5 categories before applying fold\n  - Consider removing color encoding entirely if not essential to the visualization\n  - For comparisons with many series, consider multiple separate charts instead\n\n## 4. \"Line charts do not support filter/sort/window transforms\"\n\n**Cause**: Line charts cannot use window, sort, or filter transforms - these are only allowed for bar charts.\n\n**Fix**: Remove all transforms from the line chart spec and pre-filter data in SQL instead:\n  - BAD: Line chart with {\"window\": [...], \"filter\": ...}\n  - GOOD: Line chart with no transforms, SQL: SELECT ... ORDER BY date LIMIT 10\n  - If user asks for \"top N line chart\", you should see SQL already filtered the data and generate line chart without transforms\n\n## 5. \"Line chart has non-unique x values\"\n\n**Cause**: Within a single color series, the x-axis has duplicate values, causing vertical lines in the chart.\n\n**Fix**: Aggregate data so each x value appears only once per color group:\n  - Preferred solution: Use vega-lite aggregate transform to combine duplicate x values:\n    - Add: {\"aggregate\": [{\"op\": \"sum\", \"field\": \"METRIC_FIELD\", \"as\": \"METRIC_FIELD\"}], \"groupby\": [\"X_FIELD\"]}\n    - For multi-series (with color): {\"aggregate\": [{\"op\": \"sum\", \"field\": \"METRIC_FIELD\", \"as\": \"METRIC_FIELD\"}], \"groupby\": [\"X_FIELD\", \"COLOR_FIELD\"]}\n    - Replace \"sum\" with appropriate operation: \"sum\", \"mean\", \"min\", \"max\", \"count\", etc.\n  - Alternative solution: Run new SQL with GROUP BY on the x-axis field and aggregate the y-axis value\n    - Example: SELECT date, SUM(sales) FROM ... GROUP BY date\n  - If comparing multiple series (color), ensure x values are unique WITHIN each series\n\n## 6. \"Bar chart has too many unique categories per color\"\n\n**Cause**: When using color encoding, each color group has more than 20 bars.\n\n**Fix**: Similar to warning #1, but applies per color group:\n  - Use top-N transform to limit bars: {\"filter\": \"datum.rank <= 10\"}\n  - OR reduce color categories first (see warning #3), then limit bars\n  - Consider simplifying to a single-color bar chart\n\n## 7. \"X-axis has insufficient distinct values for scatter charts\" / \"Y-axis has insufficient distinct values for scatter charts\"\n\n**Cause**: Scatter charts require at least 5 distinct values on BOTH x and y axes to show meaningful correlations.\n\n**Fix**: Use a different chart type:\n  - If data has few distinct x or y values, scatter chart is not appropriate\n  - Use bar chart for comparisons with categorical data\n  - Use line chart for time-series with few data points\n  - Only use scatter when both axes have 5+ unique numeric values\n\n---\n\n**GENERAL WARNING RECOVERY STRATEGY**:\n1. Read the warning or error message carefully\n2. If the warning is about data limits (too many bars, colors, etc.) \u2192 Use vega-lite transform to filter/aggregate the data (preferred when applicable due to lower latency) OR run new SQL to filter/aggregate data\n3. If warning is about chart specification (field used twice, wrong transform) \u2192 Fix the chart spec and retry\n4. If chart type is inappropriate for the data \u2192 Choose a different chart type\n\nFinal notes:\n* Pay special attention to limits described in \"Available chart types\" - violating these limits will result in warnings and you MUST NOT cite charts with warnings (unless some behaviour is explicitly requested by the user)\n* Double check chart-related custom instruction provided in [Important Case-specific Instructions] section of system prompt.\n* Remember that the \"data\" field will be added in post processing, NEVER add that field to chart_spec.\n* Do not include width and height fields. This will be added in postprocessing.\n* Only single layer charts are allowed. You must provide only \"title\", \"mark\", \"encoding\" and (optionally) \"transform\" and \"config\" fields.",
+              "skill_name": "chart_generation_instructions"
+            },
+            "type": "json"
+          }
+        ],
+        "name": "server_skill",
+        "status": "success",
+        "tool_use_id": "toolu_bdrk_0181uU3uwd14x8BRMzwpm1cT",
+        "type": "server_skill"
+      },
+      "type": "tool_result"
+    },
+    {
+      "thinking": {
+        "text": "\nNow I need to create a multi-line chart. The data has columns: WEEK (date), TICKER (text), SHARE_PRICE (number). This is a time series with 4 tickers, which is \u22645 color values. I should use a line chart with smooth interpolation as instructed for stock price time series.\n\nLet me generate the chart spec.\n"
+      },
+      "type": "thinking"
+    },
+    {
+      "tool_use": {
+        "client_side_execute": false,
+        "input": {
+          "chart": "{\n  \"title\": \"Share Prices: MSFT, AMZN, SNOW & NVDA (Feb 2025 \u2013 Feb 2026)\",\n  \"mark\": {\"type\": \"line\", \"interpolate\": \"monotone\"},\n  \"encoding\": {\n    \"x\": {\"field\": \"WEEK\", \"title\": \"Date\", \"type\": \"temporal\"},\n    \"y\": {\"field\": \"SHARE_PRICE\", \"title\": \"Share Price (USD)\", \"type\": \"quantitative\"},\n    \"color\": {\"field\": \"TICKER\", \"type\": \"nominal\", \"title\": \"Ticker\"}\n  }\n}",
+          "question": "THIS FIELD WILL BE DEPRECATED SOON. Please stop using it and use the 'chart' field instead.",
+          "tool_result_id": "tooluse_d61b43c82cc14c7f9f3111"
+        },
+        "name": "data_to_chart",
+        "tool_use_id": "toolu_bdrk_015jA4mRKFoubf8SEqLkGnNy",
+        "type": "data_to_chart"
+      },
+      "type": "tool_use"
+    },
+    {
+      "tool_result": {
+        "content": [
+          {
+            "json": {
+              "charts": [
+                "{\"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\", \"data\": {\"values\": [{\"SHARE_PRICE\": 220.03, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 412.02, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 137.44, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 181.1, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 212.53, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 398.21, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 127.12, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 174.02, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 203.83, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 393.83, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 114.55, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 168.3, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 196.32, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 382.11, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 113.81, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 151.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 195.28, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 387.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 117.77, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 156.39, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 200.6, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 389.07, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 114.81, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 158.27, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 182.99, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 371.8, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 103.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 142.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 180.85, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 374.33, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 104.39, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 140.44, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 175.08, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 374.93, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 103.26, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 144.6, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 181.65, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 378.06, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 104.05, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 149.55, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 187.78, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 413.83, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 110.64, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 163.19, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 189.64, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 436.56, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 115.6, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 171.24, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 207.14, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 450.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 131.43, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 181.15, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 202.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 454.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 132.95, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 192.06, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 206.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 459.56, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 137.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 205.08, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 208.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 465.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 140.22, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 210.01, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 214.3, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 472.87, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 142.96, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 209.66, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 212.65, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 477.65, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 143.99, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 210.01, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 215.27, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 492.92, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 152.16, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 220.99, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 220.79, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 494.63, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 156.72, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 219.68, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 222.68, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 500.5, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 162.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 219.46, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 224.95, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 506.74, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 170.21, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 213.32, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 230.38, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 510.0, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 171.73, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 215.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 227.07, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 528.9, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 177.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 218.55, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 218.69, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 527.15, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 180.46, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 205.14, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 225.7, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 523.78, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 181.58, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 195.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 226.63, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 508.82, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 177.19, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 195.51, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 229.0, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 505.94, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 178.37, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 220.6, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 230.06, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 502.32, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 169.34, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 226.42, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 232.42, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 503.63, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 174.87, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 225.39, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 232.21, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 512.6, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 175.25, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 222.72, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 221.78, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 510.43, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 178.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 224.48, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 220.8, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 516.55, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 186.08, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 231.4, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 222.15, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 522.13, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 187.18, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 244.36, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 215.91, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 512.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 182.94, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 241.91, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 219.96, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 520.01, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 182.39, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 249.45, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 236.41, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 528.33, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 202.16, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 270.4, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 248.28, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 506.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 195.88, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 266.94, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 242.95, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 507.45, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 192.66, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 264.91, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 224.17, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 488.46, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 184.88, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 248.77, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 229.67, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 482.64, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 178.27, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 248.08, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 232.02, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 483.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 181.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 246.59, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 228.51, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 484.43, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 182.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 219.96, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 224.13, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 479.05, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 176.1, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 219.31, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 231.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 486.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 187.5, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 224.15, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 230.43, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 482.88, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 187.6, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 220.28, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 241.77, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 478.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 187.02, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 227.25, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 240.35, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 464.57, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 185.45, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 210.64, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 234.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 454.37, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 183.46, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 208.41, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 241.08, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 453.31, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 189.43, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 205.59, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 224.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 408.23, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 179.64, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 170.78, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 203.77, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 407.45, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 188.03, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 178.97, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 205.2, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 398.12, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 187.78, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 176.17, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-16\"}]}, \"encoding\": {\"color\": {\"field\": \"TICKER\", \"title\": \"Ticker\", \"type\": \"nominal\"}, \"x\": {\"field\": \"WEEK\", \"title\": \"Date\", \"type\": \"temporal\", \"sort\": null, \"timeUnit\": \"utcyearmonthdate\", \"axis\": {\"labelSeparation\": 25}}, \"y\": {\"field\": \"SHARE_PRICE\", \"title\": \"Share Price (USD)\", \"type\": \"quantitative\", \"sort\": null}, \"tooltip\": [{\"field\": \"WEEK\", \"type\": \"temporal\", \"title\": \"Date\", \"timeUnit\": \"utcyearmonthdate\", \"format\": \"%b %d, %Y\"}, {\"field\": \"SHARE_PRICE\", \"type\": \"quantitative\", \"title\": \"Share Price (USD)\", \"format\": \",.6~f\"}, {\"field\": \"TICKER\", \"type\": \"nominal\", \"title\": \"Ticker\"}]}, \"mark\": {\"interpolate\": \"monotone\", \"type\": \"line\"}, \"title\": \"Share Prices: MSFT, AMZN, SNOW & NVDA (Feb 2025 \\u2013 Feb 2026)\", \"usermeta\": {\"snowflake\": {\"columnRoles\": {\"SHARE_PRICE\": \"measure\", \"TICKER\": \"dimension\", \"WEEK\": \"dimension\"}}}}"
+              ]
+            },
+            "type": "json"
+          }
+        ],
+        "name": "data_to_chart",
+        "status": "success",
+        "tool_use_id": "toolu_bdrk_015jA4mRKFoubf8SEqLkGnNy",
+        "type": "data_to_chart"
+      },
+      "type": "tool_result"
+    },
+    {
+      "thinking": {
+        "text": "\nThe chart was generated successfully with no warnings. Let me now present the results to the user.\n"
+      },
+      "type": "thinking"
+    },
+    {
+      "tool_use": {
+        "client_side_execute": false,
+        "input": {
+          "skill_name": "system_suggested_queries"
+        },
+        "name": "server_skill",
+        "tool_use_id": "toolu_bdrk_012dTr1ruVwje5g9J6o6rSvF",
+        "type": "server_skill"
+      },
+      "type": "tool_use"
+    },
+    {
+      "tool_result": {
+        "content": [
+          {
+            "json": {
+              "content": "# Skill: system_suggested_queries\n\n**Description**: \"Follow-up question generation -- criteria for relevant, novel suggested queries, plus required output format and confidence scoring rubric. Load before emitting `<suggested_queries>` follow-up questions.\"\n\n## Instructions\n\n\n# Suggested Follow-up Questions\n\n## Context and Purpose\n- Follow-up questions help users explore the topic further after receiving an answer\n- They should be natural extensions or related angles, not repetitions of what was just answered\n- Think: \"What would a curious user want to know next?\"\n\n## When to Provide\n- After successfully answering a question with data/analysis\n- When the answer reveals interesting patterns or insights worth exploring\n- When there are natural follow-up directions the user might want to pursue\n- Do NOT suggest follow-ups for: system errors, clarification requests, or greetings\n\n## Core Principles\n\n1. **Match the user's question pattern**: Follow-ups should mirror the TYPE of question asked.\n   - \"what changed\" \u2192 more \"what changed\" explorations (different time periods, dimensions)\n   - \"how much\" \u2192 more quantitative follow-ups (breakdowns, comparisons, trends)\n   - \"who/which\" \u2192 more identification/ranking follow-ups\n   - \"why\" \u2192 deeper \"why\" ONLY if data sources support causal analysis (see rule 4)\n\n2. **Stay within the same data sources**: Suggest questions answerable by the SAME tools and specific data sources used in the current answer. If the answer came from Cortex Analyst, suggest questions the same semantic model(s) can answer. If from Cortex Search, suggest questions the same search index can answer.\n\n3. **Use these follow-up templates** (adapt naturally to the conversation, don't use verbatim):\n   - **Drill-down**: \"How does [metric] break down by [a different dimension in the data]?\"\n   - **Time comparison**: \"How does [metric] compare to [a different time period]?\"\n   - **Trend**: \"What is the trend for [metric] over [time range available]?\"\n   - **Ranking**: \"Which [entities] have the highest/lowest [metric]?\"\n   - **Filtering**: \"What does [metric] look like for [a specific segment in the data]?\"\n\n4. **[CRITICAL] Be careful with \"why\" questions**: \"Why\" questions often require causal reasoning or external context that tools CANNOT provide.\n   - SQL/Analyst tools can show WHAT happened and HOW metrics changed, but rarely WHY.\n   - Only suggest \"why\" if search indexes or documents contain explanatory content (reports, analyses, commentary) that could plausibly answer it.\n   - When in doubt, reframe \"why\" as \"what\". E.g., instead of \"Why did revenue drop?\" \u2192 \"What are the top contributing segments to the revenue change?\"\n\n5. **Novelty**: Questions MUST require NEW information not already provided in the answer. Don't suggest questions that can be answered from information already given.\n\n6. **Answerability**: [IMPORTANT] Questions MUST have high confidence of being answerable using the same tools available. Do NOT suggest questions requiring information your tools do not have access to.\n\n7. **Recency and Relevance**: Prefer questions about recent time periods over historical data, unless historical context is specifically relevant.\n\n## Format\n- Generate 2-3 high-quality questions maximum\n- Enclose in <suggested_queries>...</suggested_queries> tags\n- Frame as natural questions a user might ask\n- Don't repeat the current question with minor variations\n- Each suggestion should explore a distinct angle\n\n**Confidence scoring**: Rate each question on 3 criteria (1 point each):\n  - **Relevant**: Related to the previous question, matches the question pattern, natural follow-up\n  - **Novel**: Requires additional information to be looked up (not already in the answer)\n  - **Answerable**: Can be answered by the SAME tools and data sources used\n\nScore: \"high\" if all 3 are true, \"medium\" if 2/3, \"low\" if 0-1.\n\nOutput as a JSON array of objects with query and confidence score.\n\n## Examples\nGood suggestions after answering \"What was Q1 2023 revenue?\":\n- \"How does Q1 2023 revenue compare to Q1 2022?\"\n- \"Which product line contributed most to Q1 2023 revenue?\"\n- \"What is the revenue forecast for Q2 2023?\"\n\nBad suggestions:\n- \"What is the total Q1 2023 revenue?\" (repeats answered question)\n- \"Why did revenue change in Q1 2023?\" (requires causal data that may not exist)\n- \"What is customer satisfaction?\" (unrelated, requires different data)",
+              "skill_name": "system_suggested_queries"
+            },
+            "type": "json"
+          }
+        ],
+        "name": "server_skill",
+        "status": "success",
+        "tool_use_id": "toolu_bdrk_012dTr1ruVwje5g9J6o6rSvF",
+        "type": "server_skill"
+      },
+      "type": "tool_result"
+    },
+    {
+      "text": "\nHere's the share price comparison for **Microsoft (MSFT)**, **Amazon (AMZN)**, **Snowflake (SNOW)**, and **NVIDIA (NVDA)** from 20 Feb 2025 to 20 Feb 2026, using weekly average closing prices in USD.\n\n",
+      "type": "text"
+    },
+    {
+      "chart": {
+        "chart_spec": "{\"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\", \"data\": {\"values\": [{\"SHARE_PRICE\": 220.03, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 412.02, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 137.44, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 181.1, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-02-17\"}, {\"SHARE_PRICE\": 212.53, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 398.21, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 127.12, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 174.02, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-02-24\"}, {\"SHARE_PRICE\": 203.83, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 393.83, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 114.55, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 168.3, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-03\"}, {\"SHARE_PRICE\": 196.32, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 382.11, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 113.81, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 151.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-10\"}, {\"SHARE_PRICE\": 195.28, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 387.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 117.77, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 156.39, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-17\"}, {\"SHARE_PRICE\": 200.6, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 389.07, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 114.81, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 158.27, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-24\"}, {\"SHARE_PRICE\": 182.99, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 371.8, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 103.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 142.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-03-31\"}, {\"SHARE_PRICE\": 180.85, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 374.33, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 104.39, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 140.44, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-07\"}, {\"SHARE_PRICE\": 175.08, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 374.93, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 103.26, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 144.6, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-14\"}, {\"SHARE_PRICE\": 181.65, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 378.06, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 104.05, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 149.55, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-21\"}, {\"SHARE_PRICE\": 187.78, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 413.83, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 110.64, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 163.19, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-04-28\"}, {\"SHARE_PRICE\": 189.64, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 436.56, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 115.6, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 171.24, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-05\"}, {\"SHARE_PRICE\": 207.14, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 450.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 131.43, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 181.15, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-12\"}, {\"SHARE_PRICE\": 202.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 454.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 132.95, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 192.06, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-19\"}, {\"SHARE_PRICE\": 206.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 459.56, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 137.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 205.08, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-05-26\"}, {\"SHARE_PRICE\": 208.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 465.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 140.22, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 210.01, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-02\"}, {\"SHARE_PRICE\": 214.3, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 472.87, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 142.96, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 209.66, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-09\"}, {\"SHARE_PRICE\": 212.65, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 477.65, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 143.99, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 210.01, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-16\"}, {\"SHARE_PRICE\": 215.27, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 492.92, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 152.16, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 220.99, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-23\"}, {\"SHARE_PRICE\": 220.79, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 494.63, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 156.72, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 219.68, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-06-30\"}, {\"SHARE_PRICE\": 222.68, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 500.5, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 162.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 219.46, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-07\"}, {\"SHARE_PRICE\": 224.95, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 506.74, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 170.21, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 213.32, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-14\"}, {\"SHARE_PRICE\": 230.38, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 510.0, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 171.73, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 215.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-21\"}, {\"SHARE_PRICE\": 227.07, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 528.9, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 177.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 218.55, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-07-28\"}, {\"SHARE_PRICE\": 218.69, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 527.15, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 180.46, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 205.14, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-04\"}, {\"SHARE_PRICE\": 225.7, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 523.78, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 181.58, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 195.13, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-11\"}, {\"SHARE_PRICE\": 226.63, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 508.82, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 177.19, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 195.51, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-18\"}, {\"SHARE_PRICE\": 229.0, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 505.94, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 178.37, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 220.6, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-08-25\"}, {\"SHARE_PRICE\": 230.06, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 502.32, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 169.34, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 226.42, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-01\"}, {\"SHARE_PRICE\": 232.42, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 503.63, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 174.87, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 225.39, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-08\"}, {\"SHARE_PRICE\": 232.21, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 512.6, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 175.25, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 222.72, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-15\"}, {\"SHARE_PRICE\": 221.78, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 510.43, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 178.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 224.48, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-22\"}, {\"SHARE_PRICE\": 220.8, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 516.55, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 186.08, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 231.4, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-09-29\"}, {\"SHARE_PRICE\": 222.15, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 522.13, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 187.18, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 244.36, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-06\"}, {\"SHARE_PRICE\": 215.91, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 512.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 182.94, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 241.91, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-13\"}, {\"SHARE_PRICE\": 219.96, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 520.01, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 182.39, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 249.45, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-20\"}, {\"SHARE_PRICE\": 236.41, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 528.33, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 202.16, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 270.4, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-10-27\"}, {\"SHARE_PRICE\": 248.28, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 506.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 195.88, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 266.94, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-03\"}, {\"SHARE_PRICE\": 242.95, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 507.45, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 192.66, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 264.91, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-10\"}, {\"SHARE_PRICE\": 224.17, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 488.46, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 184.88, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 248.77, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-17\"}, {\"SHARE_PRICE\": 229.67, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 482.64, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 178.27, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 248.08, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-11-24\"}, {\"SHARE_PRICE\": 232.02, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 483.99, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 181.33, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 246.59, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-01\"}, {\"SHARE_PRICE\": 228.51, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 484.43, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 182.14, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 219.96, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-08\"}, {\"SHARE_PRICE\": 224.13, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 479.05, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 176.1, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 219.31, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-15\"}, {\"SHARE_PRICE\": 231.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 486.71, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 187.5, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 224.15, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-22\"}, {\"SHARE_PRICE\": 230.43, \"TICKER\": \"AMZN\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 482.88, \"TICKER\": \"MSFT\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 187.6, \"TICKER\": \"NVDA\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 220.28, \"TICKER\": \"SNOW\", \"WEEK\": \"2025-12-29\"}, {\"SHARE_PRICE\": 241.77, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 478.26, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 187.02, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 227.25, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-05\"}, {\"SHARE_PRICE\": 240.35, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 464.57, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 185.45, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 210.64, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-12\"}, {\"SHARE_PRICE\": 234.29, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 454.37, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 183.46, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 208.41, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-19\"}, {\"SHARE_PRICE\": 241.08, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 453.31, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 189.43, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 205.59, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-01-26\"}, {\"SHARE_PRICE\": 224.86, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 408.23, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 179.64, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 170.78, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-02\"}, {\"SHARE_PRICE\": 203.77, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 407.45, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 188.03, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 178.97, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-09\"}, {\"SHARE_PRICE\": 205.2, \"TICKER\": \"AMZN\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 398.12, \"TICKER\": \"MSFT\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 187.78, \"TICKER\": \"NVDA\", \"WEEK\": \"2026-02-16\"}, {\"SHARE_PRICE\": 176.17, \"TICKER\": \"SNOW\", \"WEEK\": \"2026-02-16\"}]}, \"encoding\": {\"color\": {\"field\": \"TICKER\", \"title\": \"Ticker\", \"type\": \"nominal\"}, \"x\": {\"field\": \"WEEK\", \"title\": \"Date\", \"type\": \"temporal\", \"sort\": null, \"timeUnit\": \"utcyearmonthdate\", \"axis\": {\"labelSeparation\": 25}}, \"y\": {\"field\": \"SHARE_PRICE\", \"title\": \"Share Price (USD)\", \"type\": \"quantitative\", \"sort\": null}, \"tooltip\": [{\"field\": \"WEEK\", \"type\": \"temporal\", \"title\": \"Date\", \"timeUnit\": \"utcyearmonthdate\", \"format\": \"%b %d, %Y\"}, {\"field\": \"SHARE_PRICE\", \"type\": \"quantitative\", \"title\": \"Share Price (USD)\", \"format\": \",.6~f\"}, {\"field\": \"TICKER\", \"type\": \"nominal\", \"title\": \"Ticker\"}]}, \"mark\": {\"interpolate\": \"monotone\", \"type\": \"line\"}, \"title\": \"Share Prices: MSFT, AMZN, SNOW & NVDA (Feb 2025 \\u2013 Feb 2026)\", \"usermeta\": {\"snowflake\": {\"columnRoles\": {\"SHARE_PRICE\": \"measure\", \"TICKER\": \"dimension\", \"WEEK\": \"dimension\"}}}}",
+        "tool_use_id": "toolu_bdrk_015jA4mRKFoubf8SEqLkGnNy"
+      },
+      "type": "chart"
+    },
+    {
+      "text": "\n\n**Key observations:**\n\n- **Microsoft (MSFT)** traded at the highest absolute price, peaking near **$528.90** in late July 2025 before pulling back to ~$398 by mid-February 2026 \u2014 a notable decline from its highs.\n- **Amazon (AMZN)** peaked around **$248.28** in early November 2025, then retreated to ~$205 by mid-February 2026.\n- **NVIDIA (NVDA)** hit a low of ~$103 in early April 2025, rallied to **$202.16** by late October 2025, and settled around $188 by mid-February 2026 \u2014 the strongest relative recovery over the period.\n- **Snowflake (SNOW)** had the widest swing, surging from ~$142 in late March 2025 to a peak of **$270.40** in late October 2025, before falling sharply back to ~$176 by mid-February 2026.\n\nAll four stocks experienced a broad sell-off from their Q3/Q4 2025 highs into early 2026.\n",
+      "type": "text"
+    },
+    {
+      "suggested_queries": [
+        {
+          "query": "What was the percentage return for each of these four stocks over this period?"
+        },
+        {
+          "query": "Which of these stocks had the highest daily trading volume over the last 12 months?"
+        },
+        {
+          "query": "Compare the stock price of NVDA and MSFT over the last 3 months"
+        }
+      ],
+      "type": "suggested_queries"
+    }
+  ],
+  "metadata": {
+    "usage": {
+      "tokens_consumed": [
+        {
+          "context_window": 200000,
+          "input_tokens": {
+            "cache_read": 32500,
+            "cache_write": 105838,
+            "total": 138342,
+            "uncached": 4
+          },
+          "model_name": "claude-opus-4-6",
+          "output_tokens": {
+            "total": 998
+          }
+        }
+      ]
+    }
+  },
+  "role": "assistant",
+  "schema_version": "v2",
+  "sequence_number": 243,
+  "status": "completed"
+}

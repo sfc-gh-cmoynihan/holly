@@ -93,17 +93,48 @@ All of this would normally take most of the day across Bloomberg, SEC EDGAR, int
 
 ### 1. Prerequisites
 
-- Snowflake account with ACCOUNTADMIN access (Works with Trial Accounts)
-- Subscribe to **Snowflake Public Data (Paid)** from Marketplace:
-  - Go to: **Data Products > Marketplace**
-  - Search: "Snowflake Public Data"
-  - Click "Get" (free trial available)
-  - This provides: `SNOWFLAKE_PUBLIC_DATA_PAID`
-  - **Schema Note:** The default schema is `CYBERSYN`. Trial accounts use `PUBLIC_DATA`. The INSTALL.sql defaults to `CYBERSYN` — find-and-replace with `PUBLIC_DATA` if on a trial account.
+- Snowflake account with **ACCOUNTADMIN** access (works with Trial Accounts)
+- Subscribe to **Snowflake Public Data (Paid)** from the Snowflake Marketplace (see below)
 
-  <img src="images/snowflake_marketplace.png" alt="Snowflake Public Data (Paid) - Marketplace Listing" width="600"/>
+### 2. Subscribe to Snowflake Public Data (Paid)
 
-### 2. Installation via Workspaces (Recommended)
+Holly uses S&P 500 stock prices, SEC filings, and earnings transcripts from the **Snowflake Public Data (Paid)** Marketplace listing. You must subscribe to this listing before running the installation script.
+
+<img src="images/snowflake_marketplace.png" alt="Snowflake Public Data (Paid) - Marketplace Listing" width="600"/>
+
+**Step-by-step:**
+
+1. **Open the Marketplace** in Snowsight:
+   - Navigate to **Data Products > Marketplace** in the left sidebar
+
+2. **Search for the listing:**
+   - Type **"Snowflake Public Data"** in the search bar
+   - Look for **Snowflake Public Data (Paid)** — *"Near real-time 90+ sources of public domain data in one location"*
+   - The provider is **Snowflake Public Data Products**
+
+3. **Subscribe to the listing:**
+   - Click the listing tile to open it
+   - Click **"Get"** in the top right
+   - Accept the terms and conditions
+   - Leave the database name as the default: **`SNOWFLAKE_PUBLIC_DATA_PAID`**
+   - Select the roles that should have access (at minimum, **ACCOUNTADMIN**)
+   - Click **"Get"** to confirm
+
+4. **Verify the database exists:**
+   ```sql
+   SHOW DATABASES LIKE 'SNOWFLAKE_PUBLIC_DATA_PAID';
+   ```
+
+5. **Check available schemas:**
+   ```sql
+   SHOW SCHEMAS IN DATABASE SNOWFLAKE_PUBLIC_DATA_PAID;
+   ```
+
+> **Schema Note:** The default schema is `CYBERSYN`. Trial accounts use `PUBLIC_DATA` instead. The `INSTALL.sql` defaults to `CYBERSYN` — if you are on a trial account, find-and-replace `CYBERSYN` with `PUBLIC_DATA` before running.
+
+> **Cost:** Despite the "(Paid)" name, a **free unlimited 90-day trial** is available. No credit card is required for trial accounts.
+
+### 3. Installation via Workspaces (Recommended)
 
 #### Option A: If Git Integration Already Exists
 
@@ -146,7 +177,7 @@ Then follow Option A above.
 4. Paste into a new Snowflake worksheet
 5. Click **Run All**
 
-### 3. Additional Data Setup
+### 4. Additional Data Setup
 
 The main `INSTALL.sql` creates all US market data, SEC filings, transcripts, company document search (PDF RAG pipeline), and the agent automatically. Two additional steps require manual action:
 
@@ -172,7 +203,7 @@ PUT file:///path/to/time_out_group_plc_half_year_2026_presentation.pdf @COLM_DB.
 
 The PDF chunker (`PDF_TEXT_CHUNKER`) uses PyPDF2 to extract and chunk text, then the chunks are indexed by the `COMPANY_DOCS_SEARCH` Cortex Search service.
 
-### 4. Access Holly
+### 5. Access Holly
 
 Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly - FS Financial Agent**.
 
