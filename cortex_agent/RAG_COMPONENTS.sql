@@ -4,7 +4,7 @@
 USE ROLE ACCOUNTADMIN;
 USE DATABASE COLM_DB;
 USE SCHEMA UNSTRUCTURED;
-USE WAREHOUSE ADHOC_WH;
+USE WAREHOUSE SMALL_WH;
 
 -- Step 1: Create table to store document chunks
 CREATE OR REPLACE TABLE DOCS_CHUNKS_TABLE (
@@ -55,18 +55,18 @@ class pdf_text_chunker:
 $$;
 
 -- Step 3: Load PDFs from stage into chunks table
--- Assumes PDFs are in @COLM_DB.UNSTRUCTURED.REPORTS stage
+-- Assumes PDFs are in @COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS stage
 INSERT INTO DOCS_CHUNKS_TABLE (RELATIVE_PATH, SIZE, FILE_URL, SCOPED_FILE_URL, CHUNK, CHUNK_INDEX)
 SELECT 
     relative_path,
     size,
     file_url,
-    build_scoped_file_url(@REPORTS, relative_path) as scoped_file_url,
+    build_scoped_file_url(@COMPANY_ANNOUNCEMENTS, relative_path) as scoped_file_url,
     c.chunk,
     c.chunk_index
 FROM 
-    DIRECTORY(@REPORTS) d,
-    TABLE(PDF_TEXT_CHUNKER(build_scoped_file_url(@REPORTS, relative_path))) c
+    DIRECTORY(@COMPANY_ANNOUNCEMENTS) d,
+    TABLE(PDF_TEXT_CHUNKER(build_scoped_file_url(@COMPANY_ANNOUNCEMENTS, relative_path))) c
 WHERE relative_path LIKE '%.pdf';
 
 -- Step 4: Create RAG Q&A function using vector similarity search

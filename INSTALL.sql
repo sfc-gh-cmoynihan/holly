@@ -4,8 +4,8 @@
   Installation Script
   
   Author: Colm Moynihan
-  Version: 3.1
-  Date: 21st April 2026
+  Version: 3.2
+  Date: 2nd May 2026
   
   PREREQUISITES:
   --------------
@@ -31,12 +31,13 @@
   WHAT THIS SCRIPT CREATES:
   -------------------------
   - Database: COLM_DB (with STRUCTURED, SEMI_STRUCTURED, UNSTRUCTURED schemas)
-  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, AIM_STOCK_PRICES (empty, loaded by Python script), EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, DOCS_CHUNKS_TABLE
+  - Tables: SP500_COMPANIES (503 companies), STOCK_PRICE_TIMESERIES, STOCK_PRICE_TIMESERIES_SP500_IT, STOCK_PRICE_TIMESERIES_IT (Interactive Tables), AIM_STOCK_PRICES (empty, loaded by Python script), EDGAR_FILINGS, PUBLIC_TRANSCRIPTS, DOCS_CHUNKS_TABLE
+  - Warehouses: HOLLY_IW (Interactive Warehouse), HOLLY_WH (fallback)
   - Stage: COMPANY_ANNOUNCEMENTS (with Time Out Group PDFs for RAG)
   - Functions: PDF_TEXT_CHUNKER (Python UDTF for PDF chunking)
   - Cortex Search Services: EDGAR_FILINGS_SEARCH, PUBLIC_TRANSCRIPTS_SEARCH, COMPANY_DOCS_SEARCH
-  - Semantic Views: STOCK_PRICE_TIMESERIES_SV, AIM_STOCK_PRICES_SV, SP500
-  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (9 tools incl. company docs, AIM prices, web search & charting)
+  - Semantic Views: STOCK_PRICE_TIMESERIES_SV, STOCK_PRICE_TIMESERIES_IW_SV, AIM_STOCK_PRICES_SV, SP500
+  - Agent: SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY (10 tools incl. company docs, AIM prices, all stock prices, web search & charting)
 
   ESTIMATED RUNTIME: 5-10 minutes (depending on data volume)
 ================================================================================
@@ -606,6 +607,41 @@ WHERE TICKER IN (SELECT SYMBOL FROM COLM_DB.STRUCTURED.SP500_COMPANIES);
 ALTER TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES SET CHANGE_TRACKING = TRUE;
 
 -- ============================================================================
+-- STEP 4a: CREATE INTERACTIVE TABLES AND INTERACTIVE WAREHOUSE
+-- ============================================================================
+
+-- Interactive Table: S&P 500 stocks
+CREATE OR REPLACE INTERACTIVE TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT
+    CLUSTER BY (TICKER, DATE)
+    COMMENT = 'S&P 500 stock price data (Interactive Table for Cortex Analyst)'
+AS
+SELECT * FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES;
+
+-- Interactive Table: All US-listed stocks
+CREATE OR REPLACE INTERACTIVE TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT
+    CLUSTER BY (TICKER, DATE)
+    COMMENT = 'Historical stock price data for all US-listed stocks (Interactive Table for Cortex Analyst)'
+AS
+SELECT
+    TICKER,
+    ASSET_CLASS,
+    PRIMARY_EXCHANGE_CODE,
+    PRIMARY_EXCHANGE_NAME,
+    VARIABLE,
+    VARIABLE_NAME,
+    DATE,
+    VALUE
+FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.STOCK_PRICE_TIMESERIES;
+
+-- Create Interactive Warehouse and standard fallback warehouse
+CREATE OR REPLACE INTERACTIVE WAREHOUSE HOLLY_IW WAREHOUSE_SIZE = 'MEDIUM';
+CREATE OR REPLACE WAREHOUSE HOLLY_WH WAREHOUSE_SIZE = 'MEDIUM';
+
+ALTER WAREHOUSE HOLLY_IW SET FALLBACK_WAREHOUSE = HOLLY_WH;
+ALTER WAREHOUSE HOLLY_IW ADD TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT);
+ALTER WAREHOUSE HOLLY_IW ADD TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT);
+
+-- ============================================================================
 -- STEP 4b: CREATE AIM STOCK PRICES TABLE (Time Out Group - London AIM)
 -- Data is loaded by: scripts/load_aim_stock_prices.py
 -- Run AFTER this script: SNOWFLAKE_CONNECTION_NAME=<conn> python scripts/load_aim_stock_prices.py
@@ -790,27 +826,27 @@ AS (
 -- STEP 8: CREATE SEMANTIC VIEWS FOR CORTEX ANALYST
 -- ============================================================================
 
--- 8.1 Stock Price Timeseries Semantic View
+-- 8.1 Stock Price Timeseries Semantic View (S&P 500 Interactive Table)
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
-  TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES)
+  TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT)
   FACTS (
-    STOCK_PRICE_TIMESERIES.VALUE AS VALUE
+    STOCK_PRICE_TIMESERIES_SP500_IT.VALUE AS VALUE
       comment='Value reported for the variable (price in USD or volume count).'
   )
   DIMENSIONS (
-    STOCK_PRICE_TIMESERIES.TICKER AS TICKER
+    STOCK_PRICE_TIMESERIES_SP500_IT.TICKER AS TICKER
       comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, SNOW, AMZN, GOOGL. Contains all S&P 500 companies plus SNOW.',
-    STOCK_PRICE_TIMESERIES.ASSET_CLASS AS ASSET_CLASS
+    STOCK_PRICE_TIMESERIES_SP500_IT.ASSET_CLASS AS ASSET_CLASS
       comment='Type of security e.g. Common Shares.',
-    STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
+    STOCK_PRICE_TIMESERIES_SP500_IT.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
       comment='Exchange code e.g. NYS, NAS.',
-    STOCK_PRICE_TIMESERIES.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME
+    STOCK_PRICE_TIMESERIES_SP500_IT.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME
       comment='Full exchange name e.g. NEW YORK STOCK EXCHANGE, NASDAQ.',
-    STOCK_PRICE_TIMESERIES.VARIABLE AS VARIABLE
+    STOCK_PRICE_TIMESERIES_SP500_IT.VARIABLE AS VARIABLE
       comment='Unique variable identifier e.g. post-market_close, pre-market_open.',
-    STOCK_PRICE_TIMESERIES.VARIABLE_NAME AS VARIABLE_NAME
+    STOCK_PRICE_TIMESERIES_SP500_IT.VARIABLE_NAME AS VARIABLE_NAME
       comment='Human-readable variable name. Valid values: Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume. Use Post-Market Close for share price or closing price queries.',
-    STOCK_PRICE_TIMESERIES.DATE AS DATE
+    STOCK_PRICE_TIMESERIES_SP500_IT.DATE AS DATE
       comment='Trading date for the price data.'
   )
   COMMENT = 'S&P 500 + SNOW daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
@@ -820,35 +856,35 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''SNOW'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''SNOW'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
     "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
       QUESTION 'Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''MSFT'', ''AMZN'', ''SNOW'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''AMZN'', ''SNOW'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
     "What is the closing price of NVDA for the last 30 days?" AS (
       QUESTION 'What is the closing price of NVDA for the last 30 days?'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION false
-      SQL 'SELECT DATE, TICKER, VALUE AS CLOSING_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(DAY, -30, CURRENT_DATE()) ORDER BY DATE'
+      SQL 'SELECT DATE, TICKER, VALUE AS CLOSING_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(DAY, -30, CURRENT_DATE()) ORDER BY DATE'
     ),
     "What is the latest share price of NVIDIA?" AS (
       QUESTION 'What is the latest share price of NVIDIA?'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT TICKER, DATE, VALUE AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' ORDER BY DATE DESC LIMIT 1'
+      SQL 'SELECT TICKER, DATE, VALUE AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER = ''NVDA'' AND VARIABLE_NAME = ''Post-Market Close'' ORDER BY DATE DESC LIMIT 1'
     ),
     "Compare the stock price of Microsoft and Google over the last 6 months" AS (
       QUESTION 'Compare the stock price of Microsoft and Google over the last 6 months'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES WHERE TICKER IN (''MSFT'', ''GOOGL'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -6, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''GOOGL'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -6, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     )
   );
 
@@ -911,7 +947,55 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.AIM_STOCK_PRICES_SV
     )
   );
 
--- 8.3 S&P 500 Companies Semantic View
+-- 8.3 All Stock Prices Interactive Table Semantic View (non-S&P 500 coverage)
+CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IW_SV
+  TABLES (COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT)
+  FACTS (
+    STOCK_PRICE_TIMESERIES_IT.VALUE AS VALUE
+      comment='Value reported for the variable (price in USD or volume count).'
+  )
+  DIMENSIONS (
+    STOCK_PRICE_TIMESERIES_IT.TICKER AS TICKER
+      comment='Stock ticker symbol. Contains all publicly traded US stocks beyond the S&P 500 index. Use for stocks NOT in the S&P 500.',
+    STOCK_PRICE_TIMESERIES_IT.ASSET_CLASS AS ASSET_CLASS
+      comment='Type of security e.g. Common Shares.',
+    STOCK_PRICE_TIMESERIES_IT.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
+      comment='Exchange code e.g. NYS, NAS.',
+    STOCK_PRICE_TIMESERIES_IT.PRIMARY_EXCHANGE_NAME AS PRIMARY_EXCHANGE_NAME
+      comment='Full exchange name e.g. NEW YORK STOCK EXCHANGE, NASDAQ.',
+    STOCK_PRICE_TIMESERIES_IT.VARIABLE AS VARIABLE
+      comment='Unique variable identifier e.g. post-market_close, pre-market_open.',
+    STOCK_PRICE_TIMESERIES_IT.VARIABLE_NAME AS VARIABLE_NAME
+      comment='Human-readable variable name. Valid values: Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume. Use Post-Market Close for share price or closing price queries.',
+    STOCK_PRICE_TIMESERIES_IT.DATE AS DATE
+      comment='Trading date for the price data.'
+  )
+  COMMENT = 'Stock price time series for all US-listed stocks (including those outside the S&P 500). Use VARIABLE_NAME = Post-Market Close for share/closing prices. Use this semantic view for any ticker NOT in the S&P 500 index. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
+  AI_VERIFIED_QUERIES (
+    "Plot the share price of Palantir over the last 12 months" AS (
+      QUESTION 'Plot the share price of Palantir over the last 12 months'
+      VERIFIED_AT 1746144000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT WHERE TICKER = ''PLTR'' AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK'
+    ),
+    "What is the latest share price of Rivian?" AS (
+      QUESTION 'What is the latest share price of Rivian?'
+      VERIFIED_AT 1746144000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION true
+      SQL 'SELECT TICKER, DATE, VALUE AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT WHERE TICKER = ''RIVN'' AND VARIABLE_NAME = ''Post-Market Close'' ORDER BY DATE DESC LIMIT 1'
+    ),
+    "Compare the stock price of Coinbase and Robinhood over the last 6 months" AS (
+      QUESTION 'Compare the stock price of Coinbase and Robinhood over the last 6 months'
+      VERIFIED_AT 1746144000
+      VERIFIED_BY 'ADMIN'
+      ONBOARDING_QUESTION false
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT WHERE TICKER IN (''COIN'', ''HOOD'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -6, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+    )
+  );
+
+-- 8.4 S&P 500 Companies Semantic View
 CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     TABLES (COLM_DB.STRUCTURED.SP500_COMPANIES)
     DIMENSIONS (
@@ -934,7 +1018,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
     )
     COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';
 
--- 8.4 SEC EDGAR Filings Semantic View
+-- 8.5 SEC EDGAR Filings Semantic View
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
   'COLM_DB.SEMI_STRUCTURED',
   'name: EDGAR_FILINGS_SV
@@ -1070,8 +1154,10 @@ instructions:
     - Company documents are internal PDFs for Time Out Group only (annual reports, interim results, presentations).
 
     **Tool Selection:**
-    - Use STOCK_PRICES for US stock price queries (OHLC, trends, charts).
+    - Use STOCK_PRICES for S&P 500 US stock price queries (OHLC, trends, charts). This covers only S&P 500 constituents.
         Examples: "Plot NVIDIA over the last year", "What is Apple's share price?"
+    - Use ALL_STOCK_PRICES for any US stock price query where the ticker is NOT in the S&P 500. This covers all US-listed stocks.
+        Examples: "Plot Palantir over 12 months", "What is Rivian's share price?", "Compare Coinbase and Robinhood"
     - Use AIM_STOCK_PRICES for London AIM stock prices (Time Out Group / TMO).
         Examples: "TMO share price", "Plot Time Out over 12 months"
     - Use SP500_COMPANIES for S&P 500 index membership and company fundamentals.
@@ -1091,11 +1177,13 @@ instructions:
     **Business Rules:**
     - When a user mentions "Time Out", "TMO", or "Time Out Group" and asks about share price → use AIM_STOCK_PRICES, never STOCK_PRICES.
     - When a user mentions "Time Out", "TMO", or "Time Out Group" and asks about financials, strategy, revenue, EBITDA, Markets division, or board → use COMPANY_DOCS_SEARCH.
-    - For cross-market comparisons (e.g. TMO vs Airbnb vs Live Nation), use BOTH AIM_STOCK_PRICES and STOCK_PRICES.
+    - For cross-market comparisons (e.g. TMO vs Airbnb vs Live Nation), use BOTH AIM_STOCK_PRICES and STOCK_PRICES or ALL_STOCK_PRICES as appropriate.
     - For volatility or price drop analysis linked to announcements, use AIM_STOCK_PRICES for price data AND COMPANY_DOCS_SEARCH for context.
     - When comparing companies using SEC filings, use SEC_FILINGS_SEARCH to retrieve content, not SEC_FILINGS_ANALYST.
     - For any chart or plot request, always use DATA_TO_CHART after retrieving the data.
     - If a question requires multiple data sources, call all relevant tools — do not answer partially.
+    - For US stock prices: If the ticker IS in the S&P 500, use STOCK_PRICES. If the ticker is NOT in the S&P 500 (e.g. Palantir/PLTR, Rivian/RIVN, Coinbase/COIN, Robinhood/HOOD, Reddit/RDDT, DraftKings/DKNG), use ALL_STOCK_PRICES.
+    - If unsure whether a ticker is in the S&P 500, use SP500_COMPANIES to check first, then route accordingly.
 
     **Boundaries:**
     - You do NOT have access to real-time streaming prices. Stock data is daily close. If asked for "right now" prices, clarify this.
@@ -1145,24 +1233,17 @@ instructions:
     - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
-    - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
     - question: "What is the latest share price of NVIDIA"
-    - question: "Would you recommend buying Nvidia Stock at 195"
     - question: "What is the latest share price of Time Out Group PLC?"
     - question: "Plot the Time Out Group share price over the last 12 months"
-    - question: "What was the highest share price of TMO in the last year?"
     - question: "Plot the share price of Time Out Group over the last 12 months against Airbnb and Live Nation"
-    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
     - question: "What was Time Out Group's revenue in FY25 and how did it break down between Markets and Media?"
-    - question: "What caused the £35m impairment charge in Time Out Group's FY25 annual report?"
     - question: "How many Time Out Markets are currently open worldwide and which new markets are in the pipeline?"
-    - question: "What is Time Out Group's adjusted net debt position and how has it changed?"
-    - question: "Explain the December 2025 share placing - how much was raised and from whom?"
-    - question: "What is Time Out Group's new franchise model and where is it being launched?"
-    - question: "How did the Manhattan smaller format Market perform and what does it mean for future expansion?"
-    - question: "What were Time Out Group's H1 FY26 interim results - revenue, EBITDA and key highlights?"
-    - question: "Why did Time Out Group's Media division lose money in FY25 and what is the turnaround plan?"
-    - question: "What is Time Out Group's global audience reach and how fast is it growing?"
+    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
+    - question: "What is the share price of Palantir?"
+    - question: "Compare Coinbase and Robinhood stock prices over the last 6 months"
+    - question: "What are the top 3 most volatile stocks outside the S&P 500 over the last 3 months?"
+    - question: "What are the top 5 best performing stocks by price over the last 5 months outside the S&P 500? Chart this."
 
 tools:
   - tool_spec:
@@ -1193,10 +1274,18 @@ tools:
       type: cortex_analyst_text_to_sql
       name: STOCK_PRICES
       description: |
-        Queries historical US stock price data (S&P 500, NYSE, NASDAQ) with daily OHLC values. Prices in USD.
+        Queries historical US stock price data for S&P 500 companies with daily OHLC values. Prices in USD.
         Data: Daily Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume by ticker and date.
-        When to Use: US stock price queries, historical trends, price charts, or OHLC analysis for US-listed companies.
-        When NOT to Use: Do not use for Time Out Group / TMO (that is London AIM — use AIM_STOCK_PRICES). Do not use for company fundamentals (use SP500_COMPANIES).
+        When to Use: US stock price queries for S&P 500 companies (e.g. AAPL, MSFT, NVDA, AMZN, GOOGL, META, SNOW).
+        When NOT to Use: Do not use for Time Out Group / TMO (use AIM_STOCK_PRICES). Do not use for stocks outside the S&P 500 (use ALL_STOCK_PRICES). Do not use for company fundamentals (use SP500_COMPANIES).
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: ALL_STOCK_PRICES
+      description: |
+        Queries historical US stock price data for ALL US-listed stocks including those outside the S&P 500. Prices in USD. Backed by an Interactive Table.
+        Data: Daily Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume by ticker and date.
+        When to Use: US stock price queries for companies NOT in the S&P 500 (e.g. Palantir/PLTR, Rivian/RIVN, Coinbase/COIN, Robinhood/HOOD, Reddit/RDDT, DraftKings/DKNG, Roku/ROKU).
+        When NOT to Use: Do not use for S&P 500 companies (use STOCK_PRICES for those). Do not use for Time Out Group / TMO (use AIM_STOCK_PRICES).
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: AIM_STOCK_PRICES
@@ -1268,7 +1357,13 @@ tool_resources:
     semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV"
     execution_environment:
       type: warehouse
-      warehouse: SMALL_WH
+      warehouse: HOLLY_IW
+    query_timeout: 120
+  ALL_STOCK_PRICES:
+    semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IW_SV"
+    execution_environment:
+      type: warehouse
+      warehouse: HOLLY_IW
     query_timeout: 120
   AIM_STOCK_PRICES:
     semantic_view: "COLM_DB.STRUCTURED.AIM_STOCK_PRICES_SV"
@@ -1298,11 +1393,48 @@ ALTER AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY SET PROFILE = '{"display_name": 
 ALTER WAREHOUSE SMALL_WH SET WAREHOUSE_SIZE = 'MEDIUM' AUTO_SUSPEND = 300;
 
 -- ============================================================================
--- STEP 10: VERIFICATION
+-- STEP 10: CREATE DAILY REFRESH TASK FOR INTERACTIVE TABLE
+-- ============================================================================
+
+CREATE OR REPLACE TASK COLM_DB.STRUCTURED.REFRESH_STOCK_PRICE_IT
+  WAREHOUSE = HOLLY_WH
+  SCHEDULE = 'USING CRON 0 5 * * 1-5 UTC'
+  COMMENT = 'Refreshes STOCK_PRICE_TIMESERIES_IT Interactive Table every weekday at 6:00 AM BST (5:00 UTC)'
+AS
+  CREATE OR REPLACE INTERACTIVE TABLE COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT
+    CLUSTER BY (TICKER, DATE)
+    COMMENT = 'Historical stock price data for all US-listed stocks (Interactive Table for Cortex Analyst)'
+  AS
+    SELECT
+      TICKER,
+      ASSET_CLASS,
+      PRIMARY_EXCHANGE_CODE,
+      PRIMARY_EXCHANGE_NAME,
+      VARIABLE,
+      VARIABLE_NAME,
+      DATE,
+      VALUE
+    FROM SNOWFLAKE_PUBLIC_DATA_PAID.CYBERSYN.STOCK_PRICE_TIMESERIES;
+
+ALTER TASK COLM_DB.STRUCTURED.REFRESH_STOCK_PRICE_IT RESUME;
+
+CREATE OR REPLACE TASK COLM_DB.STRUCTURED.SUSPEND_HOLLY_IW
+  WAREHOUSE = HOLLY_WH
+  SCHEDULE = 'USING CRON 0 17 * * * UTC'
+  COMMENT = 'Suspends HOLLY_IW Interactive Warehouse daily at 6:00 PM BST (17:00 UTC)'
+AS
+  ALTER WAREHOUSE HOLLY_IW SUSPEND;
+
+ALTER TASK COLM_DB.STRUCTURED.SUSPEND_HOLLY_IW RESUME;
+
+-- ============================================================================
+-- STEP 11: VERIFICATION
 -- ============================================================================
 
 SELECT 'SP500_COMPANIES' AS table_name, COUNT(*) AS row_count FROM COLM_DB.STRUCTURED.SP500_COMPANIES
 UNION ALL SELECT 'STOCK_PRICE_TIMESERIES', COUNT(*) FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES
+UNION ALL SELECT 'STOCK_PRICE_TIMESERIES_SP500_IT', COUNT(*) FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT
+UNION ALL SELECT 'STOCK_PRICE_TIMESERIES_IT', COUNT(*) FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IT
 UNION ALL SELECT 'AIM_STOCK_PRICES', COUNT(*) FROM COLM_DB.STRUCTURED.AIM_STOCK_PRICES
 UNION ALL SELECT 'EDGAR_FILINGS', COUNT(*) FROM COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS
 UNION ALL SELECT 'PUBLIC_TRANSCRIPTS', COUNT(*) FROM COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS

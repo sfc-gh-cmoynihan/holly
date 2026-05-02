@@ -21,8 +21,10 @@ instructions:
     - Company documents are internal PDFs for Time Out Group only (annual reports, interim results, presentations).
 
     **Tool Selection:**
-    - Use STOCK_PRICES for US stock price queries (OHLC, trends, charts).
+    - Use STOCK_PRICES for S&P 500 US stock price queries (OHLC, trends, charts). This covers only S&P 500 constituents.
         Examples: "Plot NVIDIA over the last year", "What is Apple's share price?"
+    - Use ALL_STOCK_PRICES for any US stock price query where the ticker is NOT in the S&P 500. This covers all US-listed stocks.
+        Examples: "Plot Palantir over 12 months", "What is Rivian's share price?", "Compare Coinbase and Robinhood"
     - Use AIM_STOCK_PRICES for London AIM stock prices (Time Out Group / TMO).
         Examples: "TMO share price", "Plot Time Out over 12 months"
     - Use SP500_COMPANIES for S&P 500 index membership and company fundamentals.
@@ -42,11 +44,13 @@ instructions:
     **Business Rules:**
     - When a user mentions "Time Out", "TMO", or "Time Out Group" and asks about share price → use AIM_STOCK_PRICES, never STOCK_PRICES.
     - When a user mentions "Time Out", "TMO", or "Time Out Group" and asks about financials, strategy, revenue, EBITDA, Markets division, or board → use COMPANY_DOCS_SEARCH.
-    - For cross-market comparisons (e.g. TMO vs Airbnb vs Live Nation), use BOTH AIM_STOCK_PRICES and STOCK_PRICES.
+    - For cross-market comparisons (e.g. TMO vs Airbnb vs Live Nation), use BOTH AIM_STOCK_PRICES and STOCK_PRICES or ALL_STOCK_PRICES as appropriate.
     - For volatility or price drop analysis linked to announcements, use AIM_STOCK_PRICES for price data AND COMPANY_DOCS_SEARCH for context.
     - When comparing companies using SEC filings, use SEC_FILINGS_SEARCH to retrieve content, not SEC_FILINGS_ANALYST.
     - For any chart or plot request, always use DATA_TO_CHART after retrieving the data.
     - If a question requires multiple data sources, call all relevant tools — do not answer partially.
+    - For US stock prices: If the ticker IS in the S&P 500, use STOCK_PRICES. If the ticker is NOT in the S&P 500 (e.g. Palantir/PLTR, Rivian/RIVN, Coinbase/COIN, Robinhood/HOOD, Reddit/RDDT, DraftKings/DKNG), use ALL_STOCK_PRICES.
+    - If unsure whether a ticker is in the S&P 500, use SP500_COMPANIES to check first, then route accordingly.
 
     **Boundaries:**
     - You do NOT have access to real-time streaming prices. Stock data is daily close. If asked for "right now" prices, clarify this.
@@ -96,24 +100,17 @@ instructions:
     - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
-    - question: "What is the latest 10-K for Nvidia from the EDGAR Filings"
     - question: "What is the latest share price of NVIDIA"
-    - question: "Would you recommend buying Nvidia Stock at 195"
     - question: "What is the latest share price of Time Out Group PLC?"
     - question: "Plot the Time Out Group share price over the last 12 months"
-    - question: "What was the highest share price of TMO in the last year?"
     - question: "Plot the share price of Time Out Group over the last 12 months against Airbnb and Live Nation"
-    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
     - question: "What was Time Out Group's revenue in FY25 and how did it break down between Markets and Media?"
-    - question: "What caused the £35m impairment charge in Time Out Group's FY25 annual report?"
     - question: "How many Time Out Markets are currently open worldwide and which new markets are in the pipeline?"
-    - question: "What is Time Out Group's adjusted net debt position and how has it changed?"
-    - question: "Explain the December 2025 share placing - how much was raised and from whom?"
-    - question: "What is Time Out Group's new franchise model and where is it being launched?"
-    - question: "How did the Manhattan smaller format Market perform and what does it mean for future expansion?"
-    - question: "What were Time Out Group's H1 FY26 interim results - revenue, EBITDA and key highlights?"
-    - question: "Why did Time Out Group's Media division lose money in FY25 and what is the turnaround plan?"
-    - question: "What is Time Out Group's global audience reach and how fast is it growing?"
+    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
+    - question: "What is the share price of Palantir?"
+    - question: "Compare Coinbase and Robinhood stock prices over the last 6 months"
+    - question: "What are the top 3 most volatile stocks outside the S&P 500 over the last 3 months?"
+    - question: "What are the top 5 best performing stocks by price over the last 5 months outside the S&P 500? Chart this."
 
 tools:
   - tool_spec:
@@ -144,10 +141,18 @@ tools:
       type: cortex_analyst_text_to_sql
       name: STOCK_PRICES
       description: |
-        Queries historical US stock price data (S&P 500, NYSE, NASDAQ) with daily OHLC values. Prices in USD.
+        Queries historical US stock price data for S&P 500 companies with daily OHLC values. Prices in USD.
         Data: Daily Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume by ticker and date.
-        When to Use: US stock price queries, historical trends, price charts, or OHLC analysis for US-listed companies.
-        When NOT to Use: Do not use for Time Out Group / TMO (that is London AIM — use AIM_STOCK_PRICES). Do not use for company fundamentals (use SP500_COMPANIES).
+        When to Use: US stock price queries for S&P 500 companies (e.g. AAPL, MSFT, NVDA, AMZN, GOOGL, META, SNOW).
+        When NOT to Use: Do not use for Time Out Group / TMO (use AIM_STOCK_PRICES). Do not use for stocks outside the S&P 500 (use ALL_STOCK_PRICES). Do not use for company fundamentals (use SP500_COMPANIES).
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: ALL_STOCK_PRICES
+      description: |
+        Queries historical US stock price data for ALL US-listed stocks including those outside the S&P 500. Prices in USD. Backed by an Interactive Table.
+        Data: Daily Post-Market Close, Pre-Market Open, All-Day High, All-Day Low, Nasdaq Volume by ticker and date.
+        When to Use: US stock price queries for companies NOT in the S&P 500 (e.g. Palantir/PLTR, Rivian/RIVN, Coinbase/COIN, Robinhood/HOOD, Reddit/RDDT, DraftKings/DKNG, Roku/ROKU).
+        When NOT to Use: Do not use for S&P 500 companies (use STOCK_PRICES for those). Do not use for Time Out Group / TMO (use AIM_STOCK_PRICES).
   - tool_spec:
       type: cortex_analyst_text_to_sql
       name: AIM_STOCK_PRICES
@@ -219,7 +224,13 @@ tool_resources:
     semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV"
     execution_environment:
       type: warehouse
-      warehouse: SMALL_WH
+      warehouse: HOLLY_IW
+    query_timeout: 120
+  ALL_STOCK_PRICES:
+    semantic_view: "COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_IW_SV"
+    execution_environment:
+      type: warehouse
+      warehouse: HOLLY_IW
     query_timeout: 120
   AIM_STOCK_PRICES:
     semantic_view: "COLM_DB.STRUCTURED.AIM_STOCK_PRICES_SV"

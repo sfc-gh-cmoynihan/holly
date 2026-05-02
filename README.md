@@ -15,7 +15,7 @@
 
 ---
 
-**Author:** Colm Moynihan | **Version:** 3.1 | **Updated:** 21 April 2026
+**Author:** Colm Moynihan | **Version:** 3.2 | **Updated:** 2 May 2026
 
 </div>
 
@@ -46,6 +46,7 @@ All of this would normally take most of the day across Bloomberg, SEC EDGAR, int
 ### Key Features
 
 - **US Stock Analysis** - S&P 500 daily OHLC prices, smooth charts
+- **All US Stocks** - Interactive Table covering all US-listed stocks (non-S&P 500)
 - **UK AIM Market** - Time Out Group daily prices (GBX) since 2016
 - **Company Documents** - Time Out Group annual reports, interims, presentations (PDF search)
 - **S&P 500 Fundamentals** - Sector, industry, headquarters, CIK
@@ -213,7 +214,8 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly
 
 | Tool | Type | Description |
 |------|------|-------------|
-| **STOCK_PRICES** | Cortex Analyst | S&P 500 daily OHLC prices (USD) |
+| **STOCK_PRICES** | Cortex Analyst | S&P 500 daily OHLC prices (USD) — Interactive Table on HOLLY_IW |
+| **ALL_STOCK_PRICES** | Cortex Analyst | All US-listed stocks outside S&P 500 (USD) — Interactive Table on HOLLY_IW |
 | **AIM_STOCK_PRICES** | Cortex Analyst | London AIM daily prices for Time Out Group (GBX) |
 | **SP500_COMPANIES** | Cortex Analyst | S&P 500 company fundamentals (sector, industry, HQ) |
 | **SEC_FILINGS_ANALYST** | Cortex Analyst | SEC filing metadata counts & aggregations |
@@ -225,6 +227,36 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly
 
 ---
 
+## Interactive Tables & Warehouse
+
+Holly uses **Interactive Tables** and an **Interactive Warehouse** for sub-second stock price queries across all US-listed securities.
+
+### Architecture
+
+| Object | Purpose |
+|--------|---------|
+| `STOCK_PRICE_TIMESERIES_SP500_IT` | Interactive Table — S&P 500 stock prices (clustered by TICKER, DATE) |
+| `STOCK_PRICE_TIMESERIES_IT` | Interactive Table — All US-listed stocks (clustered by TICKER, DATE) |
+| `HOLLY_IW` | Interactive Warehouse (Medium) — serves both Interactive Tables |
+| `HOLLY_WH` | Standard Warehouse (Medium, Gen 2) — fallback for complex queries |
+
+### How It Works
+
+- **Interactive Tables** pre-load data into the Interactive Warehouse's dedicated compute, enabling sub-second responses for common query patterns (latest price, time-series charts, volatility calculations).
+- **Fallback Warehouse**: If a query exceeds the Interactive Warehouse's capabilities (e.g., large aggregations or joins), it automatically falls back to `HOLLY_WH` — a standard Gen 2 warehouse. No query fails; it just takes slightly longer.
+- **Daily Refresh**: A scheduled task (`REFRESH_STOCK_PRICE_IT`) recreates the all-stocks Interactive Table from the Cybersyn marketplace every weekday at 6:00 AM BST.
+- **Cost Control**: A second task (`SUSPEND_HOLLY_IW`) suspends the Interactive Warehouse daily at 6:00 PM BST. It auto-resumes on next query.
+
+### Coverage
+
+Holly now covers **all US-listed securities** — not just the S&P 500. The agent orchestration routes queries automatically:
+
+- S&P 500 tickers (AAPL, MSFT, NVDA, etc.) → `STOCK_PRICES` tool
+- Non-S&P 500 tickers (PLTR, RIVN, COIN, HOOD, RDDT, etc.) → `ALL_STOCK_PRICES` tool
+- If unsure, Holly checks `SP500_COMPANIES` first, then routes accordingly
+
+---
+
 ## Project Structure
 
 ```
@@ -232,14 +264,15 @@ holly/
 ├── README.md                              # This file
 ├── INSTALL.sql                            # Complete installation script
 ├── UNINSTALL.sql                          # Complete uninstall script
-├── DEMO_SCRIPT.md                         # Demo walkthrough (11 questions, all 9 tools)
+├── DEMO_SCRIPT.md                         # Demo walkthrough (11 questions, all 10 tools)
 ├── cortex_agent/
-│   ├── HOLLY.sql                          # Agent definition (9 tools, v3 orchestration)
+│   ├── HOLLY.sql                          # Agent definition (10 tools, v3 orchestration)
 │   ├── MCP_SERVER.sql                     # MCP Server setup for Cursor/Claude Desktop
 │   ├── YAHOO_FINANCE.sql                  # Real-time stock price UDF (standalone)
 │   └── RAG_COMPONENTS.sql                 # PDF document Q&A (standalone version, now integrated in INSTALL.sql)
 ├── cortex_analyst/
-│   ├── STOCK_PRICE_TIMESERIES_SV.sql      # US stock price semantic view with VQRs
+│   ├── STOCK_PRICE_TIMESERIES_SV.sql      # S&P 500 stock price semantic view with VQRs
+│   ├── STOCK_PRICE_TIMESERIES_IW_SV.sql   # All US stocks semantic view (Interactive Table)
 │   ├── AIM_STOCK_PRICES_SV.sql            # London AIM stock price semantic view with VQRs
 │   └── SP500.sql                          # S&P 500 semantic view
 ├── cortex_search/

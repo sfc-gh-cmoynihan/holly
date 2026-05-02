@@ -5,18 +5,17 @@
   Refreshes EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables from Snowflake Marketplace
   and triggers incremental updates to Cortex Search Services.
   
-  Schedule: Daily at 6:00 AM GMT/UTC
-  Warehouse: ADHOC_WH
+  Schedule: Daily at 6:00 AM UTC
+  Warehouse: HOLLY_WH
 ================================================================================
 */
 
 CREATE OR REPLACE TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH
-  WAREHOUSE = ADHOC_WH
+  WAREHOUSE = HOLLY_WH
   SCHEDULE = 'USING CRON 0 6 * * * UTC'
-  COMMENT = 'Daily refresh of EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables at 6:00 AM GMT'
+  COMMENT = 'Daily refresh of EDGAR_FILINGS and PUBLIC_TRANSCRIPTS tables at 6:00 AM UTC'
 AS
 BEGIN
-  -- Refresh EDGAR_FILINGS table with latest SEC filings
   MERGE INTO COLM_DB.SEMI_STRUCTURED.EDGAR_FILINGS AS target
   USING (
     SELECT 
@@ -38,7 +37,6 @@ BEGIN
     INSERT (COMPANY_NAME, ANNOUNCEMENT_TYPE, FILED_DATE, FISCAL_PERIOD, FISCAL_YEAR, ITEM_NUMBER, ITEM_TITLE, ANNOUNCEMENT_TEXT)
     VALUES (source.COMPANY_NAME, source.ANNOUNCEMENT_TYPE, source.FILED_DATE, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.ITEM_NUMBER, source.ITEM_TITLE, source.ANNOUNCEMENT_TEXT);
 
-  -- Refresh PUBLIC_TRANSCRIPTS table with latest earnings call transcripts
   MERGE INTO COLM_DB.UNSTRUCTURED.PUBLIC_TRANSCRIPTS AS target
   USING (
     SELECT 
@@ -63,5 +61,4 @@ BEGIN
     VALUES (source.COMPANY_ID, source.CIK, source.COMPANY_NAME, source.PRIMARY_TICKER, source.FISCAL_PERIOD, source.FISCAL_YEAR, source.EVENT_TYPE, source.TRANSCRIPT, source.EVENT_TIMESTAMP);
 END;
 
--- Enable the task
 ALTER TASK COLM_DB.STRUCTURED.DAILY_DATA_REFRESH RESUME;
