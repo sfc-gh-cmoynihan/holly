@@ -2,7 +2,7 @@ CREATE OR REPLACE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.HOLLY
   COMMENT = 'Financial research assistant for SEC filings, transcripts, stock prices, company data, and Time Out Group documents'
   FROM SPECIFICATION $$
 models:
-  orchestration: claude-opus-4-6
+  orchestration: auto
 
 instructions:
   orchestration: |
