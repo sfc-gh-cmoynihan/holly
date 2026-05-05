@@ -96,8 +96,8 @@ instructions:
     - Source attribution for each data point.
 
   sample_questions:
-    - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
-    - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
+    - question: "Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
+    - question: "Are Nvidia, Microsoft, Amazon, Meta in the SP500"
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
     - question: "What is the latest share price of NVIDIA"

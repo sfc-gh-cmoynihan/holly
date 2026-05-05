@@ -18,4 +18,4 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
         SP500_COMPANIES.FOUNDED AS FOUNDED
           comment='Year the company was founded.'
     )
-    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';
+    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups.';

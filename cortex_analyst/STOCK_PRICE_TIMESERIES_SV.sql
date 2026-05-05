@@ -8,7 +8,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
   )
   DIMENSIONS (
     STOCK_PRICE_TIMESERIES_SP500_IT.TICKER AS TICKER
-      comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, SNOW, AMZN, GOOGL. Contains all S&P 500 companies plus SNOW.',
+      comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, AMZN, GOOGL. Contains all S&P 500 companies.',
     STOCK_PRICE_TIMESERIES_SP500_IT.ASSET_CLASS AS ASSET_CLASS
       comment='Type of security e.g. Common Shares.',
     STOCK_PRICE_TIMESERIES_SP500_IT.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
@@ -22,21 +22,21 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
     STOCK_PRICE_TIMESERIES_SP500_IT.DATE AS DATE
       comment='Trading date for the price data.'
   )
-  COMMENT = 'S&P 500 + SNOW daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
+  COMMENT = 'S&P 500 daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
   AI_VERIFIED_QUERIES (
-    "Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months" AS (
-      QUESTION 'Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months'
+    "Plot the share price of Meta, Microsoft, Amazon, Google, and Nvidia from the last 12 months" AS (
+      QUESTION 'Plot the share price of Meta, Microsoft, Amazon, Google, and Nvidia from the last 12 months'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''SNOW'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''META'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
-    "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
-      QUESTION 'Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
+    "Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
+      QUESTION 'Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''AMZN'', ''SNOW'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''AMZN'', ''META'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
     "What is the closing price of NVDA for the last 30 days?" AS (
       QUESTION 'What is the closing price of NVDA for the last 30 days?'

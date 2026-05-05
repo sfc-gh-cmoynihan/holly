@@ -580,8 +580,7 @@ SELECT * FROM VALUES
     ('YUM', 'Yum! Brands', 'Consumer Discretionary', 'Restaurants', 'Louisville, Kentucky', '1997-10-06', '1041061', '1997'),
     ('ZBRA', 'Zebra Technologies', 'Information Technology', 'Electronic Equipment & Instruments', 'Lincolnshire, Illinois', '2019-12-23', '877212', '1969'),
     ('ZBH', 'Zimmer Biomet', 'Health Care', 'Health Care Equipment', 'Warsaw, Indiana', '2001-08-07', '1136869', '1927'),
-    ('ZTS', 'Zoetis', 'Health Care', 'Pharmaceuticals', 'Parsippany, New Jersey', '2013-06-21', '1555280', '1952'),
-    ('SNOW', 'Snowflake Inc.', 'Information Technology', 'Application Software', 'Bozeman, Montana', NULL, '1640147', '2012');
+    ('ZTS', 'Zoetis', 'Health Care', 'Pharmaceuticals', 'Parsippany, New Jersey', '2013-06-21', '1555280', '1952');
 
 
 -- ============================================================================
@@ -835,7 +834,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
   )
   DIMENSIONS (
     STOCK_PRICE_TIMESERIES_SP500_IT.TICKER AS TICKER
-      comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, SNOW, AMZN, GOOGL. Contains all S&P 500 companies plus SNOW.',
+      comment='Stock ticker symbol e.g. AAPL, MSFT, NVDA, AMZN, GOOGL. Contains all S&P 500 companies.',
     STOCK_PRICE_TIMESERIES_SP500_IT.ASSET_CLASS AS ASSET_CLASS
       comment='Type of security e.g. Common Shares.',
     STOCK_PRICE_TIMESERIES_SP500_IT.PRIMARY_EXCHANGE_CODE AS PRIMARY_EXCHANGE_CODE
@@ -849,21 +848,21 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SV
     STOCK_PRICE_TIMESERIES_SP500_IT.DATE AS DATE
       comment='Trading date for the price data.'
   )
-  COMMENT = 'S&P 500 + SNOW daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
+  COMMENT = 'S&P 500 daily stock price time series. Use VARIABLE_NAME = Post-Market Close for share/closing prices. When plotting charts over periods longer than 1 month, use weekly aggregation (DATE_TRUNC week) with AVG for smoother visualizations.'
   AI_VERIFIED_QUERIES (
-    "Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months" AS (
-      QUESTION 'Plot the share price of Snowflake, Microsoft, Amazon, Google, and Nvidia from the last 12 months'
+    "Plot the share price of Meta, Microsoft, Amazon, Google, and Nvidia from the last 12 months" AS (
+      QUESTION 'Plot the share price of Meta, Microsoft, Amazon, Google, and Nvidia from the last 12 months'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''SNOW'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''META'', ''MSFT'', ''AMZN'', ''GOOGL'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= DATEADD(MONTH, -12, CURRENT_DATE()) GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
-    "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
-      QUESTION 'Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
+    "Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026" AS (
+      QUESTION 'Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026'
       VERIFIED_AT 1743552000
       VERIFIED_BY 'ADMIN'
       ONBOARDING_QUESTION true
-      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''AMZN'', ''SNOW'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
+      SQL 'SELECT DATE_TRUNC(''WEEK'', DATE) AS WEEK, TICKER, ROUND(AVG(VALUE), 2) AS SHARE_PRICE FROM COLM_DB.STRUCTURED.STOCK_PRICE_TIMESERIES_SP500_IT WHERE TICKER IN (''MSFT'', ''AMZN'', ''META'', ''NVDA'') AND VARIABLE_NAME = ''Post-Market Close'' AND DATE >= ''2025-02-20'' AND DATE <= ''2026-02-20'' GROUP BY DATE_TRUNC(''WEEK'', DATE), TICKER ORDER BY WEEK, TICKER'
     ),
     "What is the closing price of NVDA for the last 30 days?" AS (
       QUESTION 'What is the closing price of NVDA for the last 30 days?'
@@ -1016,7 +1015,7 @@ CREATE OR REPLACE SEMANTIC VIEW COLM_DB.STRUCTURED.SP500
         SP500_COMPANIES.FOUNDED AS FOUNDED
           comment='Year the company was founded.'
     )
-    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups. Includes 503 companies plus SNOW (Snowflake).';
+    COMMENT = 'S&P 500 index constituents with company details. Use SYMBOL for ticker lookups.';
 
 -- 8.5 SEC EDGAR Filings Semantic View
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
@@ -1229,8 +1228,8 @@ instructions:
     - Source attribution for each data point.
 
   sample_questions:
-    - question: "Plot the share price of Microsoft, Amazon, Snowflake and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
-    - question: "Are Nvidia, Microsoft, Amazon, Snowflake in the SP500"
+    - question: "Plot the share price of Microsoft, Amazon, Meta and Nvidia starting 20th Feb 2025 to 20th Feb 2026"
+    - question: "Are Nvidia, Microsoft, Amazon, Meta in the SP500"
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
     - question: "What is the latest share price of NVIDIA"
