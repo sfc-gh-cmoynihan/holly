@@ -1213,16 +1213,16 @@ instructions:
     - question: "What are the latest public transcripts for NVIDIA"
     - question: "Compare Nvidia's annual growth rate and Microsoft annual growth rate using the latest Annual reports using a table format for all the key metrics"
     - question: "What is the latest share price of NVIDIA"
-    - question: "What is the latest share price of Time Out Group PLC?"
-    - question: "Plot the Time Out Group share price over the last 12 months"
-    - question: "Plot the share price of Time Out Group over the last 12 months against Airbnb and Live Nation"
-    - question: "What was Time Out Group's revenue in FY25 and how did it break down between Markets and Media?"
-    - question: "How many Time Out Markets are currently open worldwide and which new markets are in the pipeline?"
-    - question: "Show the biggest daily price drops for Time Out Group in the last 12 months and explain what company announcements caused them"
+    - question: "What is the share price of ExxonMobil?"
+    - question: "Plot the share price of ExxonMobil, Chevron and ConocoPhillips over the last 12 months"
+    - question: "Compare the top 3 oil and gas companies in the S&P 500 by share price performance over the last 6 months"
+    - question: "Which oil and gas companies are in the S&P 500?"
+    - question: "What did ExxonMobil's latest 10-K say about production growth?"
     - question: "What is the share price of Palantir?"
     - question: "Compare Coinbase and Robinhood stock prices over the last 6 months"
     - question: "What are the top 3 most volatile stocks outside the S&P 500 over the last 3 months?"
     - question: "What are the top 5 best performing stocks by price over the last 5 months outside the S&P 500? Chart this."
+    - question: "Compare the share price of Chevron and Shell over the last year"
 
 tools:
   - tool_spec:
