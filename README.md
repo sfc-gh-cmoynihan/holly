@@ -131,7 +131,7 @@ Holly uses S&P 500 stock prices, SEC filings, and earnings transcripts from the 
    SHOW SCHEMAS IN DATABASE SNOWFLAKE_PUBLIC_DATA_PAID;
    ```
 
-> **Schema Note:** The default schema is `CYBERSYN`. Trial accounts use `PUBLIC_DATA` instead. The `INSTALL.sql` defaults to `CYBERSYN` — if you are on a trial account, find-and-replace `CYBERSYN` with `PUBLIC_DATA` before running.
+> **Schema Note:** The default schema is `PUBLIC_DATA`. Non-trial accounts may use `CYBERSYN` instead. The `INSTALL.sql` defaults to `PUBLIC_DATA` — if you are on a non-trial account with only `CYBERSYN`, find-and-replace `PUBLIC_DATA` with `CYBERSYN` before running.
 
 > **Cost:** Despite the "(Paid)" name, a **free unlimited 90-day trial** is available. No credit card is required for trial accounts.
 
@@ -207,6 +207,16 @@ The PDF chunker (`PDF_TEXT_CHUNKER`) uses PyPDF2 to extract and chunk text, then
 ### 5. Access Holly
 
 Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly - FS Financial Agent**.
+
+### Install Summary
+
+| Step | Action | Required? |
+|------|--------|-----------|
+| 1 | ACCOUNTADMIN access on target Snowflake account | Yes |
+| 2 | Subscribe to **Snowflake Public Data (Paid)** from the Marketplace | Yes |
+| 3 | Run `INSTALL.sql` (creates all objects end-to-end) | Yes |
+| 4 | Upload Time Out Group PDFs to `@COLM_DB.UNSTRUCTURED.COMPANY_ANNOUNCEMENTS` | Optional |
+| 5 | Run `scripts/load_aim_stock_prices.py` to load AIM market data | Optional |
 
 ---
 
