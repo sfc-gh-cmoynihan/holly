@@ -231,6 +231,24 @@ Navigate to **AI & ML > Snowflake Intelligence** in Snowsight and select **Holly
 
 Holly uses **Interactive Tables** and an **Interactive Warehouse** for sub-second stock price queries across all US-listed securities.
 
+### Why Interactive Tables?
+
+Traditional warehouses must scan data from remote storage on every query — even for simple lookups like "What is NVIDIA's latest share price?". This creates 2-5 second latency per query, which compounds when an agent chains multiple tool calls in a single response.
+
+**Interactive Tables** solve this by keeping frequently-queried data pre-loaded in dedicated compute:
+
+| Approach | Typical Latency | Best For |
+|----------|----------------|----------|
+| Standard Warehouse + Table | 2–5 seconds | Complex analytics, large joins, batch processing |
+| Interactive Warehouse + Interactive Table | **< 1 second** | Point lookups, time-series charts, real-time dashboards |
+
+For a conversational agent like Holly, this means:
+- **Single-stock price queries** return instantly instead of waiting for warehouse resume + scan
+- **Multi-ticker comparisons** (e.g. "Plot NVDA vs MSFT") complete in under a second
+- **Chained tool calls** (check SP500 membership → fetch price → chart) feel conversational, not sluggish
+
+The **fallback warehouse** (`HOLLY_WH`, Gen 2) catches any query that exceeds the Interactive Warehouse's capabilities — so nothing fails, it just takes a couple of seconds longer.
+
 ### Architecture
 
 | Object | Purpose |
